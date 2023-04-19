@@ -1,0 +1,113 @@
+plugins {
+    id 'java'
+    id 'fabric-loom' version '1.1.8'
+    id 'maven-publish'
+    id 'gradle-build-utils' version '1.2.0'
+    id 'kibu-plugin-dev' version '0.1.0'
+}
+
+Properties props = loadProperties.call('publish.properties') as Properties
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+group = project.maven_group
+version = gitVersion.call()
+archivesBaseName = project.archives_base_name
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url "https://repo.lclpnet.work/repository/internal"
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
+
+    /* other Java dependencies */
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+loom {
+    // if you want to develop a plugin for dedicated servers, uncomment the following block
+    /*serverOnlyMinecraftJar()
+
+    runs {
+        remove client
+    }*/
+}
+
+test {
+    useJUnitPlatform()
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("plugin.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 17
+}
+
+java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = project.archives_base_name
+
+            from components.java
+
+            pom {
+                name = 'Example Plugin'
+                description = 'This is an example description! Tell everyone what your plugin is about!'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            def env = System.getenv()
+            if (Arrays.stream("DEPLOY_URL", "DEPLOY_USER", "DEPLOY_PASSWORD").allMatch(env.&containsKey)) {
+                credentials {
+                    username env.get("DEPLOY_USER")
+                    password env.get("DEPLOY_PASSWORD")
+                }
+                url env.get("DEPLOY_URL")
+            }
+            else if (Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(props.&containsKey)) {
+                credentials {
+                    username props.getProperty('mavenUser')
+                    password props.getProperty('mavenPassword')
+                }
+                url props.getProperty('mavenHost')
+            } else {
+                url "file:///${project.projectDir}/repo"
+            }
+        }
+    }
+}
