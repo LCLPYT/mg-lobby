@@ -40,12 +40,11 @@ dependencies {
 }
 
 loom {
-    // if you want to develop a plugin for dedicated servers, uncomment the following block
-    /*serverOnlyMinecraftJar()
+    serverOnlyMinecraftJar()
 
     runs {
         remove client
-    }*/
+    }
 }
 
 test {
@@ -83,8 +82,8 @@ publishing {
             from components.java
 
             pom {
-                name = 'Example Plugin'
-                description = 'This is an example description! Tell everyone what your plugin is about!'
+                name = 'Minigame Lobby'
+                description = 'A kibu plugin for managing minigame lobbies in FabricMC.'
             }
         }
     }

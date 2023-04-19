@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "version": "${version}",
-  "id": "examplePlugin",
-  "entry": "org.example.ExamplePlugin",
+  "id": "mg-lobby",
+  "entry": "work.lclpnet.lobby.LobbyPlugin",
   "dependsOn": [],
   "fabric": {
-    "env": ["client", "server"],
+    "env": ["server"],
     "requires": ["fabric-api", "kibu"]
   }
 }
