@@ -19,7 +19,11 @@ repositories {
     mavenCentral()
 
     maven {
-        url "https://repo.lclpnet.work/repository/internal"
+        url 'https://repo.lclpnet.work/repository/internal'
+    }
+
+    maven {
+        url = 'https://maven.nucleoid.xyz/'
     }
 }
 
@@ -32,8 +36,15 @@ dependencies {
     modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
 
+    modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
+
     /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'org.json:json:20220924'
+    implementation 'work.lclpnet:json-config4j:1.0.0'
+    include 'work.lclpnet:json-config4j:1.0.0'
+    implementation 'org.apache.commons:commons-compress:1.23.0'
+    include 'org.apache.commons:commons-compress:1.23.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
