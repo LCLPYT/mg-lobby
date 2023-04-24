@@ -4,7 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import work.lclpnet.kibu.hook.ServerLifecycleHooks;
 import work.lclpnet.kibu.plugin.hook.HookListenerModule;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
-import work.lclpnet.lobby.type.ServerAccess;
+import work.lclpnet.lobby.api.ServerAccess;
 
 public class LifecycleListener implements HookListenerModule, ServerAccess {
 

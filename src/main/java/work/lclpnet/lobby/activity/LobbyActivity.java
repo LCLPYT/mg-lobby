@@ -8,7 +8,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.lobby.LobbyPlugin;
-import work.lclpnet.lobby.type.ServerAccess;
+import work.lclpnet.lobby.api.ServerAccess;
 import xyz.nucleoid.fantasy.Fantasy;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.fantasy.RuntimeWorldHandle;

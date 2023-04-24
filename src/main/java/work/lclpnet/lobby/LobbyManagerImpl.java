@@ -5,20 +5,20 @@ import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
 import work.lclpnet.config.json.FileConfigSerializer;
-import work.lclpnet.lobby.config.ConfigAccess;
+import work.lclpnet.lobby.api.LobbyManager;
+import work.lclpnet.lobby.api.ServerAccess;
 import work.lclpnet.lobby.config.LobbyConfig;
-import work.lclpnet.lobby.type.ServerAccess;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Path;
 
-public class LobbyManager implements ServerAccess, ConfigAccess {
+public class LobbyManagerImpl implements LobbyManager {
 
     private final ConfigHandler<LobbyConfig> configHandler;
     private final ServerAccess serverAccess;
     private final Logger logger;
 
-    public LobbyManager(ServerAccess serverAccess, Logger logger) {
+    public LobbyManagerImpl(ServerAccess serverAccess, Logger logger) {
         this.serverAccess = serverAccess;
         this.logger = logger;
 
@@ -29,6 +29,7 @@ public class LobbyManager implements ServerAccess, ConfigAccess {
         this.configHandler = new ConfigHandler<>(configFile, configSerializer, logger);
     }
 
+    @Override
     public Logger getLogger() {
         return logger;
     }
@@ -42,5 +43,9 @@ public class LobbyManager implements ServerAccess, ConfigAccess {
     @Override
     public LobbyConfig getConfig() {
         return configHandler.getConfig();
+    }
+
+    public void init() {
+        configHandler.loadConfig();
     }
 }

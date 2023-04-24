@@ -15,12 +15,15 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener {
     public static final String ID = "mg-lobby";
     private static final Logger logger = LoggerFactory.getLogger(ID);
     private final LifecycleListener lifecycleListener = new LifecycleListener();
-    private final LobbyManager manager = new LobbyManager(lifecycleListener, logger);
+    private final LobbyManagerImpl manager = new LobbyManagerImpl(lifecycleListener, logger);
 
     @Override
     public void loadKibuPlugin() {
         registerHooks(lifecycleListener);
         registerHooks(new ConnectionListener());
+
+        // load config etc.
+        manager.init();
 
         // renew world on server startup
         if (manager.getServer() == null) {
