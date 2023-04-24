@@ -3,7 +3,8 @@ plugins {
     id 'fabric-loom' version '1.1.8'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.2.0'
-    id 'kibu-plugin-dev' version '0.1.0'
+    id 'kibu-plugin-dev' version '0.2.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 Properties props = loadProperties.call('publish.properties') as Properties
@@ -42,9 +43,9 @@ dependencies {
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.json:json:20220924'
     implementation 'work.lclpnet:json-config4j:1.0.0'
-    include 'work.lclpnet:json-config4j:1.0.0'
+    bundle ('work.lclpnet:json-config4j:1.0.0') { transitive = false }
     implementation 'org.apache.commons:commons-compress:1.23.0'
-    include 'org.apache.commons:commons-compress:1.23.0'
+    bundle 'org.apache.commons:commons-compress:1.23.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
