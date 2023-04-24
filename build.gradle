@@ -3,7 +3,7 @@ plugins {
     id 'fabric-loom' version '1.1.8'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.2.0'
-    id 'kibu-plugin-dev' version '0.2.0'
+    id 'kibu-plugin-dev' version '0.3.0'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -72,7 +72,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
+    it.options.getRelease().convention(17)
 }
 
 java {
@@ -86,12 +86,15 @@ jar {
     }
 }
 
+println project.outgoingVariants
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
-            from components.java
+            artifact remapJar
+            artifact remapSourcesJar
 
             pom {
                 name = 'Minigame Lobby'
