@@ -8,22 +8,21 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.lobby.LobbyPlugin;
-import work.lclpnet.lobby.api.ServerAccess;
 import xyz.nucleoid.fantasy.Fantasy;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.fantasy.RuntimeWorldHandle;
 
 public class LobbyActivity implements Activity {
 
-    private final ServerAccess serverAccess;
+    private final PluginContext pluginContext;
 
-    public LobbyActivity(ServerAccess serverAccess) {
-        this.serverAccess = serverAccess;
+    public LobbyActivity(PluginContext pluginContext) {
+        this.pluginContext = pluginContext;
     }
 
     @Override
     public void startActivity(PluginContext context) {
-        MinecraftServer server = serverAccess.getServer();
+        MinecraftServer server = pluginContext.getEnvironment().getServer();
         var players = PlayerLookup.all(server);
 
         Fantasy fantasy = Fantasy.get(server);

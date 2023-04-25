@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.plugin.KibuPlugin;
 import work.lclpnet.lobby.activity.LobbyActivity;
 import work.lclpnet.lobby.event.ConnectionListener;
-import work.lclpnet.lobby.event.LifecycleListener;
 import work.lclpnet.lobby.io.LobbyWorldReset;
 import work.lclpnet.mplugins.ext.WorldStateListener;
 
@@ -14,19 +13,17 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener {
 
     public static final String ID = "mg-lobby";
     private static final Logger logger = LoggerFactory.getLogger(ID);
-    private final LifecycleListener lifecycleListener = new LifecycleListener();
-    private final LobbyManagerImpl manager = new LobbyManagerImpl(lifecycleListener, logger);
+    private final LobbyManagerImpl manager = new LobbyManagerImpl(this, logger);
 
     @Override
     public void loadKibuPlugin() {
-        registerHooks(lifecycleListener);
         registerHooks(new ConnectionListener());
 
         // load config etc.
         manager.init();
 
-        // renew world on server startup
-        if (manager.getServer() == null) {
+        // renew world on initial server startup
+        if (getEnvironment().getServer() == null) {
             new LobbyWorldReset(manager).renewWorld();
         }
 
@@ -35,7 +32,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener {
 
     @Override
     public void onWorldReady() {
-        new LobbyActivity(lifecycleListener).startActivity(this);
+        new LobbyActivity(this).startActivity(this);
     }
 
     @Override
