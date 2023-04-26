@@ -9,16 +9,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
-public class LobbyWorldReset {
+public class LobbyWorldDownloader {
 
     private final Path lobbyDir;
     private final ConfigAccess configAccess;
 
-    public LobbyWorldReset(ConfigAccess configAccess) {
-        this(Path.of("lobby"), configAccess);
+    public LobbyWorldDownloader(ConfigAccess configAccess) {
+        this(Path.of(configAccess.getConfig().getSafeLobbyLevelName()), configAccess);
     }
 
-    public LobbyWorldReset(Path lobbyDir, ConfigAccess configAccess) {
+    public LobbyWorldDownloader(Path lobbyDir, ConfigAccess configAccess) {
         this.lobbyDir = lobbyDir;
         this.configAccess = configAccess;
     }

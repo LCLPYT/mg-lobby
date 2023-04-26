@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LobbyWorldResetTest {
+class LobbyWorldDownloaderTest {
 
     private static final ConfigAccess TEST_CONFIG_ACCESS = () -> {
         LobbyConfig lobbyConfig = new LobbyConfig();
@@ -25,7 +25,7 @@ class LobbyWorldResetTest {
         Path lobbyDir = Files.createTempDirectory("mgl_lwr").resolve("lobby");
         assertFalse(Files.exists(lobbyDir));
 
-        LobbyWorldReset reset = new LobbyWorldReset(lobbyDir, TEST_CONFIG_ACCESS);
+        LobbyWorldDownloader reset = new LobbyWorldDownloader(lobbyDir, TEST_CONFIG_ACCESS);
         reset.renewWorld();
 
         assertTrue(Files.exists(lobbyDir));
@@ -44,7 +44,7 @@ class LobbyWorldResetTest {
         assertTrue(Files.exists(lobbyDir));
 
         // reset the lobby
-        LobbyWorldReset reset = new LobbyWorldReset(lobbyDir, TEST_CONFIG_ACCESS);
+        LobbyWorldDownloader reset = new LobbyWorldDownloader(lobbyDir, TEST_CONFIG_ACCESS);
         reset.renewWorld();
 
         assertTrue(Files.exists(lobbyDir));
