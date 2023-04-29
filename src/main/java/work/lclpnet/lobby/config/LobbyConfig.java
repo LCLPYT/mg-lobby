@@ -3,6 +3,7 @@ package work.lclpnet.lobby.config;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
 import work.lclpnet.config.json.JsonConfigFactory;
+import work.lclpnet.lobby.maze.MazeConfig;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -13,6 +14,7 @@ public class LobbyConfig implements JsonConfig {
     public static final String DEFAULT_LOBBY_LEVEL_NAME = "lobby";
     public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-1.19.4");
     public String lobbyLevelName = "lobby";
+    public MazeConfig mazeConfig = new MazeConfig();
 
     public LobbyConfig() {}
 
@@ -24,6 +26,11 @@ public class LobbyConfig implements JsonConfig {
 
         if (obj.has("lobby")) {
             this.lobbyLevelName = obj.getString("lobbyLevelName");
+        }
+
+        if (obj.has("maze")) {
+            JSONObject maze = obj.getJSONObject("maze");
+            this.mazeConfig = new MazeConfig(maze);
         }
     }
 
@@ -51,6 +58,8 @@ public class LobbyConfig implements JsonConfig {
         }
 
         json.put("lobbyLevelName", lobbyLevelName);
+
+        json.put("maze", mazeConfig.toJson());
 
         return json;
     }
