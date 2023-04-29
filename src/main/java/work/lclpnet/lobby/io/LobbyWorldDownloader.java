@@ -1,5 +1,9 @@
 package work.lclpnet.lobby.io;
 
+import work.lclpnet.kibu.jnbt.CompoundTag;
+import work.lclpnet.kibu.jnbt.NBTConstants;
+import work.lclpnet.kibu.jnbt.Tag;
+import work.lclpnet.kibu.jnbt.io.NbtIOHelper;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.io.copy.WorldCopier;
 
@@ -24,20 +28,10 @@ public class LobbyWorldDownloader {
     }
 
     public void renewWorld() {
-        if (Files.exists(lobbyDir)) {
-            // delete lobby directory recursively
-            try (var files = Files.walk(lobbyDir)) {
-                var iterator = files
-                        .sorted(Comparator.reverseOrder())
-                        .iterator();
-
-                while (iterator.hasNext()) {
-                    Path path = iterator.next();
-                    Files.delete(path);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Could not cleanup old lobby file");
-            }
+        try {
+            removeIfExists(lobbyDir);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not cleanup old lobby file");
         }
 
         URI worldSource = configAccess.getConfig().lobbySource;
@@ -47,6 +41,66 @@ public class LobbyWorldDownloader {
             copier.copyTo(lobbyDir);
         } catch (IOException e) {
             throw new RuntimeException("Failed to copy lobby", e);
+        }
+
+        try {
+            patchWorld();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to patch lobby", e);
+        }
+    }
+
+    private void patchWorld() throws IOException {
+        removeIfExists(lobbyDir.resolve("advancements"));
+        removeIfExists(lobbyDir.resolve("playerdata"));
+        removeIfExists(lobbyDir.resolve("stats"));
+        removeIfExists(lobbyDir.resolve("icon.png"));
+        removeIfExists(lobbyDir.resolve("level.dat_old"));
+        removeIfExists(lobbyDir.resolve("session.lock"));
+
+        Path levelDataPath = lobbyDir.resolve("level.dat");
+        if (Files.isRegularFile(levelDataPath)) {
+            patchLevelDat(levelDataPath);
+        }
+    }
+
+    private void patchLevelDat(Path levelDataPath) throws IOException {
+        Tag parsed;
+        try (var in = Files.newInputStream(levelDataPath)) {
+            parsed = NbtIOHelper.read(in).tag();
+        }
+
+        if (!(parsed instanceof CompoundTag root)) return;
+
+        if (!root.contains("Data", NBTConstants.TYPE_COMPOUND)) return;
+
+        CompoundTag data = root.getCompound("Data");
+        data.putString("LevelName", lobbyDir.getFileName().toString());
+
+        try (var out = Files.newOutputStream(levelDataPath)) {
+            NbtIOHelper.write(root, out);
+        }
+    }
+
+    private static void removeIfExists(Path path) throws IOException {
+        if (!Files.exists(path)) return;
+
+        if (!Files.isDirectory(path)) {
+            // regular file
+            Files.delete(path);
+            return;
+        }
+
+        // delete directory recursively
+        try (var files = Files.walk(path)) {
+            var iterator = files
+                    .sorted(Comparator.reverseOrder())
+                    .iterator();
+
+            while (iterator.hasNext()) {
+                Path p = iterator.next();
+                Files.delete(p);
+            }
         }
     }
 }
