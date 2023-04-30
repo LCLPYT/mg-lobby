@@ -19,6 +19,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     private static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyPlugin instance = null;
     private final LobbyManagerImpl manager = new LobbyManagerImpl(this, logger);
+    private LobbyActivity lobbyActivity;
 
     @Override
     public void loadKibuPlugin() {
@@ -41,12 +42,14 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
 
     @Override
     public void onWorldReady() {
-         new LobbyActivity(manager).startActivity(this);
+        lobbyActivity = new LobbyActivity(manager);
+        lobbyActivity.startActivity(this);
     }
 
     @Override
     public void onWorldUnready() {
         // called when the main world or the plugin is unloading
+        lobbyActivity.endActivity(this);
     }
 
     @Override

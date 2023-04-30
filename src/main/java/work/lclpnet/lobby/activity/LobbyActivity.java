@@ -37,7 +37,6 @@ public class LobbyActivity implements Activity {
 
     @Override
     public void endActivity(PluginContext context) {
-        ServerWorld world = lobbyManager.getLobbyWorld();
-        mazeCreator.reset(world);
+        mazeCreator.reset();
     }
 }

@@ -1,7 +1,6 @@
 package work.lclpnet.lobby.maze;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import work.lclpnet.maze.Maze;
 import work.lclpnet.maze.MazeOutput;
 import work.lclpnet.maze.graph.Graph;
@@ -10,11 +9,11 @@ import work.lclpnet.maze.graph.Node;
 public class LobbyMazeOutput implements MazeOutput<PositionedNode> {
 
     private final MazeConfig config;
-    private final World world;
+    private final BlockStateWriter writer;
 
-    public LobbyMazeOutput(MazeConfig config, World world) {
+    public LobbyMazeOutput(MazeConfig config, BlockStateWriter writer) {
         this.config = config;
-        this.world = world;
+        this.writer = writer;
     }
 
     @Override
@@ -42,7 +41,7 @@ public class LobbyMazeOutput implements MazeOutput<PositionedNode> {
                 int z = pos.getZ() + dz;
 
                 for (BlockPos wallPos : BlockPos.iterate(x, y, z, x, y + config.height - 1, z)) {
-                    world.setBlockState(wallPos, config.material);
+                    writer.setBlockState(wallPos, config.material);
                 }
             }
         }
