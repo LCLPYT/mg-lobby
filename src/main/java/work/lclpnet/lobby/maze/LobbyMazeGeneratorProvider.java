@@ -8,9 +8,7 @@ import net.minecraft.world.BlockView;
 import work.lclpnet.maze.MazeGenerator;
 import work.lclpnet.maze.MazeGeneratorProvider;
 import work.lclpnet.maze.graph.Graph;
-import work.lclpnet.maze.graph.Graphs;
 import work.lclpnet.maze.impl.BasicMazeGenerator;
-import work.lclpnet.maze.impl.SimpleMaze;
 
 import java.util.*;
 
@@ -59,7 +57,9 @@ public class LobbyMazeGeneratorProvider implements MazeGeneratorProvider<Positio
             }
         }
 
-        var maze = new SimpleMaze<>(nodes.values(), Graphs::undirected);
+        final PositionedNode startNode = nodes.get(config.start);
+
+        LobbyMaze maze = new LobbyMaze(nodes);
 
         // carve forced passages
         Graph graph = maze.getGraph();
@@ -73,8 +73,8 @@ public class LobbyMazeGeneratorProvider implements MazeGeneratorProvider<Positio
             graph.removeEdge(maze.getNodeId(from), maze.getNodeId(to));
         }
 
-        // find start
-        int start = maze.getNodeId(nodes.get(config.start));
+        // find start node id
+        int start = maze.getNodeId(startNode);
 
         return new BasicMazeGenerator<>(maze, start);
     }

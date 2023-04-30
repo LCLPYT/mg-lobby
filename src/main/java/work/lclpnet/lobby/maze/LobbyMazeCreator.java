@@ -36,7 +36,7 @@ public class LobbyMazeCreator {
 
             LobbyMazeGeneratorProvider provider = new LobbyMazeGeneratorProvider(mazeConfig, world);
             MazeGenerationAlgorithm algorithm = RecursiveBacktrackingMazeGenerationAlgorithm.getInstance();
-            LobbyMazeOutput output = new LobbyMazeOutput(mazeConfig, writer);
+            LobbyMazeOutput output = new LobbyMazeOutput(mazeConfig, writer, logger);
 
             var creator = new MazeCreator<>(provider, algorithm, output);
             creator.create(new Random());

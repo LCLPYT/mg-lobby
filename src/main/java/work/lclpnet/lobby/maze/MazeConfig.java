@@ -22,6 +22,7 @@ public class MazeConfig implements JsonConfig {
     public BlockState material = Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.PERSISTENT, true);
     public int height = 4;
     public List<Pair<BlockPos, BlockPos>> forcePassages = new ArrayList<>();
+    public List<Pair<BlockPos, BlockPos>> exits = new ArrayList<>();
 
     public MazeConfig() {}
 
@@ -73,6 +74,24 @@ public class MazeConfig implements JsonConfig {
                 forcePassages.add(passage);
             }
         }
+
+        if (json.has("exits")) {
+            JSONArray array = json.getJSONArray("exits");
+
+            exits = new ArrayList<>();
+
+            for (Object tupleElement : array) {
+                if (!(tupleElement instanceof JSONArray tuple)) continue;
+
+                if (tuple.length() < 2) throw new IllegalArgumentException("Exit tuples must have two elements");
+
+                BlockPos from = ConfigUtil.getBlockPos(tuple.getJSONArray(0));
+                BlockPos to = ConfigUtil.getBlockPos(tuple.getJSONArray(1));
+
+                var exit = Pair.of(from, to);
+                exits.add(exit);
+            }
+        }
     }
 
     @Override
@@ -103,6 +122,17 @@ public class MazeConfig implements JsonConfig {
         }
 
         json.put("force_passages", forcePassages);
+
+        JSONArray exits = new JSONArray();
+        for (var exit : this.exits) {
+            JSONArray tuple = new JSONArray();
+            tuple.put(ConfigUtil.writeBlockPos(exit.left()));
+            tuple.put(ConfigUtil.writeBlockPos(exit.right()));
+
+            exits.put(tuple);
+        }
+
+        json.put("exits", exits);
 
         return json;
     }
