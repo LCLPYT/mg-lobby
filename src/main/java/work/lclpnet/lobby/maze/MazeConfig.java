@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.maze;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LeavesBlock;
@@ -9,13 +10,18 @@ import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
 import work.lclpnet.kibu.util.BlockStateUtils;
 import work.lclpnet.lobby.config.ConfigUtil;
+import work.lclpnet.lobby.maze.geometry.Bounds;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MazeConfig implements JsonConfig {
 
     public BlockPos start = null;
-    public final BlockPos[] bounds = new BlockPos[2];
+    public Bounds bounds = new Bounds(BlockPos.ORIGIN, BlockPos.ORIGIN);
     public BlockState material = Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.PERSISTENT, true);
     public int height = 4;
+    public List<Pair<BlockPos, BlockPos>> forcePassages = new ArrayList<>();
 
     public MazeConfig() {}
 
@@ -28,13 +34,14 @@ public class MazeConfig implements JsonConfig {
             JSONArray positions = json.getJSONArray("bounds");
             if (positions.length() < 2) throw new IllegalArgumentException("Bounds must be of length 2");
 
-            if (!positions.isNull(0)) {
-                this.bounds[0] = ConfigUtil.getBlockPos(positions.getJSONArray(0));
+            if (positions.isNull(0) || positions.isNull(1)) {
+                throw new IllegalArgumentException("bounds must contain two arrays");
             }
 
-            if (!positions.isNull(1)) {
-                this.bounds[1] = ConfigUtil.getBlockPos(positions.getJSONArray(1));
-            }
+            this.bounds = new Bounds(
+                    ConfigUtil.getBlockPos(positions.getJSONArray(0)),
+                    ConfigUtil.getBlockPos(positions.getJSONArray(1))
+            );
         }
 
         if (json.has("material")) {
@@ -47,6 +54,24 @@ public class MazeConfig implements JsonConfig {
 
         if (json.has("height")) {
             this.height = json.getInt("height");
+        }
+
+        if (json.has("force_passages")) {
+            JSONArray array = json.getJSONArray("force_passages");
+
+            forcePassages = new ArrayList<>();
+
+            for (Object tupleElement : array) {
+                if (!(tupleElement instanceof JSONArray tuple)) continue;
+
+                if (tuple.length() < 2) throw new IllegalArgumentException("Passage tuples must have two elements");
+
+                BlockPos from = ConfigUtil.getBlockPos(tuple.getJSONArray(0));
+                BlockPos to = ConfigUtil.getBlockPos(tuple.getJSONArray(1));
+
+                var passage = Pair.of(from, to);
+                forcePassages.add(passage);
+            }
         }
     }
 
@@ -61,23 +86,23 @@ public class MazeConfig implements JsonConfig {
         }
 
         JSONArray bounds = new JSONArray();
-        if (this.bounds[0] != null) {
-            bounds.put(ConfigUtil.writeBlockPos(this.bounds[0]));
-        } else {
-            bounds.put(JSONObject.NULL);
-        }
-
-        if (this.bounds[1] != null) {
-            bounds.put(ConfigUtil.writeBlockPos(this.bounds[1]));
-        } else {
-            bounds.put(JSONObject.NULL);
-        }
+        bounds.put(ConfigUtil.writeBlockPos(BlockPos.ofFloored(this.bounds.getMin())));
+        bounds.put(ConfigUtil.writeBlockPos(BlockPos.ofFloored(this.bounds.getMax())));
 
         json.put("bounds", bounds);
-
         json.put("material", BlockStateUtils.stringify(material));
-
         json.put("height", height);
+
+        JSONArray forcePassages = new JSONArray();
+        for (var passage : this.forcePassages) {
+            JSONArray tuple = new JSONArray();
+            tuple.put(ConfigUtil.writeBlockPos(passage.left()));
+            tuple.put(ConfigUtil.writeBlockPos(passage.right()));
+
+            forcePassages.put(tuple);
+        }
+
+        json.put("force_passages", forcePassages);
 
         return json;
     }

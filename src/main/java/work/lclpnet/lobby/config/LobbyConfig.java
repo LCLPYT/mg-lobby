@@ -19,13 +19,13 @@ public class LobbyConfig implements JsonConfig {
     public LobbyConfig() {}
 
     public LobbyConfig(JSONObject obj) {
-        if (obj.has("lobbySource")) {
-            String lobbySource = obj.getString("lobbySource").replace('\\', '/');
+        if (obj.has("lobby_source")) {
+            String lobbySource = obj.getString("lobby_source").replace('\\', '/');
             this.lobbySource = URI.create(lobbySource);
         }
 
-        if (obj.has("lobby")) {
-            this.lobbyLevelName = obj.getString("lobbyLevelName");
+        if (obj.has("lobby_level_name")) {
+            this.lobbyLevelName = obj.getString("lobby_level_name");
         }
 
         if (obj.has("maze")) {
@@ -52,12 +52,12 @@ public class LobbyConfig implements JsonConfig {
             }
 
             Path relativeLobbySource = current.relativize(lobbyPath);
-            json.put("lobbySource", relativeLobbySource.toString());
+            json.put("lobby_source", relativeLobbySource.toString());
         } else {
-            json.put("lobbySource", lobbySource.toString());
+            json.put("lobby_source", lobbySource.toString());
         }
 
-        json.put("lobbyLevelName", lobbyLevelName);
+        json.put("lobby_level_name", lobbyLevelName);
 
         json.put("maze", mazeConfig.toJson());
 

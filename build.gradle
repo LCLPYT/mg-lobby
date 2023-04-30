@@ -46,6 +46,8 @@ dependencies {
     bundle ('work.lclpnet:json-config4j:1.0.0') { transitive = false }
     implementation 'org.apache.commons:commons-compress:1.23.0'
     bundle 'org.apache.commons:commons-compress:1.23.0'
+    implementation "work.lclpnet:maze-lib:${project.maze_lib_version}"
+    bundle ("work.lclpnet:maze-lib:${project.maze_lib_version}") { transitive = false }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
