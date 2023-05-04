@@ -12,10 +12,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
-import work.lclpnet.config.json.FileConfigSerializer;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.lobby.api.LobbyManager;
+import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
 
 import javax.annotation.Nonnull;
@@ -32,7 +32,7 @@ public class LobbyManagerImpl implements LobbyManager {
         this.pluginContext = pluginContext;
         this.logger = logger;
 
-        var configSerializer = new FileConfigSerializer<>(LobbyConfig.FACTORY, logger);
+        var configSerializer = new ExtendedConfigSerializer<>(LobbyConfig.FACTORY, logger);
         Path configFile = FabricLoader.getInstance().getConfigDir()
                 .resolve(LobbyPlugin.ID).resolve("config.json");
 
