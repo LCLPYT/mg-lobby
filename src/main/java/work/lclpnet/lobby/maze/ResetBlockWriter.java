@@ -7,12 +7,12 @@ import net.minecraft.world.World;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WorldBlockChange implements BlockStateWriter {
+public class ResetBlockWriter implements BlockStateWriter {
 
     private final World world;
     private final Map<BlockPos, BlockState> states = new HashMap<>();
 
-    public WorldBlockChange(World world) {
+    public ResetBlockWriter(World world) {
         this.world = world;
     }
 

@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.config;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
 import work.lclpnet.config.json.JsonConfigFactory;
@@ -7,6 +8,8 @@ import work.lclpnet.lobby.maze.MazeConfig;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class LobbyConfig implements JsonConfig {
@@ -14,7 +17,7 @@ public class LobbyConfig implements JsonConfig {
     public static final String DEFAULT_LOBBY_LEVEL_NAME = "lobby";
     public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-1.19.4");
     public String lobbyLevelName = "lobby";
-    public MazeConfig mazeConfig = new MazeConfig();
+    public List<MazeConfig> mazeConfigs = new ArrayList<>(List.of(new MazeConfig()));  // one maze by default; mutable
 
     public LobbyConfig() {}
 
@@ -28,9 +31,18 @@ public class LobbyConfig implements JsonConfig {
             this.lobbyLevelName = obj.getString("lobby_level_name");
         }
 
-        if (obj.has("maze")) {
-            JSONObject maze = obj.getJSONObject("maze");
-            this.mazeConfig = new MazeConfig(maze);
+        if (obj.has("mazes")) {
+            JSONArray mazes = obj.getJSONArray("mazes");
+            List<MazeConfig> mazeConfigs = new ArrayList<>();
+
+            for (Object entry : mazes) {
+                if (!(entry instanceof JSONObject maze)) continue;
+
+                MazeConfig mazeConfig = new MazeConfig(maze);
+                mazeConfigs.add(mazeConfig);
+            }
+
+            this.mazeConfigs = mazeConfigs;
         }
     }
 
@@ -59,7 +71,11 @@ public class LobbyConfig implements JsonConfig {
 
         json.put("lobby_level_name", lobbyLevelName);
 
-        json.put("maze", mazeConfig.toJson());
+        JSONArray mazes = new JSONArray();
+        for (MazeConfig mazeConfig : this.mazeConfigs) {
+            mazes.put(mazeConfig.toJson());
+        }
+        json.put("mazes", mazes);
 
         return json;
     }

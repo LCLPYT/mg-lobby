@@ -8,11 +8,13 @@ import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.event.LobbyListener;
 import work.lclpnet.lobby.maze.LobbyMazeCreator;
+import work.lclpnet.lobby.maze.ResetBlockWriter;
 
 public class LobbyActivity implements Activity {
 
     private final LobbyManager lobbyManager;
     private final LobbyMazeCreator mazeCreator;
+    private ResetBlockWriter blockWriter;
 
     public LobbyActivity(LobbyManager lobbyManager) {
         this.lobbyManager = lobbyManager;
@@ -32,11 +34,12 @@ public class LobbyActivity implements Activity {
 
         // generate maze
         ServerWorld world = lobbyManager.getLobbyWorld();
-        mazeCreator.create(world);
+        blockWriter = new ResetBlockWriter(world);
+        mazeCreator.create(blockWriter, world);
     }
 
     @Override
     public void endActivity(PluginContext context) {
-        mazeCreator.reset();
+        blockWriter.undo();
     }
 }
