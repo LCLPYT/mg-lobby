@@ -48,22 +48,28 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
-
     modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
 
-    /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.json:json:20220924'
 
-    implementation 'work.lclpnet:json-config4j:1.0.0'
-    bundle ('work.lclpnet:json-config4j:1.0.0') { transitive = false }
+    // bundle these dependencies
+    'work.lclpnet:json-config4j:1.0.0'.with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
 
-    implementation 'org.apache.commons:commons-compress:1.23.0'
-    bundle 'org.apache.commons:commons-compress:1.23.0'
+    'org.apache.commons:commons-compress:1.23.0'.with {
+        implementation it
+        bundle it
+    }
 
-    implementation "work.lclpnet:maze-lib:${project.maze_lib_version}"
-    bundle ("work.lclpnet:maze-lib:${project.maze_lib_version}") { transitive = false }
+    "work.lclpnet:maze-lib:${project.maze_lib_version}".with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
 
+    // test dependencies
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testImplementation 'org.junit.platform:junit-platform-launcher:1.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
