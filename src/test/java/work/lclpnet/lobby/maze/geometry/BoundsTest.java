@@ -11,31 +11,31 @@ class BoundsTest {
     @Test
     void getMin() {
         var bounds = new Bounds(new BlockPos(0, 0, 0), new BlockPos(1, 1, 1));
-        assertEquals(new BlockPos(0, 0, 0), bounds.getMin());
+        assertEquals(new Vec3d(0, 0, 0), bounds.getMin());
 
         bounds = new Bounds(new BlockPos(1, 1, 1), new BlockPos(0, 0, 0));
-        assertEquals(new BlockPos(0, 0, 0), bounds.getMin());
+        assertEquals(new Vec3d(0, 0, 0), bounds.getMin());
 
         bounds = new Bounds(new BlockPos(0, 1, 1), new BlockPos(1, 0, 0));
-        assertEquals(new BlockPos(0, 0, 0), bounds.getMin());
+        assertEquals(new Vec3d(0, 0, 0), bounds.getMin());
 
         bounds = new Bounds(new BlockPos(1, 0, 0), new BlockPos(0, 0, 1));
-        assertEquals(new BlockPos(0, 0, 0), bounds.getMin());
+        assertEquals(new Vec3d(0, 0, 0), bounds.getMin());
     }
 
     @Test
     void getMax() {
         var bounds = new Bounds(new BlockPos(0, 0, 0), new BlockPos(1, 1, 1));
-        assertEquals(new BlockPos(1, 1, 1), bounds.getMax());
+        assertEquals(new Vec3d(1, 1, 1), bounds.getMax());
 
         bounds = new Bounds(new BlockPos(1, 1, 1), new BlockPos(0, 0, 0));
-        assertEquals(new BlockPos(1, 1, 1), bounds.getMax());
+        assertEquals(new Vec3d(1, 1, 1), bounds.getMax());
 
         bounds = new Bounds(new BlockPos(0, 1, 1), new BlockPos(1, 0, 0));
-        assertEquals(new BlockPos(1, 1, 1), bounds.getMax());
+        assertEquals(new Vec3d(1, 1, 1), bounds.getMax());
 
         bounds = new Bounds(new BlockPos(1, 0, 0), new BlockPos(0, 0, 1));
-        assertEquals(new BlockPos(1, 0, 1), bounds.getMax());
+        assertEquals(new Vec3d(1, 0, 1), bounds.getMax());
     }
 
     @Test

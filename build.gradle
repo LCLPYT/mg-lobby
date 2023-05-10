@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'fabric-loom' version '1.1.8'
+    id 'fabric-loom' version '1.2.7'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.2.0'
     id 'kibu-plugin-dev' version '0.3.0'
@@ -50,6 +50,7 @@ dependencies {
     bundle ("work.lclpnet:maze-lib:${project.maze_lib_version}") { transitive = false }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
@@ -63,6 +64,7 @@ loom {
 
 test {
     useJUnitPlatform()
+    systemProperty('fabric.side', 'server')  // required atm for server-only unit tests using mc code
 }
 
 processResources {
@@ -87,8 +89,6 @@ jar {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
-
-println project.outgoingVariants
 
 publishing {
     publications {

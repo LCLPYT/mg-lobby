@@ -42,14 +42,14 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
 
     @Override
     public void onWorldReady() {
-        lobbyActivity = new LobbyActivity(manager);
-        lobbyActivity.startActivity(this);
+        lobbyActivity = new LobbyActivity(this, manager);
+        lobbyActivity.start();
     }
 
     @Override
     public void onWorldUnready() {
         // called when the main world or the plugin is unloading
-        lobbyActivity.endActivity(this);
+        lobbyActivity.stop();
     }
 
     @Override

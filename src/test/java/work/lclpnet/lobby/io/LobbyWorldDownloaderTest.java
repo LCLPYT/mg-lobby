@@ -1,5 +1,8 @@
 package work.lclpnet.lobby.io;
 
+import net.minecraft.Bootstrap;
+import net.minecraft.SharedConstants;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.config.LobbyConfig;
@@ -19,6 +22,12 @@ class LobbyWorldDownloaderTest {
         lobbyConfig.lobbySource = Path.of("src", "test", "resources", "directory.tar.gz").toUri();
         return lobbyConfig;
     };
+
+    @BeforeAll
+    public static void setup() {
+        SharedConstants.createGameVersion();
+        Bootstrap.initialize();
+    }
 
     @Test
     void testRenewLobbyEmpty() throws IOException {

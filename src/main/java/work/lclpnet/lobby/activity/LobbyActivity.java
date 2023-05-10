@@ -5,27 +5,39 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import work.lclpnet.kibu.plugin.PluginContext;
+import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.api.LobbyManager;
+import work.lclpnet.lobby.api.activity.ComponentActivity;
+import work.lclpnet.lobby.api.component.ComponentBundle;
 import work.lclpnet.lobby.event.LobbyListener;
 import work.lclpnet.lobby.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.maze.ResetBlockWriter;
 
-public class LobbyActivity implements Activity {
+import static work.lclpnet.lobby.api.component.builtin.BuiltinComponents.HOOKS;
+
+public class LobbyActivity extends ComponentActivity {
 
     private final LobbyManager lobbyManager;
     private final LobbyMazeCreator mazeCreator;
     private ResetBlockWriter blockWriter;
 
-    public LobbyActivity(LobbyManager lobbyManager) {
+    public LobbyActivity(PluginContext context, LobbyManager lobbyManager) {
+        super(context);
         this.lobbyManager = lobbyManager;
         this.mazeCreator = new LobbyMazeCreator(lobbyManager, lobbyManager.getLogger());
     }
 
     @Override
-    public void startActivity(PluginContext context) {
-        context.registerHooks(new LobbyListener(lobbyManager));
+    protected void initComponents(ComponentBundle components) {
+        components.add(HOOKS);
+    }
 
-        MinecraftServer server = context.getEnvironment().getServer();
+    @Override
+    public void start() {
+        HookRegistrar hooks = component(HOOKS).hooks();
+        hooks.registerHooks(new LobbyListener(lobbyManager));
+
+        MinecraftServer server = getServer();
 
         // send every online player to the lobby
         for (ServerPlayerEntity player : PlayerLookup.all(server)) {
@@ -39,7 +51,7 @@ public class LobbyActivity implements Activity {
     }
 
     @Override
-    public void endActivity(PluginContext context) {
+    public void stop() {
         blockWriter.undo();
     }
 }
