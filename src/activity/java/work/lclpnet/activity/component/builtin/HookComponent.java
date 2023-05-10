@@ -1,8 +1,8 @@
-package work.lclpnet.lobby.api.component.builtin;
+package work.lclpnet.activity.component.builtin;
 
+import work.lclpnet.activity.component.Component;
 import work.lclpnet.kibu.plugin.hook.HookContainer;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
-import work.lclpnet.lobby.api.component.Component;
 
 public class HookComponent implements Component {
 

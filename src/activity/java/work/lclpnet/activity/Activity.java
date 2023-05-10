@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.api.activity;
+package work.lclpnet.activity;
 
 public interface Activity {
 

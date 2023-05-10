@@ -1,16 +1,16 @@
-package work.lclpnet.lobby.api.component;
+package work.lclpnet.activity.component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class ListComponentBundle implements ComponentBundle {
+public class ListComponentBuilder implements ComponentBuilder {
 
     private final List<ComponentKey<?>> components = new ArrayList<>();
 
     @Override
-    public ListComponentBundle add(ComponentKey<?> component) {
+    public ListComponentBuilder add(ComponentKey<?> component) {
         Objects.requireNonNull(component);
         components.add(component);
         return this;

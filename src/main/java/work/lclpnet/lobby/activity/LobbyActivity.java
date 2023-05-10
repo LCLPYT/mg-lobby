@@ -4,16 +4,16 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import work.lclpnet.activity.ComponentActivity;
+import work.lclpnet.activity.component.ComponentBuilder;
 import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.api.LobbyManager;
-import work.lclpnet.lobby.api.activity.ComponentActivity;
-import work.lclpnet.lobby.api.component.ComponentBundle;
 import work.lclpnet.lobby.event.LobbyListener;
 import work.lclpnet.lobby.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.maze.ResetBlockWriter;
 
-import static work.lclpnet.lobby.api.component.builtin.BuiltinComponents.HOOKS;
+import static work.lclpnet.activity.component.builtin.BuiltinComponents.HOOKS;
 
 public class LobbyActivity extends ComponentActivity {
 
@@ -28,7 +28,7 @@ public class LobbyActivity extends ComponentActivity {
     }
 
     @Override
-    protected void initComponents(ComponentBundle components) {
+    protected void buildComponents(ComponentBuilder components) {
         components.add(HOOKS);
     }
 

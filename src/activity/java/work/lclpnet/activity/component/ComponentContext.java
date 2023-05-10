@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.api.component;
+package work.lclpnet.activity.component;
 
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;

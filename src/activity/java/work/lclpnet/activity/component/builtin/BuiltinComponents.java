@@ -1,6 +1,6 @@
-package work.lclpnet.lobby.api.component.builtin;
+package work.lclpnet.activity.component.builtin;
 
-import work.lclpnet.lobby.api.component.ComponentKey;
+import work.lclpnet.activity.component.ComponentKey;
 
 public class BuiltinComponents {
 

@@ -1,3 +1,5 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 plugins {
     id 'java'
     id 'fabric-loom' version '1.2.7'
@@ -28,6 +30,16 @@ repositories {
     }
 }
 
+sourceSets {
+    activity
+
+    // make activity classes available in the main sourceSet
+    main {
+        compileClasspath += activity.output
+        runtimeClasspath += activity.output
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -42,16 +54,35 @@ dependencies {
     /* other Java dependencies */
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.json:json:20220924'
+
     implementation 'work.lclpnet:json-config4j:1.0.0'
     bundle ('work.lclpnet:json-config4j:1.0.0') { transitive = false }
+
     implementation 'org.apache.commons:commons-compress:1.23.0'
     bundle 'org.apache.commons:commons-compress:1.23.0'
+
     implementation "work.lclpnet:maze-lib:${project.maze_lib_version}"
     bundle ("work.lclpnet:maze-lib:${project.maze_lib_version}") { transitive = false }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testImplementation 'org.junit.platform:junit-platform-launcher:1.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+// add main dependencies to the activity sourceSet
+configurations {
+    activityImplementation.extendsFrom(implementation)
+
+    activityCompileClasspath.extendsFrom(modCompileClasspathMapped)
+    activityRuntimeClasspath.extendsFrom(modCompileClasspathMapped)
+}
+
+// add minecraft dependencies to activity sourceSet (only available after project evaluation)
+afterEvaluate {
+    configurations {
+        activityCompileClasspath.extendsFrom(minecraftNamedCompile)
+        activityRuntimeClasspath.extendsFrom(minecraftNamedRuntime)
+    }
 }
 
 loom {
@@ -67,7 +98,18 @@ test {
     systemProperty('fabric.side', 'server')  // required atm for server-only unit tests using mc code
 }
 
+java {
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.getRelease().convention(17)
+}
+
 processResources {
+    dependsOn processActivityResources  // should process activity resources
+
+    // replace placeholders in resources
     inputs.property "version", project.version
 
     filesMatching("plugin.json") {
@@ -75,17 +117,32 @@ processResources {
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.getRelease().convention(17)
+// add activity jar tasks
+tasks.register("activityJar", Jar.class) {
+    archiveClassifier.set("activity-dev")
+    destinationDirectory.set(new File(buildDir, "devlibs"))
 }
 
-java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    withSourcesJar()
+tasks.register("remapActivityJar", RemapJarTask.class) {
+    dependsOn(tasks.activityJar)
+
+    description("Remaps the built activity jar to intermediary mappings.")
+    group("fabric")
+    archiveClassifier.set("activity")
+
+    inputFile.convention(tasks.activityJar.archiveFile)
 }
 
-jar {
-    from("LICENSE") {
+[activityJar, remapActivityJar].each {
+    tasks.assemble.dependsOn(it)
+}
+
+// tweak all jar tasks
+[jar, sourcesJar, shadowJar, activityJar].each {
+    it.from sourceSets.activity.output
+
+    // include license file
+    it.from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
@@ -97,6 +154,7 @@ publishing {
 
             artifact remapJar
             artifact remapSourcesJar
+            artifact remapActivityJar
 
             pom {
                 name = 'Minigame Lobby'

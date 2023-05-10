@@ -1,9 +1,9 @@
-package work.lclpnet.lobby.api.component.builtin;
+package work.lclpnet.activity.component.builtin;
 
+import work.lclpnet.activity.component.Component;
+import work.lclpnet.activity.component.ComponentContext;
 import work.lclpnet.kibu.scheduler.KibuScheduling;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
-import work.lclpnet.lobby.api.component.Component;
-import work.lclpnet.lobby.api.component.ComponentContext;
 
 import java.util.function.Supplier;
 

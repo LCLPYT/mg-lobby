@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.api.component;
+package work.lclpnet.activity.component;
 
 import java.util.Collection;
 

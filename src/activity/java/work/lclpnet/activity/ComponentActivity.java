@@ -1,9 +1,9 @@
-package work.lclpnet.lobby.api.activity;
+package work.lclpnet.activity;
 
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
+import work.lclpnet.activity.component.*;
 import work.lclpnet.kibu.plugin.PluginContext;
-import work.lclpnet.lobby.api.component.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,12 +16,12 @@ public abstract class ComponentActivity implements Activity, ComponentContext {
     public ComponentActivity(PluginContext context) {
         this.context = context;
 
-        final ComponentBundle componentBundle = new ListComponentBundle();
-        initComponents(componentBundle);
+        final ComponentBuilder componentBuilder = new ListComponentBuilder();
+        buildComponents(componentBuilder);
 
         Map<ComponentKey<?>, Component> componentMap = new HashMap<>();
 
-        for (var componentKey : componentBundle.build()) {
+        for (var componentKey : componentBuilder.build()) {
             Component component = componentKey.newInstance(this);
             componentMap.put(componentKey, component);
         }
@@ -29,7 +29,7 @@ public abstract class ComponentActivity implements Activity, ComponentContext {
         this.components = new ComponentContainer(componentMap);
     }
 
-    protected abstract void initComponents(ComponentBundle components);
+    protected abstract void buildComponents(ComponentBuilder components);
 
     public final <T extends Component> T component(ComponentKey<T> key) {
         return components.get(key);
