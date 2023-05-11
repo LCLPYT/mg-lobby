@@ -5,7 +5,7 @@ import java.util.ServiceLoader;
 
 class ActivityManagerContainer {
 
-    private final ServiceLoader<ActivityManager> serviceLoader = ServiceLoader.load(ActivityManager.class);
+    private final ServiceLoader<ActivityManagerProvider> serviceLoader = ServiceLoader.load(ActivityManagerProvider.class);
     private ActivityManager activityManager = null;
 
     private ActivityManagerContainer() {
@@ -13,7 +13,10 @@ class ActivityManagerContainer {
     }
 
     public void load() {
-        activityManager = serviceLoader.findFirst().orElseThrow(() -> new NoSuchElementException("No ActivityManager implementation found"));
+        ActivityManagerProvider provider = serviceLoader.findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No ActivityManagerProvider found"));
+
+        activityManager = provider.create();
     }
 
     public ActivityManager getActivityManager() {

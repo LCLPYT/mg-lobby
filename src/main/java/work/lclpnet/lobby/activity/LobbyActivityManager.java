@@ -7,6 +7,8 @@ public class LobbyActivityManager implements ActivityManager {
 
     private Activity currentActivity = null;
 
+    LobbyActivityManager() {}
+
     @Override
     public void startActivity(Activity activity) {
         synchronized (this) {
