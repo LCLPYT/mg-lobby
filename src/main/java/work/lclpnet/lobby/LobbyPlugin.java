@@ -3,6 +3,7 @@ package work.lclpnet.lobby;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.plugin.KibuPlugin;
 import work.lclpnet.lobby.activity.LobbyActivity;
 import work.lclpnet.lobby.api.LobbyManager;
@@ -19,7 +20,6 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     private static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyPlugin instance = null;
     private final LobbyManagerImpl manager = new LobbyManagerImpl(this, logger);
-    private LobbyActivity lobbyActivity;
 
     @Override
     public void loadKibuPlugin() {
@@ -42,14 +42,13 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
 
     @Override
     public void onWorldReady() {
-        lobbyActivity = new LobbyActivity(this, manager);
-        lobbyActivity.start();
+        ActivityManager.getInstance().startActivity(new LobbyActivity(this, manager));
     }
 
     @Override
     public void onWorldUnready() {
         // called when the main world or the plugin is unloading
-        lobbyActivity.stop();
+        ActivityManager.getInstance().stop();
     }
 
     @Override

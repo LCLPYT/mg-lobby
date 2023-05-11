@@ -109,7 +109,7 @@ java {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.getRelease().convention(17)
+    it.options.release.convention(17)
 }
 
 processResources {
@@ -129,12 +129,12 @@ tasks.register("activityJar", Jar.class) {
     destinationDirectory.set(new File(buildDir, "devlibs"))
 }
 
-tasks.register("remapActivityJar", RemapJarTask.class) {
-    dependsOn(tasks.activityJar)
+tasks.register('remapActivityJar', RemapJarTask.class) {
+    dependsOn tasks.activityJar
 
-    description("Remaps the built activity jar to intermediary mappings.")
-    group("fabric")
-    archiveClassifier.set("activity")
+    description 'Remaps the built activity jar to intermediary mappings.'
+    group 'fabric'
+    archiveClassifier.set('activity')
 
     inputFile.convention(tasks.activityJar.archiveFile)
 }
@@ -143,12 +143,13 @@ tasks.register("remapActivityJar", RemapJarTask.class) {
     tasks.assemble.dependsOn(it)
 }
 
-// tweak all jar tasks
+// tweak jar tasks
 [jar, sourcesJar, shadowJar, activityJar].each {
+    // include activity sourceSet
     it.from sourceSets.activity.output
 
     // include license file
-    it.from("LICENSE") {
+    it.from('LICENSE') {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
