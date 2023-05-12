@@ -5,10 +5,11 @@ import java.util.ServiceLoader;
 
 class ActivityManagerContainer {
 
-    private final ServiceLoader<ActivityManagerProvider> serviceLoader = ServiceLoader.load(ActivityManagerProvider.class);
+    private final ServiceLoader<ActivityManagerProvider> serviceLoader;
     private ActivityManager activityManager = null;
 
     private ActivityManagerContainer() {
+        serviceLoader = ServiceLoader.load(ActivityManagerProvider.class, getClass().getClassLoader());
         load();
     }
 

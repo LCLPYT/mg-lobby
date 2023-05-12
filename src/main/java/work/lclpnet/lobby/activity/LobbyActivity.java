@@ -34,7 +34,6 @@ public class LobbyActivity extends ComponentActivity {
 
     @Override
     public void start() {
-        getLogger().info("START");
         HookRegistrar hooks = component(HOOKS).hooks();
         hooks.registerHooks(new LobbyListener(lobbyManager));
 
@@ -53,7 +52,6 @@ public class LobbyActivity extends ComponentActivity {
 
     @Override
     public void stop() {
-        getLogger().info("STOP");
         blockWriter.undo();
     }
 }
