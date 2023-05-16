@@ -5,7 +5,7 @@ plugins {
     id 'fabric-loom' version '1.2.7'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.2.0'
-    id 'kibu-plugin-dev' version '0.3.0'
+    id 'kibu-plugin-dev' version '0.5.0'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -33,10 +33,9 @@ repositories {
 sourceSets {
     activity
 
-    // make activity classes available in the main sourceSet
     main {
+        // make activity classes available in the main sourceSet
         compileClasspath += activity.output
-        runtimeClasspath += activity.output
     }
 }
 
@@ -91,6 +90,11 @@ afterEvaluate {
     }
 }
 
+kibu {
+    // add activity sources to the dev plugin loader
+    pluginPaths.from(sourceSets.activity.output)
+}
+
 loom {
     serverOnlyMinecraftJar()
 
@@ -125,6 +129,8 @@ processResources {
 
 // add activity jar tasks
 tasks.register("activityJar", Jar.class) {
+    description 'Builds the standalone activity api jar.'
+    group 'build'
     archiveClassifier.set("activity-dev")
     destinationDirectory.set(new File(buildDir, "devlibs"))
 }
