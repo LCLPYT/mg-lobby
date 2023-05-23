@@ -12,6 +12,10 @@ public class Bounds {
     private final double maxX, maxY, maxZ;
 
     public Bounds(Vec3i from, Vec3i to) {
+        this(Vec3d.of(from), Vec3d.of(to));
+    }
+
+    public Bounds(Vec3d from, Vec3d to) {
         this.minX = min(from.getX(), to.getX());
         this.minY = min(from.getY(), to.getY());
         this.minZ = min(from.getZ(), to.getZ());
