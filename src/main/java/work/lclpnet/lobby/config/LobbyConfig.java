@@ -1,5 +1,7 @@
 package work.lclpnet.lobby.config;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
@@ -18,6 +20,8 @@ public class LobbyConfig implements JsonConfig {
     public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-1.19.4");
     public String lobbyLevelName = "lobby";
     public List<MazeConfig> mazeConfigs = new ArrayList<>(List.of(new MazeConfig()));  // one maze by default; mutable
+    public BlockPos kingOfLadderGoal = null;
+    public List<Vec3d> kingOfLadderDisplays = new ArrayList<>();
 
     public LobbyConfig() {}
 
@@ -43,6 +47,28 @@ public class LobbyConfig implements JsonConfig {
             }
 
             this.mazeConfigs = mazeConfigs;
+        }
+
+        if (obj.has("king_of_ladder")) {
+            JSONObject kol = obj.getJSONObject("king_of_ladder");
+
+            if (kol.has("goal") && !kol.isNull("goal")) {
+                JSONArray tuple = kol.getJSONArray("goal");
+                kingOfLadderGoal = ConfigUtil.getBlockPos(tuple);
+            }
+
+            if (kol.has("displays")) {
+                JSONArray displays = kol.getJSONArray("displays");
+
+                kingOfLadderDisplays = new ArrayList<>();
+
+                for (Object entry : displays) {
+                    if (!(entry instanceof JSONArray tuple)) continue;
+
+                    Vec3d pos = ConfigUtil.getVec3d(tuple);
+                    kingOfLadderDisplays.add(pos);
+                }
+            }
         }
     }
 
@@ -76,6 +102,18 @@ public class LobbyConfig implements JsonConfig {
             mazes.put(mazeConfig.toJson());
         }
         json.put("mazes", mazes);
+
+        JSONObject kol = new JSONObject();
+        kol.put("goal", kingOfLadderGoal != null ? ConfigUtil.writeBlockPos(kingOfLadderGoal) : JSONObject.NULL);
+
+        JSONArray displays = new JSONArray();
+        for (Vec3d pos : kingOfLadderDisplays) {
+            displays.put(ConfigUtil.writeVec3d(pos));
+        }
+
+        kol.put("displays", displays);
+
+        json.put("king_of_ladder", kol);
 
         return json;
     }

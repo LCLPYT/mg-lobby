@@ -9,6 +9,9 @@ import work.lclpnet.activity.component.ComponentBuilder;
 import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.api.LobbyManager;
+import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.decor.KingOfLadder;
+import work.lclpnet.lobby.event.KingOfLadderListener;
 import work.lclpnet.lobby.event.LobbyListener;
 import work.lclpnet.lobby.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.maze.ResetBlockWriter;
@@ -20,6 +23,7 @@ public class LobbyActivity extends ComponentActivity {
     private final LobbyManager lobbyManager;
     private final LobbyMazeCreator mazeCreator;
     private ResetBlockWriter blockWriter;
+    private KingOfLadder kingOfLadder;
 
     public LobbyActivity(PluginContext context, LobbyManager lobbyManager) {
         super(context);
@@ -34,6 +38,8 @@ public class LobbyActivity extends ComponentActivity {
 
     @Override
     public void start() {
+        super.start();
+
         HookRegistrar hooks = component(HOOKS).hooks();
         hooks.registerHooks(new LobbyListener(lobbyManager));
 
@@ -48,10 +54,23 @@ public class LobbyActivity extends ComponentActivity {
         ServerWorld world = lobbyManager.getLobbyWorld();
         blockWriter = new ResetBlockWriter(world);
         mazeCreator.create(blockWriter, world);
+
+        // init king of the ladder
+        LobbyConfig config = lobbyManager.getConfig();
+        if (config.kingOfLadderGoal != null) {
+            kingOfLadder = new KingOfLadder(server, config.kingOfLadderGoal, config.kingOfLadderDisplays);
+            hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
+        }
     }
 
     @Override
     public void stop() {
+        super.stop();
+
         blockWriter.undo();
+
+        if (kingOfLadder != null) {
+            kingOfLadder.reset();
+        }
     }
 }
