@@ -1,8 +1,10 @@
 package work.lclpnet.lobby.event;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemUsageContext;
@@ -12,6 +14,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import work.lclpnet.kibu.hook.ServerPlayConnectionHooks;
+import work.lclpnet.kibu.hook.entity.ServerLivingEntityHooks;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
@@ -55,6 +58,7 @@ public class LobbyListener implements HookListenerModule {
         registrar.registerHook(WorldPhysicsHooks.CAULDRON_PRECIPITATION, (world, pos, newState) -> isLobby(world));
         registrar.registerHook(WorldPhysicsHooks.FROST_WALKER_FREEZE, (world, pos, entity) -> cancelLobbyAction(entity));
         registrar.registerHook(PlayerInventoryHooks.DROP_ITEM, (player, slot) -> cancelLobbyAction(player));
+        registrar.registerHook(ServerLivingEntityHooks.ALLOW_DAMAGE, (entity, source, amount) -> source.isOf(DamageTypes.OUT_OF_WORLD));
     }
 
     private void onJoin(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) {
