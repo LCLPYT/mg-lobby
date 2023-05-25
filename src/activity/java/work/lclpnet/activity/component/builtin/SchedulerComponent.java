@@ -5,9 +5,7 @@ import work.lclpnet.activity.component.ComponentContext;
 import work.lclpnet.kibu.scheduler.KibuScheduling;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 
-import java.util.function.Supplier;
-
-public class SchedulerComponent implements Component, Supplier<Scheduler> {
+public class SchedulerComponent implements Component {
 
     private final Scheduler scheduler;
 
@@ -25,8 +23,7 @@ public class SchedulerComponent implements Component, Supplier<Scheduler> {
         KibuScheduling.getRootScheduler().removeChild(scheduler);
     }
 
-    @Override
-    public Scheduler get() {
+    public Scheduler scheduler() {
         return scheduler;
     }
 }

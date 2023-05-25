@@ -8,6 +8,7 @@ import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBuilder;
 import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.decor.KingOfLadder;
@@ -17,6 +18,7 @@ import work.lclpnet.lobby.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.maze.ResetBlockWriter;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.HOOKS;
+import static work.lclpnet.activity.component.builtin.BuiltinComponents.SCHEDULER;
 
 public class LobbyActivity extends ComponentActivity {
 
@@ -33,7 +35,7 @@ public class LobbyActivity extends ComponentActivity {
 
     @Override
     protected void buildComponents(ComponentBuilder components) {
-        components.add(HOOKS);
+        components.add(HOOKS).add(SCHEDULER);
     }
 
     @Override
@@ -57,9 +59,12 @@ public class LobbyActivity extends ComponentActivity {
 
         // init king of the ladder
         LobbyConfig config = lobbyManager.getConfig();
+        Scheduler scheduler = component(SCHEDULER).scheduler();
+
         if (config.kingOfLadderGoal != null) {
-            kingOfLadder = new KingOfLadder(server, config.kingOfLadderGoal, config.kingOfLadderDisplays);
+            kingOfLadder = new KingOfLadder(world, config.kingOfLadderGoal, config.kingOfLadderDisplays);
             hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
+            scheduler.interval(kingOfLadder::tick, 6);
         }
     }
 

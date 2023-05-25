@@ -1,7 +1,9 @@
 package work.lclpnet.lobby.decor;
 
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
@@ -19,15 +21,15 @@ import java.util.UUID;
 
 public class KingOfLadder {
 
-    private final MinecraftServer server;
+    private final ServerWorld world;
     private final BlockPos goal;
     private final List<Vec3d> displays;
     private final Collection<UUID> contesting = new HashSet<>();
     private UUID king = null;
     private String kingName = null;
 
-    public KingOfLadder(MinecraftServer server, BlockPos goal, List<Vec3d> displays) {
-        this.server = server;
+    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays) {
+        this.world = world;
         this.goal = goal;
         this.displays = displays;
     }
@@ -35,12 +37,24 @@ public class KingOfLadder {
     public void update(ServerPlayerEntity player, Position position) {
         if (isGoal(position)) {
             contesting.add(player.getUuid());
-
-            if (contesting.size() == 1 && !player.getUuid().equals(king)) {
-                makeKing(player);
-            }
         } else {
             contesting.remove(player.getUuid());
+        }
+
+        updateKing();
+    }
+
+    private void updateKing() {
+        if (contesting.size() != 1) return;  // there are multiple contesting players
+
+        UUID newKing = contesting.iterator().next();  // get winning contestant
+        if (newKing == king) return;
+
+        MinecraftServer server = world.getServer();
+        ServerPlayerEntity newKingPlayer = server.getPlayerManager().getPlayer(newKing);
+
+        if (newKingPlayer != null) {
+            makeKing(newKingPlayer);
         }
     }
 
@@ -64,6 +78,7 @@ public class KingOfLadder {
         notifyKing(player);
 
         if (formerKing != null && !formerKing.equals(king)) {
+            MinecraftServer server = world.getServer();
             ServerPlayerEntity formerKingPlayer = server.getPlayerManager().getPlayer(formerKing);
 
             if (formerKingPlayer != null) {
@@ -80,6 +95,7 @@ public class KingOfLadder {
                 .append(Text.literal(kingName).formatted(Formatting.YELLOW))
                 .append(Text.literal(" is now the king of the ladder").formatted(Formatting.GREEN));
 
+        MinecraftServer server = world.getServer();
         server.getPlayerManager().broadcast(msg, false);
     }
 
@@ -105,6 +121,17 @@ public class KingOfLadder {
 
     private void updateDisplays() {
         // TODO implement
+    }
+
+    public void tick() {
+        if (contesting.size() > 1) {
+            double x = goal.getX() + 0.5;
+            double y = goal.getY();
+            double z = goal.getZ() + 0.5;
+
+            world.spawnParticles(ParticleTypes.LAVA, x, y, z, 10, 0.25, 0.25, 0.25, 0.1);
+            world.playSound(null, x, y, z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.HOSTILE, 0.1f, 0f);
+        }
     }
 
     public void reset() {
