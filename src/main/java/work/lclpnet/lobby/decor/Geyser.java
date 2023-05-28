@@ -33,6 +33,16 @@ public class Geyser {
 
     public void tick() {
         if (timeout != 0) {
+            if (timeout<=80) {
+                Vec3d pos = position.toCenterPos();
+                double x = pos.getX();
+                double y = pos.getY();
+                double z = pos.getZ();
+
+                world.playSound(null, x, y, z, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS, SoundCategory.AMBIENT, 0.1f, 0.9f + (random.nextFloat() * 0.2f - 0.1f));
+                world.spawnParticles(ParticleTypes.SNOWFLAKE, x, y, z, 4, 0.3, 0, 0.3, 0.07);
+                world.spawnParticles(ParticleTypes.BUBBLE, x, y, z, 1, 0.3, 0, 0.3, 0.07);
+            }
             // on timeout
             timeout--;
             return;
