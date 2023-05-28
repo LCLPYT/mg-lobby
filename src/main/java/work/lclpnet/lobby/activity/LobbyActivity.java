@@ -11,6 +11,7 @@ import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
 import work.lclpnet.lobby.event.KingOfLadderListener;
 import work.lclpnet.lobby.event.LobbyListener;
@@ -65,6 +66,12 @@ public class LobbyActivity extends ComponentActivity {
             kingOfLadder = new KingOfLadder(world, config.kingOfLadderGoal, config.kingOfLadderDisplays);
             hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
             scheduler.interval(kingOfLadder::tick, 6);
+        }
+
+        // init geysers
+        if (config.geysers != null) {
+            GeyserManager geyserManager = new GeyserManager(world, config.geysers);
+            scheduler.interval(geyserManager::tick, 1);
         }
     }
 

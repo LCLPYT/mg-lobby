@@ -22,6 +22,7 @@ public class LobbyConfig implements JsonConfig {
     public List<MazeConfig> mazeConfigs = new ArrayList<>(List.of(new MazeConfig()));  // one maze by default; mutable
     public BlockPos kingOfLadderGoal = null;
     public List<Vec3d> kingOfLadderDisplays = new ArrayList<>();
+    public List<BlockPos> geysers = new ArrayList<>();
 
     public LobbyConfig() {}
 
@@ -70,6 +71,23 @@ public class LobbyConfig implements JsonConfig {
                 }
             }
         }
+
+        if (obj.has("decoration")) {
+            JSONObject decoration = obj.getJSONObject("decoration");
+
+            if (decoration.has("geysers")) {
+                JSONArray geysers = decoration.getJSONArray("geysers");
+
+                this.geysers = new ArrayList<>();
+
+                for (Object entry : geysers) {
+                    if (!(entry instanceof JSONArray tuple)) continue;
+
+                    BlockPos pos = ConfigUtil.getBlockPos(tuple);
+                    this.geysers.add(pos);
+                }
+            }
+        }
     }
 
     @Override
@@ -114,6 +132,19 @@ public class LobbyConfig implements JsonConfig {
         kol.put("displays", displays);
 
         json.put("king_of_ladder", kol);
+
+        JSONObject decoration = new JSONObject();
+        JSONArray geysers = new JSONArray();
+
+        if (this.geysers != null) {
+            for (BlockPos pos : this.geysers) {
+                JSONArray tuple = ConfigUtil.writeBlockPos(pos);
+                geysers.put(tuple);
+            }
+        }
+
+        decoration.put("geysers", geysers);
+        json.put("decoration", decoration);
 
         return json;
     }
