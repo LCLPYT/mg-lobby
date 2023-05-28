@@ -80,16 +80,20 @@ public class Geyser {
         double y = pos.getY();
         double z = pos.getZ();
 
+        double height = box.getYLength();
+        double half = height * 0.5;
+        double dy = half * 0.5 - 1;
+
         if (particleDelay == 0) {
-            world.spawnParticles(ParticleTypes.SNOWFLAKE, x, y + box.getYLength(), z, 40, 0.3, 0.5, 0.3, 0.15);
-            world.spawnParticles(ParticleTypes.DOLPHIN, x, y + box.getYLength(), z, 15, 1.5, 0.5, 1.5, 1);
+            world.spawnParticles(ParticleTypes.SNOWFLAKE, x, y + height, z, 40, 0.3, 0.5, 0.3, 0.15);
+            world.spawnParticles(ParticleTypes.DOLPHIN, x, y + height, z, 15, 1.5, 0.5, 1.5, 1);
         } else {
             particleDelay--;
         }
 
         world.playSound(null, x, y, z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.AMBIENT, 0.15f, 1 + (random.nextFloat() * 0.4f - 0.2f));
-        world.spawnParticles(ParticleTypes.POOF, x, y, z, 15, 0.25, box.getYLength() / 2, 0.25, 0.1);
-        world.spawnParticles(ParticleTypes.DOLPHIN, x, y, z, 8, 0.3, box.getYLength() / 2, 0.3, 0.3);
+        world.spawnParticles(ParticleTypes.POOF, x, y + half, z, 15, 0.25, dy, 0.25, 0.1);
+        world.spawnParticles(ParticleTypes.DOLPHIN, x, y + half, z, 8, 0.3, dy, 0.3, 0.3);
         world.spawnParticles(ParticleTypes.SPIT, x, y, z, 10, 1.5, 0.1, 1.5, 0.15);
 
         for (Entity entity : findCollidingEntities()) {
