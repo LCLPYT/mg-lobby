@@ -9,11 +9,19 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import work.lclpnet.kibu.access.VelocityModifier;
 
 import java.util.Collection;
 import java.util.Random;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 public class Geyser {
+
+    private static final double VELOCITY_Y_LIMIT = 1.5;
+    private static final double VELOCITY_Y_ACCELERATION = 0.3;
+    private static final double VELOCITY_TOP_BOOST = 1.3;  // velocity that is applied at the top end of the geyser
 
     private final ServerWorld world;
     private final BlockPos position;
@@ -33,7 +41,7 @@ public class Geyser {
 
     public void tick() {
         if (timeout != 0) {
-            if (timeout<=80) {
+            if (timeout <= 80) {
                 Vec3d pos = position.toCenterPos();
                 double x = pos.getX();
                 double y = pos.getY();
@@ -107,8 +115,23 @@ public class Geyser {
         world.spawnParticles(ParticleTypes.SPIT, x, y, z, 10, 1.5, 0.1, 1.5, 0.15);
 
         for (Entity entity : findCollidingEntities()) {
-            entity.velocityDirty = true;  // TODO not working
-            entity.setVelocity(0, 0.4, 0);
+            Vec3d velocity = entity.getVelocity();
+
+            double vy = velocity.getY();
+            vy += min(VELOCITY_Y_ACCELERATION, max(0, VELOCITY_Y_LIMIT - vy));
+
+            // stuck at top end
+            if (vy < VELOCITY_Y_ACCELERATION) {
+                vy = VELOCITY_TOP_BOOST;
+            }
+
+            velocity = new Vec3d(
+                    velocity.getX(),
+                    vy,
+                    velocity.getZ()
+            );
+
+            VelocityModifier.setVelocity(entity, velocity);
         }
     }
 
