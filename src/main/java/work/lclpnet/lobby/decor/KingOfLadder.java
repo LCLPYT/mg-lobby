@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.title.Title;
+import work.lclpnet.translations.Translator;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,14 +25,16 @@ public class KingOfLadder {
     private final ServerWorld world;
     private final BlockPos goal;
     private final List<Vec3d> displays;
+    private final Translator translator;
     private final Collection<UUID> contesting = new HashSet<>();
     private UUID king = null;
     private String kingName = null;
 
-    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays) {
+    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays, Translator translator) {
         this.world = world;
         this.goal = goal;
         this.displays = displays;
+        this.translator = translator;
     }
 
     public void update(ServerPlayerEntity player, Position position) {
@@ -100,9 +103,9 @@ public class KingOfLadder {
     }
 
     private void notifyKing(ServerPlayerEntity player) {
-        // TODO translate
-        var title = Text.literal("You").formatted(Formatting.GREEN, Formatting.BOLD);
-        var subtitle = Text.literal("are now the king of the ladder").formatted(Formatting.AQUA);
+        // TODO translate to proper language
+        var title = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.you_title")).formatted(Formatting.GREEN, Formatting.BOLD);
+        var subtitle = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.you_subtitle")).formatted(Formatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
@@ -110,9 +113,9 @@ public class KingOfLadder {
     }
 
     private void notifyFormerKing(ServerPlayerEntity player) {
-        // TODO translate
-        var title = Text.literal("You").formatted(Formatting.RED);
-        var subtitle = Text.literal("are no longer the king of the ladder").formatted(Formatting.AQUA);
+        // TODO translate to proper language
+        var title = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.not_you_title")).formatted(Formatting.RED);
+        var subtitle = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.not_you_subtitle")).formatted(Formatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 

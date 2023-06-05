@@ -63,7 +63,7 @@ public class LobbyActivity extends ComponentActivity {
         Scheduler scheduler = component(SCHEDULER).scheduler();
 
         if (config.kingOfLadderGoal != null) {
-            kingOfLadder = new KingOfLadder(world, config.kingOfLadderGoal, config.kingOfLadderDisplays);
+            kingOfLadder = new KingOfLadder(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, lobbyManager.getTranslator());
             hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
             scheduler.interval(kingOfLadder::tick, 6);
         }

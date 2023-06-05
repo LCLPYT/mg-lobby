@@ -17,6 +17,9 @@ import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.translations.DefaultLanguageTranslator;
+import work.lclpnet.translations.Translator;
+import work.lclpnet.translations.loader.translation.SPITranslationLoader;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Path;
@@ -27,6 +30,7 @@ public class LobbyManagerImpl implements LobbyManager {
     private final ConfigHandler<LobbyConfig> configHandler;
     private final PluginContext pluginContext;
     private final Logger logger;
+    private final DefaultLanguageTranslator translator;
 
     public LobbyManagerImpl(PluginContext pluginContext, Logger logger) {
         this.pluginContext = pluginContext;
@@ -37,6 +41,9 @@ public class LobbyManagerImpl implements LobbyManager {
                 .resolve(LobbyPlugin.ID).resolve("config.json");
 
         this.configHandler = new ConfigHandler<>(configFile, configSerializer, logger);
+
+        SPITranslationLoader translationLoader = new SPITranslationLoader(getClass().getClassLoader());
+        this.translator = new DefaultLanguageTranslator(translationLoader);
     }
 
     @Override
@@ -104,7 +111,13 @@ public class LobbyManagerImpl implements LobbyManager {
         abilities.setWalkSpeed(0.1f);
     }
 
+    @Override
+    public Translator getTranslator() {
+        return translator;
+    }
+
     public void init() {
         configHandler.loadConfig();
+        translator.reload().join();
     }
 }

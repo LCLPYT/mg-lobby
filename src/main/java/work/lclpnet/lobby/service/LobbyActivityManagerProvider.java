@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.activity;
+package work.lclpnet.lobby.service;
 
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.activity.manager.ActivityManagerProvider;
