@@ -4,18 +4,18 @@ plugins {
     id 'java'
     id 'fabric-loom' version '1.2.7'
     id 'maven-publish'
-    id 'gradle-build-utils' version '1.2.0'
+    id 'gradle-build-utils' version '1.4.0'
     id 'kibu-plugin-dev' version '0.5.1'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-Properties props = loadProperties.call('publish.properties') as Properties
+Properties props = buildUtils.loadProperties('publish.properties')
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 group = project.maven_group
-version = gitVersion.call()
+version = buildUtils.gitVersion()
 archivesBaseName = project.archives_base_name
 
 repositories {
@@ -50,7 +50,7 @@ dependencies {
     modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    implementation 'org.json:json:20220924'
+    implementation 'org.json:json:20230227'
 
     // bundle these dependencies
     'work.lclpnet:json-config4j:1.0.0'.with {
