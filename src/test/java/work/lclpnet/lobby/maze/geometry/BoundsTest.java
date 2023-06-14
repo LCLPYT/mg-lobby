@@ -3,6 +3,7 @@ package work.lclpnet.lobby.maze.geometry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.junit.jupiter.api.Test;
+import work.lclpnet.lobby.decor.maze.geometry.Bounds;
 
 import static org.junit.jupiter.api.Assertions.*;
 

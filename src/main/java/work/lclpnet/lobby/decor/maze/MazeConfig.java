@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.maze;
+package work.lclpnet.lobby.decor.maze;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.block.BlockState;
@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
 import work.lclpnet.kibu.util.BlockStateUtils;
 import work.lclpnet.lobby.config.ConfigUtil;
-import work.lclpnet.lobby.maze.geometry.Bounds;
+import work.lclpnet.lobby.decor.maze.geometry.Bounds;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
 import work.lclpnet.config.json.JsonConfigFactory;
-import work.lclpnet.lobby.maze.MazeConfig;
+import work.lclpnet.lobby.decor.maze.MazeConfig;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -23,6 +23,7 @@ public class LobbyConfig implements JsonConfig {
     public BlockPos kingOfLadderGoal = null;
     public List<Vec3d> kingOfLadderDisplays = new ArrayList<>();
     public List<BlockPos> geysers = new ArrayList<>();
+    public BlockPos jumpAndRunStart = null;
 
     public LobbyConfig() {}
 
@@ -88,6 +89,15 @@ public class LobbyConfig implements JsonConfig {
                 }
             }
         }
+
+        if (obj.has("jump_and_run")) {
+            JSONObject jumpAndRun = obj.getJSONObject("jump_and_run");
+
+            if (jumpAndRun.has("start") && !jumpAndRun.isNull("start")) {
+                JSONArray tuple = jumpAndRun.getJSONArray("start");
+                jumpAndRunStart = ConfigUtil.getBlockPos(tuple);
+            }
+        }
     }
 
     @Override
@@ -145,6 +155,11 @@ public class LobbyConfig implements JsonConfig {
 
         decoration.put("geysers", geysers);
         json.put("decoration", decoration);
+
+        JSONObject jumpAndRun = new JSONObject();
+        jumpAndRun.put("start", jumpAndRunStart != null ? ConfigUtil.writeBlockPos(jumpAndRunStart) : JSONObject.NULL);
+
+        json.put("jump_and_run", jumpAndRun);
 
         return json;
     }

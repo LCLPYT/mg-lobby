@@ -13,10 +13,12 @@ import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
+import work.lclpnet.lobby.decor.jnr.JumpAndRun;
+import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
+import work.lclpnet.lobby.event.JumpAndRunListener;
 import work.lclpnet.lobby.event.KingOfLadderListener;
 import work.lclpnet.lobby.event.LobbyListener;
-import work.lclpnet.lobby.maze.LobbyMazeCreator;
-import work.lclpnet.lobby.maze.ResetBlockWriter;
+import work.lclpnet.lobby.util.ResetBlockWriter;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.HOOKS;
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.SCHEDULER;
@@ -27,6 +29,7 @@ public class LobbyActivity extends ComponentActivity {
     private final LobbyMazeCreator mazeCreator;
     private ResetBlockWriter blockWriter;
     private KingOfLadder kingOfLadder;
+    private JumpAndRun jumpAndRun;
 
     public LobbyActivity(PluginContext context, LobbyManager lobbyManager) {
         super(context);
@@ -72,6 +75,12 @@ public class LobbyActivity extends ComponentActivity {
         if (config.geysers != null) {
             GeyserManager geyserManager = new GeyserManager(world, config.geysers);
             scheduler.interval(geyserManager::tick, 1);
+        }
+
+        // jump and run
+        if (config.jumpAndRunStart != null) {
+            jumpAndRun = new JumpAndRun(world, config.jumpAndRunStart, blockWriter);
+            hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
         }
     }
 

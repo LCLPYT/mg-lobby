@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.maze;
+package work.lclpnet.lobby.decor.maze;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;

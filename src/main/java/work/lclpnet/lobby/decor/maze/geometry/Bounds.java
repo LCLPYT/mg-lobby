@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.maze.geometry;
+package work.lclpnet.lobby.decor.maze.geometry;
 
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
