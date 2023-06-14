@@ -1,40 +1,42 @@
 package work.lclpnet.lobby.decor;
 
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.title.Title;
-import work.lclpnet.translations.Translator;
+import work.lclpnet.lobby.service.TranslationService;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
+import static work.lclpnet.lobby.util.FormatWrapper.styled;
+
 public class KingOfLadder {
 
     private final ServerWorld world;
     private final BlockPos goal;
     private final List<Vec3d> displays;
-    private final Translator translator;
+    private final TranslationService translations;
     private final Collection<UUID> contesting = new HashSet<>();
     private UUID king = null;
     private String kingName = null;
 
-    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays, Translator translator) {
+    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays, TranslationService translations) {
         this.world = world;
         this.goal = goal;
         this.displays = displays;
-        this.translator = translator;
+        this.translations = translations;
     }
 
     public void update(ServerPlayerEntity player, Position position) {
@@ -93,19 +95,15 @@ public class KingOfLadder {
     }
 
     private void announceKing() {
-        // TODO translate
-        MutableText msg = Text.literal("Lobby> ").formatted(Formatting.BLUE)
-                .append(Text.literal(kingName).formatted(Formatting.YELLOW))
-                .append(Text.literal(" is now the king of the ladder").formatted(Formatting.GREEN));
-
-        MinecraftServer server = world.getServer();
-        server.getPlayerManager().broadcast(msg, false);
+        translations.relativeTranslation("lobby.king_of_ladder.new_king", styled(kingName, Formatting.YELLOW))
+                .formatted(Formatting.GREEN)
+                .prefixed(Text.literal("Lobby> ").formatted(Formatting.BLUE))
+                .sendTo(PlayerLookup.world(world));
     }
 
     private void notifyKing(ServerPlayerEntity player) {
-        // TODO translate to proper language
-        var title = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.you_title")).formatted(Formatting.GREEN, Formatting.BOLD);
-        var subtitle = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.you_subtitle")).formatted(Formatting.AQUA);
+        var title = translations.translateText(player, "lobby.king_of_ladder.you_title").formatted(Formatting.GREEN, Formatting.BOLD);
+        var subtitle = translations.translateText(player, "lobby.king_of_ladder.you_subtitle").formatted(Formatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
@@ -113,9 +111,8 @@ public class KingOfLadder {
     }
 
     private void notifyFormerKing(ServerPlayerEntity player) {
-        // TODO translate to proper language
-        var title = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.not_you_title")).formatted(Formatting.RED);
-        var subtitle = Text.literal(translator.translate("en_us", "lobby.king_of_ladder.not_you_subtitle")).formatted(Formatting.AQUA);
+        var title = translations.translateText(player, "lobby.king_of_ladder.not_you_title").formatted(Formatting.RED);
+        var subtitle = translations.translateText(player, "lobby.king_of_ladder.not_you_subtitle").formatted(Formatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 

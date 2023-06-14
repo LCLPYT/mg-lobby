@@ -17,8 +17,8 @@ import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.service.TranslationService;
 import work.lclpnet.translations.DefaultLanguageTranslator;
-import work.lclpnet.translations.Translator;
 import work.lclpnet.translations.loader.translation.SPITranslationLoader;
 
 import javax.annotation.Nonnull;
@@ -31,6 +31,7 @@ public class LobbyManagerImpl implements LobbyManager {
     private final PluginContext pluginContext;
     private final Logger logger;
     private final DefaultLanguageTranslator translator;
+    private final TranslationService translationService;
 
     public LobbyManagerImpl(PluginContext pluginContext, Logger logger) {
         this.pluginContext = pluginContext;
@@ -44,6 +45,8 @@ public class LobbyManagerImpl implements LobbyManager {
 
         SPITranslationLoader translationLoader = new SPITranslationLoader(getClass().getClassLoader());
         this.translator = new DefaultLanguageTranslator(translationLoader);
+
+        this.translationService = new TranslationService(translator);
     }
 
     @Override
@@ -112,8 +115,8 @@ public class LobbyManagerImpl implements LobbyManager {
     }
 
     @Override
-    public Translator getTranslator() {
-        return translator;
+    public TranslationService getTranslationService() {
+        return translationService;
     }
 
     public void init() {

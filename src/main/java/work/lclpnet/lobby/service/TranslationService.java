@@ -2,6 +2,7 @@ package work.lclpnet.lobby.service;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import work.lclpnet.kibu.access.PlayerLanguage;
+import work.lclpnet.lobby.util.RelativeText;
 import work.lclpnet.lobby.util.RootText;
 import work.lclpnet.lobby.util.TextFormatter;
 import work.lclpnet.translations.Translator;
@@ -15,9 +16,18 @@ public class TranslationService {
         this.translator = translator;
     }
 
+    public Translator getTranslator() {
+        return translator;
+    }
+
     private String getLanguage(ServerPlayerEntity player) {
         // TODO respect configured network language
         return PlayerLanguage.getLanguage(player);
+    }
+
+    public String translate(ServerPlayerEntity player, String key) {
+        String language = getLanguage(player);
+        return translator.translate(language, key);
     }
 
     public String translate(ServerPlayerEntity player, String key, Object... args) {
@@ -29,5 +39,9 @@ public class TranslationService {
         String raw = translate(player, key);  // do not replace format specifiers
 
         return textFormatter.formatText(raw, args);
+    }
+
+    public RelativeText relativeTranslation(String key, Object... args) {
+        return RelativeText.create(player -> translateText(player, key, args));
     }
 }
