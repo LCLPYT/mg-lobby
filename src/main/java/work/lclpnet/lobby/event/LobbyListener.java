@@ -71,7 +71,7 @@ public class LobbyListener implements HookListenerModule {
     }
 
     private boolean onMove(ServerPlayerEntity player, PositionRotation from, PositionRotation to) {
-        ServerWorld world = player.getWorld();
+        ServerWorld world = player.getServerWorld();
 
         if (isLobby(world) && to.getY() < world.getBottomY()) {
             // teleport player back to spawn location
