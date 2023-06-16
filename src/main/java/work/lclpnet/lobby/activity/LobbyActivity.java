@@ -18,6 +18,7 @@ import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.event.JumpAndRunListener;
 import work.lclpnet.lobby.event.KingOfLadderListener;
 import work.lclpnet.lobby.event.LobbyListener;
+import work.lclpnet.lobby.service.TranslationService;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.HOOKS;
@@ -64,8 +65,10 @@ public class LobbyActivity extends ComponentActivity {
         LobbyConfig config = lobbyManager.getConfig();
         Scheduler scheduler = component(SCHEDULER).scheduler();
 
+        final TranslationService translationService = lobbyManager.getTranslationService();
+
         if (config.kingOfLadderGoal != null) {
-            kingOfLadder = new KingOfLadder(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, lobbyManager.getTranslationService());
+            kingOfLadder = new KingOfLadder(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, translationService);
             hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
             scheduler.interval(kingOfLadder::tick, 6);
         }
@@ -78,7 +81,7 @@ public class LobbyActivity extends ComponentActivity {
 
         // jump and run
         if (config.jumpAndRunStart != null) {
-            JumpAndRun jumpAndRun = new JumpAndRun(world, config.jumpAndRunStart, worldModifier, scheduler);
+            JumpAndRun jumpAndRun = new JumpAndRun(world, config.jumpAndRunStart, worldModifier, scheduler, translationService);
             hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
         }
     }
