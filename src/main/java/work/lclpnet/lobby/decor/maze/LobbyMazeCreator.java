@@ -3,7 +3,7 @@ package work.lclpnet.lobby.decor.maze;
 import net.minecraft.world.BlockView;
 import org.slf4j.Logger;
 import work.lclpnet.lobby.config.ConfigAccess;
-import work.lclpnet.lobby.util.BlockStateWriter;
+import work.lclpnet.lobby.util.WorldModifier;
 import work.lclpnet.maze.MazeCreator;
 import work.lclpnet.maze.algorithm.MazeGenerationAlgorithm;
 import work.lclpnet.maze.algorithm.RecursiveBacktrackingMazeGenerationAlgorithm;
@@ -20,13 +20,13 @@ public class LobbyMazeCreator {
         this.logger = logger;
     }
 
-    public void create(BlockStateWriter writer, BlockView blockView) {
+    public void create(WorldModifier writer, BlockView blockView) {
         for (MazeConfig mazeConfig : configAccess.getConfig().mazeConfigs) {
             createFromConfig(writer, blockView, mazeConfig);
         }
     }
 
-    private void createFromConfig(BlockStateWriter writer, BlockView blockView, MazeConfig mazeConfig) {
+    private void createFromConfig(WorldModifier writer, BlockView blockView, MazeConfig mazeConfig) {
         if (mazeConfig.start == null) {
             logger.warn("Maze is not configured, aborting maze generation");
             return;

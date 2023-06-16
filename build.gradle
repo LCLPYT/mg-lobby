@@ -4,7 +4,7 @@ plugins {
     id 'java'
     id 'fabric-loom' version '1.2.7'
     id 'maven-publish'
-    id 'gradle-build-utils' version '1.4.0'
+    id 'gradle-build-utils' version '1.5.3'
     id 'kibu-plugin-dev' version '0.5.1'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
@@ -69,6 +69,11 @@ dependencies {
     }
 
     "work.lclpnet:translations4j:${project.translations4j_version}".with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
+
+    "work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}".with {
         implementation it
         bundle (it) { transitive = false }
     }
@@ -164,6 +169,8 @@ tasks.register('remapActivityJar', RemapJarTask.class) {
 }
 
 publishing {
+    buildUtils.setupPublishRepository(repositories, props)
+
     publications {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
@@ -175,28 +182,6 @@ publishing {
             pom {
                 name = 'Minigame Lobby'
                 description = 'A kibu plugin for managing minigame lobbies in FabricMC.'
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            def env = System.getenv()
-            if (Arrays.stream("DEPLOY_URL", "DEPLOY_USER", "DEPLOY_PASSWORD").allMatch(env.&containsKey)) {
-                credentials {
-                    username env.get("DEPLOY_USER")
-                    password env.get("DEPLOY_PASSWORD")
-                }
-                url env.get("DEPLOY_URL")
-            }
-            else if (Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(props.&containsKey)) {
-                credentials {
-                    username props.getProperty('mavenUser')
-                    password props.getProperty('mavenPassword')
-                }
-                url props.getProperty('mavenHost')
-            } else {
-                url "file:///${project.projectDir}/repo"
             }
         }
     }
