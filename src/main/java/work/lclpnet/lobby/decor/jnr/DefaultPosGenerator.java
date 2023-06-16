@@ -13,6 +13,7 @@ import work.lclpnet.lobby.util.RayCaster;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.BiFunction;
 
 public class DefaultPosGenerator implements PosGenerator {
 
@@ -261,7 +262,7 @@ public class DefaultPosGenerator implements PosGenerator {
 
             // check if placing a block at pos would block the way from prev to next
 
-            for (int i = 1; i < 3; i++) {
+            for (int i = 1; i <= 3; i++) {
                 if (isBetween(from.up(i), next.up(i), pos)) {
                     return true;
                 }
@@ -272,7 +273,7 @@ public class DefaultPosGenerator implements PosGenerator {
     }
 
     private boolean isWayBlocked(BlockPos next) {
-        for (int i = 1; i < 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             if (blocksBetween(from.up(i), next.up(i))) {
                 return true;
             }
@@ -282,17 +283,25 @@ public class DefaultPosGenerator implements PosGenerator {
     }
 
     private boolean blocksBetween(BlockPos a, BlockPos b) {
-        Vec3d start = a.toCenterPos();
-        Vec3d end = b.toCenterPos();
-
-        return blocksBetween(start, end);
+        return shootRay(a, b, this::blocksBetween);
     }
 
-    private static boolean isBetween(BlockPos a, BlockPos b, BlockPos c) {
-        Vec3d start = a.toCenterPos();
-        Vec3d end = b.toCenterPos();
+    private boolean isBetween(BlockPos a, BlockPos b, BlockPos c) {
+        return shootRay(a, b, (from, to) -> isBetween(from, to, c));
+    }
 
-        return isBetween(start, end, c);
+    private boolean shootRay(BlockPos from, BlockPos to, BiFunction<Vec3d, Vec3d, Boolean> rayShooter) {
+        Vec3d start = from.toCenterPos();
+        Vec3d end = to.toCenterPos();
+
+        // shoot ray at the block center
+        if (rayShooter.apply(start, end)) return true;
+
+        // now, shoot two rays offset a little to the sides
+        Vec3d dir = end.subtract(start).normalize().multiply(0.4);
+        Vec3d normal = new Vec3d(-dir.getZ(), 0, dir.getX());  // 2d normal on y-axis
+
+        return rayShooter.apply(start.add(normal), end.add(normal)) || rayShooter.apply(start.subtract(normal), end.subtract(normal));
     }
 
     private static boolean isBetween(Vec3d start, Vec3d end, BlockPos position) {
