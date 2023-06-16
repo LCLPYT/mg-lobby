@@ -1,7 +1,9 @@
 package work.lclpnet.lobby.decor.jnr;
 
 import it.unimi.dsi.fastutil.ints.IntFloatPair;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -14,6 +16,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -22,13 +25,15 @@ import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.scheduler.api.TaskHandle;
+import work.lclpnet.lobby.service.TranslationService;
+import work.lclpnet.lobby.util.FormatWrapper;
 import work.lclpnet.lobby.util.WorldModifier;
 
 import java.util.*;
 
 public class JumpAndRun {
 
-    private static final int DESTROYER_TIMEOUT_TICKS = 100;
+    private static final int DESTROYER_TIMEOUT_TICKS = 700;
     private static final int DESTROYER_DELAY_TICKS = 20;
     private final Random random = new Random();
     private final Map<Block, DyeColor> palette = Map.ofEntries(
@@ -56,16 +61,18 @@ public class JumpAndRun {
     private final Stack<BlockPos> nodes;
     private final PosGenerator generator;
     private final WorldModifier modifier;
+    private final TranslationService translations;
     private Team redTeam, greenTeam;
     private BlockPos next;
     private ShulkerEntity shulkerEntity;
     private int destroyerTimeout = DESTROYER_TIMEOUT_TICKS;
     private int destroyerDelay = 0;
 
-    public JumpAndRun(ServerWorld world, BlockPos start, WorldModifier modifier, Scheduler scheduler) {
+    public JumpAndRun(ServerWorld world, BlockPos start, WorldModifier modifier, Scheduler scheduler, TranslationService translations) {
         this.world = world;
         this.start = start;
         this.modifier = modifier;
+        this.translations = translations;
         this.nodes = new Stack<>();
         this.nodes.push(start.down());
 
@@ -99,13 +106,14 @@ public class JumpAndRun {
 
     private void next(ServerPlayerEntity player) {
         if (this.next.getY() >= world.getTopY()) {
-            // goal reached, collapse TODO
+            this.collapse();
+            this.win(player);
             return;
         }
 
         BlockPos next = generator.generate();
         if (next == null) {
-            // generation stuck, collapse TODO
+            this.collapse();
             return;
         }
 
@@ -123,6 +131,30 @@ public class JumpAndRun {
         spawnShulker(block, next, greenTeam);
 
         this.next = next.up();
+    }
+
+    private void win(ServerPlayerEntity player) {
+        var players = PlayerLookup.all(world.getServer());
+
+        translations.relativeTranslation("lobby.jump_n_run.completed", FormatWrapper.styled(player.getEntityName(), Formatting.YELLOW, Formatting.BOLD))
+                .formatted(Formatting.GOLD, Formatting.BOLD)
+                .prefixed(Text.literal("Lobby> ").formatted(Formatting.BLUE))
+                .sendTo(players);
+
+        for (ServerPlayerEntity p : players) {
+            p.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.RECORDS, 100f, 1f);
+        }
+    }
+
+    private void collapse() {
+        final BlockState air = Blocks.AIR.getDefaultState();
+
+        while (nodes.size() > 1) {
+            BlockPos pos = nodes.pop();
+            modifier.setBlockState(pos, air);
+        }
+
+        reset();
     }
 
     private void spawnShulker(Block block, BlockPos pos, Team team) {
@@ -223,5 +255,11 @@ public class JumpAndRun {
         next = start;
         nodes.push(next.down());
         generator.reset();
+        destroyerDelay = 0;
+        destroyerTimeout = DESTROYER_TIMEOUT_TICKS;
+
+        if (shulkerEntity != null) {
+            shulkerEntity.discard();
+        }
     }
 }

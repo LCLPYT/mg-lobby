@@ -3,5 +3,6 @@
   "lobby.king_of_ladder.you_title": "You",
   "lobby.king_of_ladder.you_subtitle": "are now the king of the ladder",
   "lobby.king_of_ladder.not_you_title": "You",
-  "lobby.king_of_ladder.not_you_subtitle": "are no longer the king of the ladder"
+  "lobby.king_of_ladder.not_you_subtitle": "are no longer the king of the ladder",
+  "lobby.jump_n_run.completed": "%s completed the rainbow jump 'n run!"
 }
