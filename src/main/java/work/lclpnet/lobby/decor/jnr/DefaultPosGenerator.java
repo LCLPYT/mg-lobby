@@ -23,18 +23,20 @@ public class DefaultPosGenerator implements PosGenerator {
     private final Stack<BlockPos> history;
     private final int stagnationY;
     private final int longJumpY;
-    private final BlockPos start;
     private BlockPos from;
     private boolean lastMoveUp = false;
 
-    public DefaultPosGenerator(ServerWorld world, BlockPos start, Stack<BlockPos> history, Config config) {
-        this.start = start;
-
+    public DefaultPosGenerator(ServerWorld world, Stack<BlockPos> history, Config config) {
         initPossibleMoves();
+
+        if (history.size() == 0) {
+            throw new IllegalArgumentException("History must have a start element");
+        }
 
         this.history = history;
         this.world = world;
-        this.from = start;
+
+        BlockPos from = history.peek();
 
         final int fromY = from.getY();
 
@@ -346,6 +348,8 @@ public class DefaultPosGenerator implements PosGenerator {
     @Nullable
     @Override
     public BlockPos generate() {
+        from = history.peek();  // update from position, as the consumer could have changed the history
+
         var moves = getPossibleMoves();
 
         if (moves.isEmpty()) return null;  // no moves possible
@@ -361,7 +365,7 @@ public class DefaultPosGenerator implements PosGenerator {
     @Override
     public void reset() {
         this.lastMoveUp = false;
-        this.from = start;
+        this.from = history.get(0);
     }
 
     /**

@@ -5,7 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
-import work.lclpnet.lobby.util.BlockStateWriter;
+import work.lclpnet.lobby.util.WorldModifier;
 import work.lclpnet.maze.Maze;
 import work.lclpnet.maze.MazeOutput;
 import work.lclpnet.maze.algorithm.DijkstraAlgorithm;
@@ -15,10 +15,10 @@ import work.lclpnet.maze.graph.Node;
 public class LobbyMazeOutput implements MazeOutput {
 
     private final MazeConfig config;
-    private final BlockStateWriter writer;
+    private final WorldModifier writer;
     private final Logger logger;
 
-    public LobbyMazeOutput(MazeConfig config, BlockStateWriter writer, Logger logger) {
+    public LobbyMazeOutput(MazeConfig config, WorldModifier writer, Logger logger) {
         this.config = config;
         this.writer = writer;
         this.logger = logger;

@@ -72,6 +72,11 @@ dependencies {
         bundle (it) { transitive = false }
     }
 
+    "work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}".with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
+
     // test dependencies
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }
@@ -163,6 +168,8 @@ tasks.register('remapActivityJar', RemapJarTask.class) {
 }
 
 publishing {
+    buildUtils.setupPublishRepository(repositories, props)
+
     publications {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
@@ -177,6 +184,4 @@ publishing {
             }
         }
     }
-
-    buildUtils.setupPublishRepository(repositories, props)
 }

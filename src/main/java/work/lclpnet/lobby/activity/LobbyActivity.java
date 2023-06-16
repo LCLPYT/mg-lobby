@@ -18,7 +18,7 @@ import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.event.JumpAndRunListener;
 import work.lclpnet.lobby.event.KingOfLadderListener;
 import work.lclpnet.lobby.event.LobbyListener;
-import work.lclpnet.lobby.util.ResetBlockWriter;
+import work.lclpnet.lobby.util.ResetWorldModifier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.HOOKS;
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.SCHEDULER;
@@ -27,9 +27,8 @@ public class LobbyActivity extends ComponentActivity {
 
     private final LobbyManager lobbyManager;
     private final LobbyMazeCreator mazeCreator;
-    private ResetBlockWriter blockWriter;
+    private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
-    private JumpAndRun jumpAndRun;
 
     public LobbyActivity(PluginContext context, LobbyManager lobbyManager) {
         super(context);
@@ -58,8 +57,8 @@ public class LobbyActivity extends ComponentActivity {
 
         // generate maze
         ServerWorld world = lobbyManager.getLobbyWorld();
-        blockWriter = new ResetBlockWriter(world);
-        mazeCreator.create(blockWriter, world);
+        worldModifier = new ResetWorldModifier(world, hooks);
+        mazeCreator.create(worldModifier, world);
 
         // init king of the ladder
         LobbyConfig config = lobbyManager.getConfig();
@@ -79,7 +78,7 @@ public class LobbyActivity extends ComponentActivity {
 
         // jump and run
         if (config.jumpAndRunStart != null) {
-            jumpAndRun = new JumpAndRun(world, config.jumpAndRunStart, blockWriter);
+            JumpAndRun jumpAndRun = new JumpAndRun(world, config.jumpAndRunStart, worldModifier, scheduler);
             hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
         }
     }
@@ -88,7 +87,7 @@ public class LobbyActivity extends ComponentActivity {
     public void stop() {
         super.stop();
 
-        blockWriter.undo();
+        worldModifier.undo();
 
         if (kingOfLadder != null) {
             kingOfLadder.reset();
