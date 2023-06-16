@@ -30,14 +30,10 @@ public class ExtendedConfigSerializer<T extends JsonConfig> extends FileConfigSe
         String content = json.toString(2);
 
         // prettify BlockPos tuples like [[x1, y1, z1], [x2, y2, z2]]
-        Pattern tuplePattern = Pattern.compile("\\[\\s*(?:\\[(?:\\s*-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?,?){3}\\s*],?\\s*){2}]");
+        content = prettifyPosTuple("\\[\\s*(?:\\[(?:\\s*-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?,?){3}\\s*],?\\s*){2}]", content);
 
-        content = tuplePattern.matcher(content).replaceAll(matchResult -> {
-            final String match = matchResult.group();
-
-            // remove all whitespace and put space after each comma
-            return match.replaceAll("\\s+", "").replaceAll(",", ", ");
-        });
+        // prettify BlockPos tuples like [x, y, z]
+        content = prettifyPosTuple("\\[(?:\\s*-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?,?){3}\\s*]", content);
 
         Path dir = file.getParent();
 
@@ -46,5 +42,17 @@ public class ExtendedConfigSerializer<T extends JsonConfig> extends FileConfigSe
         }
 
         Files.writeString(file, content, StandardCharsets.UTF_8);
+    }
+
+    private static String prettifyPosTuple(String regex, String content) {
+        Pattern tuplePairPattern = Pattern.compile(regex);
+
+        content = tuplePairPattern.matcher(content).replaceAll(matchResult -> {
+            final String match = matchResult.group();
+
+            // remove all whitespace and put space after each comma
+            return match.replaceAll("\\s+", "").replaceAll(",", ", ");
+        });
+        return content;
     }
 }
