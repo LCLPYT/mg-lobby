@@ -7,6 +7,6 @@ public class LobbyActivityManagerProvider implements ActivityManagerProvider {
 
     @Override
     public ActivityManager create() {
-        return new LobbyActivityManager();
+        return new SyncActivityManager();
     }
 }

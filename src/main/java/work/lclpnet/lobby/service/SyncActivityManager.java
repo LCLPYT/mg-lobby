@@ -3,11 +3,9 @@ package work.lclpnet.lobby.service;
 import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.manager.ActivityManager;
 
-public class LobbyActivityManager implements ActivityManager {
+public class SyncActivityManager implements ActivityManager {
 
     private Activity currentActivity = null;
-
-    LobbyActivityManager() {}
 
     @Override
     public void startActivity(Activity activity) {

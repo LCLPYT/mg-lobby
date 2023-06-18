@@ -42,6 +42,8 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
 
     @Override
     public void onWorldReady() {
+        manager.loadGames();
+
         ActivityManager.getInstance().startActivity(new LobbyActivity(this, manager));
     }
 
