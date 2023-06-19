@@ -46,7 +46,7 @@ public class SetGameCommand {
                 .append(Text.literal("Set the current game to ").formatted(Formatting.GRAY))
                 .append(Text.literal(title).formatted(Formatting.YELLOW)));
 
-        consumer.accept(game);
+        ctx.getSource().getServer().submit(() -> consumer.accept(game));
 
         return 0;
     }

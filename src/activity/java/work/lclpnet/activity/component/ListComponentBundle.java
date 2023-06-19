@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class ListComponentBuilder implements ComponentBuilder {
+public class ListComponentBundle implements ComponentBundle {
 
     private final List<ComponentKey<?>> components = new ArrayList<>();
 
     @Override
-    public ListComponentBuilder add(ComponentKey<?> component) {
+    public ListComponentBundle add(ComponentKey<?> component) {
         Objects.requireNonNull(component);
         components.add(component);
         return this;

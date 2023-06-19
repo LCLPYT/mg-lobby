@@ -5,7 +5,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import work.lclpnet.activity.ComponentActivity;
-import work.lclpnet.activity.component.ComponentBuilder;
+import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
@@ -51,7 +51,7 @@ public class LobbyActivity extends ComponentActivity {
     }
 
     @Override
-    protected void buildComponents(ComponentBuilder components) {
+    protected void buildComponents(ComponentBundle components) {
         components.add(HOOKS).add(SCHEDULER).add(COMMANDS);
     }
 

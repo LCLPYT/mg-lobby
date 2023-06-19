@@ -2,9 +2,9 @@ package work.lclpnet.activity.component;
 
 import java.util.Collection;
 
-public interface ComponentBuilder {
+public interface ComponentBundle {
 
-    ComponentBuilder add(ComponentKey<?> component);
+    ComponentBundle add(ComponentKey<?> component);
 
     Collection<ComponentKey<?>> build();
 }
