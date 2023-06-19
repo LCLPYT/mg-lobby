@@ -62,7 +62,7 @@ public class DefaultGameStarter implements GameStarter {
     private void initGameStart() {
         if (gameStarting.get()) return;
 
-        activityManager.startActivity(new GameStartingActivity(pluginContext, game.getConfig(), this::start));
+        activityManager.startActivity(new GameStartingActivity(pluginContext, game.getConfig(), this));
 
         gameStarting.set(true);
     }

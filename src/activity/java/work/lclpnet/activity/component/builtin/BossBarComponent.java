@@ -67,6 +67,10 @@ public class BossBarComponent implements Component, DependentComponent {
         showOnJoin.remove(bossBar);
     }
 
+    /**
+     * Configures a boss bar to be shown to new players in the future.
+     * @param bossBar The boss bar to show to future players.
+     */
     public void showOnJoin(CommandBossBar bossBar) {
         showOnJoin.add(bossBar);
     }
