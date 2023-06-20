@@ -13,13 +13,13 @@ public interface TicTacToe {
 
     /**
      * Checks if the game is over.
-     * @return True, if there is a winner, or if the match is a draw.
+     * @return True, if there is a winner, or if the match is a draw. False if the game is still being played.
      */
     boolean isGameOver();
 
     /**
-     * This method returns the player who won, or -1 if the game is a draw.
-     * @return The winner, or -1 if there is none.
+     * This method returns the player who won.
+     * @return The winner; 0 when the game is a draw. -1 if the game is not set yet.
      */
     int getWinner();
 }
