@@ -9,7 +9,7 @@ class TicTacToeTest {
     private static final int PLAYER_A = 1, PLAYER_B = 2;
 
     private TicTacToe createGame() {
-        return null;
+        return new TicTacToeGame();
     }
 
     @Test
