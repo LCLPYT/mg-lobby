@@ -2,7 +2,7 @@ package work.lclpnet.activity.component;
 
 public interface DependentComponent {
 
-    void defineDependencies(ComponentBundle bundle);
+    void declareDependencies(ComponentBundle bundle);
 
     void injectDependencies(ComponentView view);
 }

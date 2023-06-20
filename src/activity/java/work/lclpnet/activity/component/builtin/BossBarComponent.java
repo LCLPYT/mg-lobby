@@ -26,7 +26,7 @@ public class BossBarComponent implements Component, DependentComponent {
     }
 
     @Override
-    public void defineDependencies(ComponentBundle bundle) {
+    public void declareDependencies(ComponentBundle bundle) {
         bundle.add(BuiltinComponents.HOOKS);
     }
 

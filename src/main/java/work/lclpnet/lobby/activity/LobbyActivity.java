@@ -51,7 +51,7 @@ public class LobbyActivity extends ComponentActivity {
     }
 
     @Override
-    protected void buildComponents(ComponentBundle components) {
+    protected void registerComponents(ComponentBundle components) {
         components.add(HOOKS).add(SCHEDULER).add(COMMANDS);
     }
 

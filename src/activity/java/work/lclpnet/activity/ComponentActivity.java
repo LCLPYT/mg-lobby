@@ -20,7 +20,7 @@ public abstract class ComponentActivity implements Activity, ComponentContext {
         this.context = context;
 
         final ComponentBundle componentBundle = new ListComponentBundle();
-        buildComponents(componentBundle);
+        registerComponents(componentBundle);
 
         dependencyTree = new DAG<>();
         Map<ComponentKey<?>, Component> componentMap = new HashMap<>();
@@ -48,7 +48,7 @@ public abstract class ComponentActivity implements Activity, ComponentContext {
         final ListComponentBundle depsBundle = new ListComponentBundle();
 
         if (component instanceof DependentComponent dependentComponent) {
-            dependentComponent.defineDependencies(depsBundle);
+            dependentComponent.declareDependencies(depsBundle);
 
             var deps = depsBundle.build();
 
@@ -65,7 +65,7 @@ public abstract class ComponentActivity implements Activity, ComponentContext {
         componentMap.put(key, component);
     }
 
-    protected abstract void buildComponents(ComponentBundle components);
+    protected abstract void registerComponents(ComponentBundle components);
 
     public final <T extends Component> T component(ComponentKey<T> key) {
         return components.get(key);

@@ -32,7 +32,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
     }
 
     @Override
-    protected void buildComponents(ComponentBundle components) {
+    protected void registerComponents(ComponentBundle components) {
         components.add(BuiltinComponents.BOSS_BAR).add(BuiltinComponents.SCHEDULER);
     }
 
