@@ -4,5 +4,7 @@
   "lobby.king_of_ladder.you_subtitle": "bist nun der King of the Ladder",
   "lobby.king_of_ladder.not_you_title": "Du",
   "lobby.king_of_ladder.not_you_subtitle": "bist nicht mehr der King of the Ladder",
-  "lobby.jump_n_run.completed": "%s hat das Regenbogen- Jump 'n Run geschafft!"
+  "lobby.jump_n_run.completed": "%s hat das Regenbogen- Jump 'n Run geschafft!",
+  "lobby.countdown.title.minutes": "%s %smin %ssek",
+  "lobby.countdown.title.seconds": "%s %ssek"
 }

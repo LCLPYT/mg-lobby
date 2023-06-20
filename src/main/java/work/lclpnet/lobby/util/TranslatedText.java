@@ -11,24 +11,24 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class RelativeText {
+public class TranslatedText {
 
     private final Function<ServerPlayerEntity, RootText> textFactory;
     private Style style;
     @Nullable
     private Text prefix = null;
 
-    private RelativeText(Function<ServerPlayerEntity, RootText> textFactory, Style style) {
+    private TranslatedText(Function<ServerPlayerEntity, RootText> textFactory, Style style) {
         this.textFactory = textFactory;
         this.style = style;
     }
 
-    public static RelativeText create(Function<ServerPlayerEntity, RootText> textFactory) {
+    public static TranslatedText create(Function<ServerPlayerEntity, RootText> textFactory) {
         return create(textFactory, Style.EMPTY);
     }
 
-    public static RelativeText create(Function<ServerPlayerEntity, RootText> textFactory, Style style) {
-        return new RelativeText(textFactory, style);
+    public static TranslatedText create(Function<ServerPlayerEntity, RootText> textFactory, Style style) {
+        return new TranslatedText(textFactory, style);
     }
 
     public void acceptEach(Iterable<ServerPlayerEntity> players, BiConsumer<ServerPlayerEntity, Text> action) {
@@ -50,7 +50,7 @@ public class RelativeText {
         acceptEach(players, (player, text) -> player.sendMessageToClient(text, overlay));
     }
 
-    public RelativeText prefixed(MutableText prefix) {
+    public TranslatedText prefixed(MutableText prefix) {
         this.prefix = prefix;
         return this;
     }
@@ -71,7 +71,7 @@ public class RelativeText {
      *
      * @param styleUpdater the style updater
      */
-    public RelativeText styled(UnaryOperator<Style> styleUpdater) {
+    public TranslatedText styled(UnaryOperator<Style> styleUpdater) {
         this.setStyle(styleUpdater.apply(this.getStyle()));
         return this;
     }
@@ -84,7 +84,7 @@ public class RelativeText {
      *
      * @param styleOverride the style that provides definitions for absent definitions in this text's style
      */
-    public RelativeText fillStyle(Style styleOverride) {
+    public TranslatedText fillStyle(Style styleOverride) {
         this.setStyle(styleOverride.withParent(this.getStyle()));
         return this;
     }
@@ -94,7 +94,7 @@ public class RelativeText {
      *
      * @param formattings an array of formattings
      */
-    public RelativeText formatted(Formatting... formattings) {
+    public TranslatedText formatted(Formatting... formattings) {
         this.setStyle(this.getStyle().withFormatting(formattings));
         return this;
     }
@@ -104,7 +104,7 @@ public class RelativeText {
      *
      * @param formatting a formatting
      */
-    public RelativeText formatted(Formatting formatting) {
+    public TranslatedText formatted(Formatting formatting) {
         this.setStyle(this.getStyle().withFormatting(formatting));
         return this;
     }

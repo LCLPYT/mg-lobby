@@ -8,6 +8,7 @@ import work.lclpnet.kibu.plugin.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.game.Game;
+import work.lclpnet.lobby.service.TranslationService;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,14 +17,16 @@ public class DefaultGameStarter implements GameStarter {
     private final PluginContext pluginContext;
     private final HookRegistrar hookRegistrar;
     private final ActivityManager activityManager;
+    private final TranslationService translations;
     private final AtomicBoolean gameStarting = new AtomicBoolean(false);
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
     private final Game game;
 
-    public DefaultGameStarter(PluginContext pluginContext, HookRegistrar hookRegistrar, ActivityManager activityManager, Game game) {
+    public DefaultGameStarter(PluginContext pluginContext, HookRegistrar hookRegistrar, ActivityManager activityManager, TranslationService translations, Game game) {
         this.pluginContext = pluginContext;
         this.hookRegistrar = hookRegistrar;
         this.activityManager = activityManager;
+        this.translations = translations;
         this.game = game;
     }
 
@@ -62,7 +65,7 @@ public class DefaultGameStarter implements GameStarter {
     private void initGameStart() {
         if (gameStarting.get()) return;
 
-        activityManager.startActivity(new GameStartingActivity(pluginContext, game.getConfig(), this));
+        activityManager.startActivity(new GameStartingActivity(pluginContext, game.getConfig(), this, translations));
 
         gameStarting.set(true);
     }

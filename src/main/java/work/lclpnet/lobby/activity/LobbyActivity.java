@@ -118,8 +118,9 @@ public class LobbyActivity extends ComponentActivity {
         if (game == null) return;
 
         final HookRegistrar hooks = component(HOOKS).hooks();
+        final TranslationService translationService = lobbyManager.getTranslationService();
 
-        this.gameStarter = new DefaultGameStarter(context, hooks, childActivity, game);
+        this.gameStarter = new DefaultGameStarter(context, hooks, childActivity, translationService, game);
         this.gameStarter.init();
     }
 

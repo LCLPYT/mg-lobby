@@ -1,11 +1,13 @@
 package work.lclpnet.lobby.service;
 
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
+import work.lclpnet.activity.util.BossBarHandler;
 import work.lclpnet.kibu.access.PlayerLanguage;
-import work.lclpnet.lobby.util.RelativeText;
-import work.lclpnet.lobby.util.RootText;
-import work.lclpnet.lobby.util.TextFormatter;
+import work.lclpnet.lobby.util.*;
 import work.lclpnet.translations.Translator;
+
+import javax.annotation.Nonnull;
 
 public class TranslationService {
 
@@ -20,7 +22,8 @@ public class TranslationService {
         return translator;
     }
 
-    private String getLanguage(ServerPlayerEntity player) {
+    @Nonnull
+    public String getLanguage(ServerPlayerEntity player) {
         // TODO respect configured network language
         return PlayerLanguage.getLanguage(player);
     }
@@ -36,12 +39,20 @@ public class TranslationService {
     }
 
     public RootText translateText(ServerPlayerEntity player, String key, Object... args) {
-        String raw = translate(player, key);  // do not replace format specifiers
+        return translateText(getLanguage(player), key, args);
+    }
+
+    public RootText translateText(String language, String key, Object... args) {
+        String raw = translator.translate(language, key);  // do not replace format specifiers
 
         return textFormatter.formatText(raw, args);
     }
 
-    public RelativeText relativeTranslation(String key, Object... args) {
-        return RelativeText.create(player -> translateText(player, key, args));
+    public TranslatedText translateText(String key, Object... args) {
+        return TranslatedText.create(player -> translateText(player, key, args));
+    }
+
+    public Partial<TranslatedBossBar, BossBarHandler> translateBossBar(Identifier id, String key, Object... args) {
+        return handler -> new TranslatedBossBar(handler, id, this, key, args);
     }
 }

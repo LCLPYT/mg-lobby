@@ -136,7 +136,7 @@ public class JumpAndRun {
     private void win(ServerPlayerEntity player) {
         var players = PlayerLookup.all(world.getServer());
 
-        translations.relativeTranslation("lobby.jump_n_run.completed", FormatWrapper.styled(player.getEntityName(), Formatting.YELLOW, Formatting.BOLD))
+        translations.translateText("lobby.jump_n_run.completed", FormatWrapper.styled(player.getEntityName(), Formatting.YELLOW, Formatting.BOLD))
                 .formatted(Formatting.GOLD, Formatting.BOLD)
                 .prefixed(Text.literal("Lobby> ").formatted(Formatting.BLUE))
                 .sendTo(players);

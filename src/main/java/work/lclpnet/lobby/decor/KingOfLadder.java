@@ -97,7 +97,7 @@ public class KingOfLadder {
     }
 
     private void announceKing() {
-        translations.relativeTranslation("lobby.king_of_ladder.new_king", styled(kingName, Formatting.YELLOW))
+        translations.translateText("lobby.king_of_ladder.new_king", styled(kingName, Formatting.YELLOW))
                 .formatted(Formatting.GREEN)
                 .prefixed(Text.literal("Lobby> ").formatted(Formatting.BLUE))
                 .sendTo(PlayerLookup.world(world));

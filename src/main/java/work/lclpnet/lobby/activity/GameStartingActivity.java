@@ -1,10 +1,10 @@
 package work.lclpnet.lobby.activity;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.entity.boss.BossBar;
-import net.minecraft.entity.boss.CommandBossBar;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BossBarComponent;
@@ -16,19 +16,25 @@ import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.start.GameStarter;
+import work.lclpnet.lobby.service.TranslationService;
+import work.lclpnet.lobby.util.TranslatedBossBar;
+
+import static work.lclpnet.lobby.util.FormatWrapper.styled;
 
 public class GameStartingActivity extends ComponentActivity implements SchedulerAction {
 
     private final GameConfig gameConfig;
     private final GameStarter starter;
-    private CommandBossBar bossBar;
+    private final TranslationService translations;
+    private TranslatedBossBar bossBar;
     private int timer;
     private int colorIndex;
 
-    public GameStartingActivity(PluginContext context, GameConfig gameConfig, GameStarter starter) {
+    public GameStartingActivity(PluginContext context, GameConfig gameConfig, GameStarter starter, TranslationService translations) {
         super(context);
         this.gameConfig = gameConfig;
         this.starter = starter;
+        this.translations = translations;
     }
 
     @Override
@@ -40,12 +46,17 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
     public void start() {
         super.start();
 
-        timer = gameConfig.getStartDuration() * 20;
+        timer = gameConfig.startDuration() * 20;
         colorIndex = 0;
 
         final BossBarComponent bossBars = component(BuiltinComponents.BOSS_BAR);
 
-        bossBar = bossBars.createBossBar(LobbyPlugin.identifier("starting"), getBossBarTitle());
+        final Identifier bossBarId = LobbyPlugin.identifier("starting");
+        final var titleTranslation = titleTranslation();
+
+        bossBar = translations.translateBossBar(bossBarId, titleTranslation.left(), titleTranslation.right())
+                .with(bossBars).formatted(Formatting.YELLOW);
+
         bossBar.setColor(BossBar.Color.values()[colorIndex]);
         bossBar.addPlayers(PlayerLookup.all(getServer()));
         bossBar.setPercent(1f);
@@ -54,33 +65,36 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         final Scheduler scheduler = component(BuiltinComponents.SCHEDULER).scheduler();
 
-        scheduler.interval(this, 1);
+        scheduler.interval(this, 1).whenComplete(() -> bossBar.setVisible(false));
     }
 
-    private Text getBossBarTitle() {
+    private Pair<String, Object[]> titleTranslation() {
         int seconds = timer / 20;
         int minutes = seconds / 60;
         seconds = seconds % 60;
 
-        StringBuilder timeString = new StringBuilder();
-        timeString.append(' ');
-
         if (minutes > 0) {
-            timeString.append(minutes).append("min ");
+            return Pair.of("lobby.countdown.title.minutes", new Object[] {
+                    styled(gameConfig.title(), Formatting.AQUA, Formatting.BOLD),
+                    minutes,
+                    seconds
+            });
         }
 
-        timeString.append(seconds).append("sec");
-
-        return Text.literal(gameConfig.title()).formatted(Formatting.AQUA, Formatting.BOLD)
-                .append(Text.literal(timeString.toString()).formatted(Formatting.YELLOW));
+        return Pair.of("lobby.countdown.title.seconds", new Object[] {
+                styled(gameConfig.title(), Formatting.AQUA, Formatting.BOLD),
+                styled(seconds, Formatting.YELLOW)
+        });
     }
 
     private void updateBossBar() {
         colorIndex = (colorIndex + 1) % BossBar.Color.values().length;
 
-        bossBar.setName(getBossBarTitle());
+        var titleTranslation = titleTranslation();
+
+        bossBar.setTitle(titleTranslation.left(), titleTranslation.right());
         bossBar.setColor(BossBar.Color.values()[colorIndex]);
-        bossBar.setPercent(timer / (float) (gameConfig.getStartDuration() * 20));
+        bossBar.setPercent(timer / (float) (gameConfig.startDuration() * 20));
     }
 
     @Override
@@ -92,7 +106,6 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         if (timer-- == 0) {
             task.cancel();
-            bossBar.setVisible(false);
             starter.start();
             return;
         }

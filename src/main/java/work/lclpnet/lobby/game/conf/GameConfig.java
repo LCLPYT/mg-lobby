@@ -24,7 +24,7 @@ public interface GameConfig {
      */
     ItemStack icon();
 
-    default int getStartDuration() {
+    default int startDuration() {
         return DEFAULT_START_DURATION_SECONDS;
     }
 }
