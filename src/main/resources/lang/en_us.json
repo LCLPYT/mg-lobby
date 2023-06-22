@@ -6,5 +6,10 @@
   "lobby.king_of_ladder.not_you_subtitle": "are no longer the king of the ladder",
   "lobby.jump_n_run.completed": "%s completed the rainbow jump 'n run!",
   "lobby.countdown.title.minutes": "%s %smin %ssec",
-  "lobby.countdown.title.seconds": "%s %ssec"
+  "lobby.countdown.title.seconds": "%s %ssec",
+  "lobby.tic_tac_toe.title": "Tic Tac Toe",
+  "lobby.tic_tac_toe.waiting": "waiting for opponent",
+  "lobby.tic_tac_toe.start": "Go!",
+  "lobby.tic_tac_toe.you_won": "You won",
+  "lobby.tic_tac_toe.you_lost": "You lost"
 }

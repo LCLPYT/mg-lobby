@@ -7,7 +7,7 @@ import work.lclpnet.kibu.hook.HookFactory;
 
 public class PlayerSeatCallback {
 
-    public static final Hook<Before> BEFORE = HookFactory.createArrayBacked(Before.class, callbacks -> (player, pos) -> {
+    public static final Hook<BeforeSit> BEFORE_SIT = HookFactory.createArrayBacked(BeforeSit.class, callbacks -> (player, pos) -> {
         for (var callback : callbacks) {
             if (callback.onSeat(player, pos)) {
                 return true;
@@ -17,17 +17,27 @@ public class PlayerSeatCallback {
         return false;
     });
 
-    public static final Hook<After> AFTER = HookFactory.createArrayBacked(After.class, callbacks -> (player, pos) -> {
+    public static final Hook<AfterSit> AFTER_SIT = HookFactory.createArrayBacked(AfterSit.class, callbacks -> (player, pos) -> {
         for (var callback : callbacks) {
             callback.onSeated(player, pos);
         }
     });
 
-    public interface Before {
+    public static final Hook<AfterGetUp> AFTER_GET_UP = HookFactory.createArrayBacked(AfterGetUp.class, callbacks -> (player) -> {
+        for (var callback : callbacks) {
+            callback.onGottenUp(player);
+        }
+    });
+
+    public interface BeforeSit {
         boolean onSeat(ServerPlayerEntity player, BlockPos pos);
     }
 
-    public interface After {
+    public interface AfterSit {
         void onSeated(ServerPlayerEntity player, BlockPos pos);
+    }
+
+    public interface AfterGetUp {
+        void onGottenUp(ServerPlayerEntity player);
     }
 }

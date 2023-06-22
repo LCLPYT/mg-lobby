@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.config;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.json.JSONArray;
@@ -24,6 +25,7 @@ public class LobbyConfig implements JsonConfig {
     public List<Vec3d> kingOfLadderDisplays = new ArrayList<>();
     public List<BlockPos> geysers = new ArrayList<>();
     public BlockPos jumpAndRunStart = null;
+    public List<Pair<BlockPos, BlockPos>> ticTacToeTables = new ArrayList<>();
 
     public LobbyConfig() {}
 
@@ -86,6 +88,31 @@ public class LobbyConfig implements JsonConfig {
 
                     BlockPos pos = ConfigUtil.getBlockPos(tuple);
                     this.geysers.add(pos);
+                }
+            }
+
+            if (decoration.has("tic_tac_toe")) {
+                JSONObject ticTacToe = decoration.getJSONObject("tic_tac_toe");
+
+                if (ticTacToe.has("tables")) {
+                    JSONArray tables = ticTacToe.getJSONArray("tables");
+
+                    this.ticTacToeTables = new ArrayList<>();
+
+                    for (Object tableEntry : tables) {
+                        if (!(tableEntry instanceof JSONArray table)) continue;
+
+                        if (table.length() < 2) throw new IllegalArgumentException("Table must be of length 2");
+
+                        if (table.isNull(0) || table.isNull(1)) {
+                            throw new IllegalArgumentException("table must contain two arrays");
+                        }
+
+                        this.ticTacToeTables.add(Pair.of(
+                                ConfigUtil.getBlockPos(table.getJSONArray(0)),
+                                ConfigUtil.getBlockPos(table.getJSONArray(1))
+                        ));
+                    }
                 }
             }
         }
@@ -154,6 +181,21 @@ public class LobbyConfig implements JsonConfig {
         }
 
         decoration.put("geysers", geysers);
+
+        JSONObject ticTacToe = new JSONObject();
+        JSONArray tables = new JSONArray();
+
+        for (var table : ticTacToeTables) {
+            JSONArray tuple = new JSONArray();
+
+            tuple.put(ConfigUtil.writeBlockPos(table.left()));
+            tuple.put(ConfigUtil.writeBlockPos(table.right()));
+
+            tables.put(tuple);
+        }
+
+        ticTacToe.put("tables", tables);
+        decoration.put("tic_tac_toe", ticTacToe);
         json.put("decoration", decoration);
 
         JSONObject jumpAndRun = new JSONObject();

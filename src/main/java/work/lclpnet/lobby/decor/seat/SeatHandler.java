@@ -56,6 +56,8 @@ public class SeatHandler {
     private void onDismount(ServerPlayerEntity player, Entity vehicle) {
         if (!vehicle.getCommandTags().contains("seat")) return;
 
+        PlayerSeatCallback.AFTER_GET_UP.invoker().onGottenUp(player);
+
         vehicle.discard();
 
         Vec3d prev = positions.remove(player.getUuid());
@@ -69,7 +71,7 @@ public class SeatHandler {
 
         Entity seatEntity = seatProvider.getSeat(world, pos);
 
-        if (seatEntity == null || PlayerSeatCallback.BEFORE.invoker().onSeat(player, pos)) return false;
+        if (seatEntity == null || PlayerSeatCallback.BEFORE_SIT.invoker().onSeat(player, pos)) return false;
 
         worldModifier.spawnEntity(seatEntity);
 
@@ -77,7 +79,7 @@ public class SeatHandler {
 
         player.startRiding(seatEntity, true);
 
-        PlayerSeatCallback.AFTER.invoker().onSeated(player, pos);
+        PlayerSeatCallback.AFTER_SIT.invoker().onSeated(player, pos);
 
         return true;
     }

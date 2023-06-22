@@ -20,9 +20,12 @@ import work.lclpnet.lobby.decor.KingOfLadder;
 import work.lclpnet.lobby.decor.jnr.JumpAndRun;
 import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.decor.seat.SeatHandler;
+import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
+import work.lclpnet.lobby.decor.ttt.TicTacToeTable;
 import work.lclpnet.lobby.event.JumpAndRunListener;
 import work.lclpnet.lobby.event.KingOfLadderListener;
 import work.lclpnet.lobby.event.LobbyListener;
+import work.lclpnet.lobby.event.TicTacToeListener;
 import work.lclpnet.lobby.game.Game;
 import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.start.DefaultGameStarter;
@@ -30,6 +33,9 @@ import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.service.TranslationService;
 import work.lclpnet.lobby.util.ResetWorldModifier;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
 
@@ -42,6 +48,7 @@ public class LobbyActivity extends ComponentActivity {
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
+    private TicTacToeManager ticTacToeManager;
 
     public LobbyActivity(PluginContext context, LobbyManager lobbyManager) {
         super(context);
@@ -102,6 +109,14 @@ public class LobbyActivity extends ComponentActivity {
         // init seat handler
         new SeatHandler(worldModifier).init(hooks);
 
+        // tic tac toe
+        Set<TicTacToeTable> tables = config.ticTacToeTables.stream()
+                .map(TicTacToeTable::new)
+                .collect(Collectors.toUnmodifiableSet());
+
+        ticTacToeManager = new TicTacToeManager(tables, translationService);
+        hooks.registerHooks(new TicTacToeListener(ticTacToeManager));
+
         // game stuff
         final GameManager gameManager = lobbyManager.getGameManager();
         final CommandRegistrar commands = component(COMMANDS).commands();
@@ -137,6 +152,8 @@ public class LobbyActivity extends ComponentActivity {
         if (kingOfLadder != null) {
             kingOfLadder.reset();
         }
+
+        ticTacToeManager.reset();
 
         childActivity.stop();
     }
