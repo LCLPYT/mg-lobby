@@ -17,6 +17,7 @@ import work.lclpnet.lobby.cmd.StartCommand;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
+import work.lclpnet.lobby.decor.SeatHandler;
 import work.lclpnet.lobby.decor.jnr.JumpAndRun;
 import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.event.JumpAndRunListener;
@@ -97,6 +98,9 @@ public class LobbyActivity extends ComponentActivity {
             JumpAndRun jumpAndRun = new JumpAndRun(world, config.jumpAndRunStart, worldModifier, scheduler, translationService);
             hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
         }
+
+        // init seat handler
+        new SeatHandler(worldModifier).init(hooks);
 
         // game stuff
         final GameManager gameManager = lobbyManager.getGameManager();
