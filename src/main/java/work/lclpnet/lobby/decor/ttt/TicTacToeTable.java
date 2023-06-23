@@ -3,14 +3,17 @@ package work.lclpnet.lobby.decor.ttt;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
 
     private final BlockPos left, right;
+    private final BlockPos center;
     private ServerPlayerEntity leftPlayer, rightPlayer;
 
     public TicTacToeTable(Pair<BlockPos, BlockPos> pair) {
@@ -20,6 +23,18 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
     public TicTacToeTable(BlockPos left, BlockPos right) {
         this.left = left;
         this.right = right;
+        this.center = calcCenter(left, right);
+    }
+
+    protected BlockPos calcCenter(BlockPos left, BlockPos right) {
+        BlockPos diff = left.subtract(right);
+
+        // check distance is 2
+        if (Math.abs(diff.getSquaredDistance(Vec3i.ZERO) - 4) > 1e-9) {
+            throw new IllegalArgumentException("Seats must be exactly 2 blocks apart");
+        }
+
+        return right.add(diff.getX() / 2, diff.getY() / 2, diff.getZ() / 2);
     }
 
     @Override
@@ -71,13 +86,17 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
         return leftPlayer != null && rightPlayer != null;
     }
 
-    public Iterable<ServerPlayerEntity> players() {
+    public Collection<ServerPlayerEntity> players() {
         var players = new ArrayList<ServerPlayerEntity>();
 
         if (leftPlayer != null) players.add(leftPlayer);
         if (rightPlayer != null) players.add(rightPlayer);
 
         return players;
+    }
+
+    public BlockPos center() {
+        return center;
     }
 
     public void clear() {
