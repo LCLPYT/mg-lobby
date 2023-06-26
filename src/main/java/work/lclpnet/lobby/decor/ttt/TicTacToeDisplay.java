@@ -37,7 +37,12 @@ public class TicTacToeDisplay {
         final float d = 2 * pixel;
 
         BlockPos pos = table.center();
-        display.setPos(pos.getX() + pixel + (pixel + d) * (x + 1), pos.getY() + 1 - pixel, pos.getZ() + pixel + (pixel + d) * (2 - y + 1));
+
+        display.setPos(
+                pos.getX() + pixel + (pixel + d) * (x + 1),
+                pos.getY() + 1 - pixel,
+                pos.getZ() + pixel + (pixel + d) * (y + 1)
+        );
 
         worldModifier.spawnEntity(display);
     }

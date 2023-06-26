@@ -192,8 +192,8 @@ public class TicTacToeManager {
         final double pixel = 1 / 16d;
         final double width = 3 * pixel;
 
-        final double rx = Math.abs(vec.getX() - (int) vec.getX());
-        final double rz = Math.abs(vec.getZ() - (int) vec.getZ());
+        final double rx = vec.getX() - Math.floor(vec.getX());
+        final double rz = vec.getZ() - Math.floor(vec.getZ());
 
         int x = (int) ((rx - 0.5 * pixel) / width) - 1;
         int y = (int) ((rz - 0.5 * pixel) / width) - 1;
