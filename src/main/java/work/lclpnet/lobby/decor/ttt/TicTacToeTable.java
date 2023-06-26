@@ -3,6 +3,7 @@ package work.lclpnet.lobby.decor.ttt;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 import javax.annotation.Nullable;
@@ -21,8 +22,15 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
     }
 
     public TicTacToeTable(BlockPos left, BlockPos right) {
-        this.left = left;
-        this.right = right;
+        Vec3i dir = right.subtract(left);
+        if (left.add(Math.abs(dir.getX()), Math.abs(dir.getY()), Math.abs(dir.getZ())).equals(right)) {
+            this.left = left;
+            this.right = right;
+        } else {
+            this.left = right;
+            this.right = left;
+        }
+
         this.center = calcCenter(left, right);
     }
 
@@ -97,6 +105,10 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
 
     public BlockPos center() {
         return center;
+    }
+
+    public Vec3d direction() {
+        return Vec3d.of(center.subtract(left));
     }
 
     public void clear() {
