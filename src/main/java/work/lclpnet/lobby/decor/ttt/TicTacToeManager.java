@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.decor.ttt;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -106,7 +107,11 @@ public class TicTacToeManager {
     }
 
     private TicTacToeInstance createInstance(TicTacToeTable table, ServerPlayerEntity opponent) {
-        return new TicTacToeInstance(new TicTacToeGame(), table.playerIndex(opponent));
+        return new TicTacToeInstance(new TicTacToeGame(), table.playerIndex(opponent), new BlockState[]{
+                // TODO make desired colors customizable
+                Blocks.RED_GLAZED_TERRACOTTA.getDefaultState(),
+                Blocks.BLUE_GLAZED_TERRACOTTA.getDefaultState()
+        });
     }
 
     private void win(ServerPlayerEntity player) {
@@ -167,7 +172,7 @@ public class TicTacToeManager {
 
         if (!instance.play(playerIndex, x, y)) return false;
 
-        display.displayMarker(table, x, y, Blocks.YELLOW_GLAZED_TERRACOTTA.getDefaultState());
+        display.displayMarker(table, x, y, instance.getDisplayBlock(playerIndex));
 
         updateInstance(table, instance);
 

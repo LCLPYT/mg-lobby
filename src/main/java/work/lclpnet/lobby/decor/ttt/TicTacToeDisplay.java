@@ -5,6 +5,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.AffineTransformation;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
@@ -43,6 +45,9 @@ public class TicTacToeDisplay {
                 pos.getY() + 1 - pixel,
                 pos.getZ() + pixel + (pixel + d) * (y + 1)
         );
+
+        display.getWorld().playSound(null, display.getX(), display.getY(), display.getZ(),
+                SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 0.15f, 1f);
 
         worldModifier.spawnEntity(display);
     }
