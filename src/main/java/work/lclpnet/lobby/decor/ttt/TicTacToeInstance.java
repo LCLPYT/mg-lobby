@@ -6,14 +6,18 @@ import net.minecraft.block.Blocks;
 public class TicTacToeInstance {
 
     private final TicTacToe game;
+    private final int initiator;
     private int nextTurn;
     private BlockState[] colors;
+    private boolean begun = false;
 
     public TicTacToeInstance(TicTacToe game, int beginner, BlockState[] colors) {
         if (beginner == -1) throw new IllegalArgumentException("Invalid beginner");
 
         this.game = game;
         this.nextTurn = beginner;
+
+        this.initiator = beginner;
 
         assignUniqueColors(colors, beginner);
     }
@@ -43,12 +47,16 @@ public class TicTacToeInstance {
     }
 
     public boolean isPlayersTurn(int player) {
+        if (isGameOver()) return false;
+
         return nextTurn == player;
     }
 
     public boolean play(int player, int x, int y) {
         boolean valid = game.doMove(player + 1, x, y);
         if (!valid) return false;
+
+        begun = true;
 
         nextTurn = 1 - player;
 
@@ -68,5 +76,13 @@ public class TicTacToeInstance {
 
     public BlockState getDisplayBlock(int player) {
         return colors[player];
+    }
+
+    public int getInitiator() {
+        return initiator;
+    }
+
+    public boolean hasBegun() {
+        return begun;
     }
 }

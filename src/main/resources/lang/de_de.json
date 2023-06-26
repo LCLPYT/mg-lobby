@@ -11,5 +11,6 @@
   "lobby.tic_tac_toe.waiting": "warten auf Mitspieler",
   "lobby.tic_tac_toe.start": "Los!",
   "lobby.tic_tac_toe.you_won": "Du hast gewonnen",
-  "lobby.tic_tac_toe.you_lost": "Du hast verloren"
+  "lobby.tic_tac_toe.you_lost": "Du hast verloren",
+  "lobby.tic_tac_toe.draw": "Unentschieden"
 }

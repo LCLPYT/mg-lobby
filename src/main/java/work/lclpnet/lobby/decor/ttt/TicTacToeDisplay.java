@@ -13,6 +13,7 @@ import org.joml.Vector3f;
 import work.lclpnet.kibu.access.entity.DisplayEntityAccess;
 import work.lclpnet.lobby.util.WorldModifier;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,13 @@ public class TicTacToeDisplay {
         display.getWorld().playSound(null, display.getX(), display.getY(), display.getZ(),
                 SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 0.15f, 1f);
 
+        addEntity(table, display);
         worldModifier.spawnEntity(display);
+    }
+
+    private void addEntity(TicTacToeTable table, Entity entity) {
+        var list = entitiesByTable.computeIfAbsent(table, key -> new ArrayList<>());
+        list.add(entity);
     }
 
     public void reset(TicTacToeTable table) {

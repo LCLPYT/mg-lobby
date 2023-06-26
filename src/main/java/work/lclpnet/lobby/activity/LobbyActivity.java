@@ -114,7 +114,7 @@ public class LobbyActivity extends ComponentActivity {
                 .map(TicTacToeTable::new)
                 .collect(Collectors.toUnmodifiableSet());
 
-        ticTacToeManager = new TicTacToeManager(tables, translationService, world, worldModifier);
+        ticTacToeManager = new TicTacToeManager(tables, translationService, scheduler, world, worldModifier);
         hooks.registerHooks(new TicTacToeListener(ticTacToeManager));
 
         // game stuff

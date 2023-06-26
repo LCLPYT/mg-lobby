@@ -12,6 +12,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.lobby.service.TranslationService;
 import work.lclpnet.lobby.util.WorldModifier;
@@ -26,16 +27,18 @@ public class TicTacToeManager {
 
     private final Map<TicTacToeTable, TicTacToeInstance> tables;
     private final TranslationService translations;
+    private final Scheduler scheduler;
     private final Map<UUID, TicTacToeTable> playing = new HashMap<>();
     private final TicTacToeDisplay display;
 
-    public TicTacToeManager(Set<TicTacToeTable> tables, TranslationService translations, ServerWorld world, WorldModifier worldModifier) {
+    public TicTacToeManager(Set<TicTacToeTable> tables, TranslationService translations, Scheduler scheduler, ServerWorld world, WorldModifier worldModifier) {
         this.tables = new HashMap<>();
 
         for (TicTacToeTable table : tables) {
             this.tables.put(table, null);
         }
 
+        this.scheduler = scheduler;
         this.translations = translations;
         this.display = new TicTacToeDisplay(world, worldModifier);
     }
@@ -61,10 +64,12 @@ public class TicTacToeManager {
     }
 
     public void stopPlaying(ServerPlayerEntity player) {
+        TicTacToeTable table;
+        TicTacToeInstance instance;
         ServerPlayerEntity opponent;
 
         synchronized (this) {
-            TicTacToeTable table = playing.remove(player.getUuid());
+            table = playing.remove(player.getUuid());
             if (table == null) return;
 
             int i = table.playerIndex(player);
@@ -72,19 +77,23 @@ public class TicTacToeManager {
 
             table.player(i, null);
 
-            if (table.players().isEmpty()) {
-                tables.put(table, null);
-            }
+            instance = tables.put(table, null);
 
             opponent = table.opponent(i);
         }
 
-        if (opponent != null) {
+        display.reset(table);
+
+        if (instance != null && instance.hasBegun() && opponent != null) {
             win(opponent);
         }
     }
 
     private void update(TicTacToeTable table, int causePlayerId) {
+        synchronized (this) {
+            if (tables.get(table) != null) return;  // there is already a game at this table
+        }
+
         if (!table.full()) {
             for (ServerPlayerEntity player : table.players()) {
                 var title = translations.translateText(player, "lobby.tic_tac_toe.title").formatted(Formatting.AQUA);
@@ -96,13 +105,19 @@ public class TicTacToeManager {
             return;
         }
 
-        tables.put(table, createInstance(table, table.opponent(causePlayerId)));
+        display.reset(table);
+
+        synchronized (this) {
+            tables.put(table, createInstance(table, table.opponent(causePlayerId)));
+        }
 
         for (ServerPlayerEntity player : table.players()) {
             var title = translations.translateText(player, "lobby.tic_tac_toe.title").formatted(Formatting.AQUA);
             var subtitle = translations.translateText(player, "lobby.tic_tac_toe.start").formatted(Formatting.GREEN, Formatting.BOLD);
 
             Title.get(player).title(title, subtitle, 10, 20, 20);
+
+            player.playSound(SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 0.6f, 0f);
         }
     }
 
@@ -126,6 +141,13 @@ public class TicTacToeManager {
 
         Title.get(player).title(Text.empty(), subtitle, 10, 70, 20);
         player.playSound(SoundEvents.ENTITY_BLAZE_DEATH, SoundCategory.PLAYERS, 0.6f, 1f);
+    }
+
+    private void draw(ServerPlayerEntity player) {
+        var subtitle = translations.translateText(player, "lobby.tic_tac_toe.draw").formatted(Formatting.AQUA);
+
+        Title.get(player).title(Text.empty(), subtitle, 10, 70, 20);
+        player.playSound(SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.PLAYERS, 0.3f, 0.57f);
     }
 
     public boolean isPlaying(ServerPlayerEntity player) {
@@ -183,6 +205,14 @@ public class TicTacToeManager {
         if (!instance.isGameOver()) return;
 
         int winnerIndex = instance.getWinner();
+        if (winnerIndex == -1) {
+            for (ServerPlayerEntity player : table.players()) {
+                draw(player);
+            }
+
+            restartGame(table);
+            return;
+        }
 
         ServerPlayerEntity winner = table.player(winnerIndex);
         win(winner);
@@ -191,6 +221,24 @@ public class TicTacToeManager {
         loose(looser);
 
         // TODO make combo glowing
+
+        restartGame(table);
+    }
+
+    private void restartGame(final TicTacToeTable table) {
+        final int initiator;
+
+        synchronized (this) {
+            final TicTacToeInstance instance = tables.put(table, null);
+
+            if (instance != null) {
+                initiator = instance.getInitiator();
+            } else {
+                initiator = 0;
+            }
+        }
+
+        scheduler.timeout(() -> update(table, initiator), 120);
     }
 
     private Vec3i getField(Vec3d vec) {

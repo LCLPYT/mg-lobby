@@ -11,5 +11,6 @@
   "lobby.tic_tac_toe.waiting": "waiting for opponent",
   "lobby.tic_tac_toe.start": "Go!",
   "lobby.tic_tac_toe.you_won": "You won",
-  "lobby.tic_tac_toe.you_lost": "You lost"
+  "lobby.tic_tac_toe.you_lost": "You lost",
+  "lobby.tic_tac_toe.draw": "Draw"
 }
