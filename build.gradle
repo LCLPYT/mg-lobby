@@ -167,6 +167,10 @@ tasks.register('remapActivityJar', RemapJarTask.class) {
     }
 }
 
+shadowJar {
+    mergeServiceFiles()
+}
+
 publishing {
     buildUtils.setupPublishRepository(repositories, props)
 
