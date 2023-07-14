@@ -13,14 +13,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.title.Title;
-import work.lclpnet.lobby.service.TranslationService;
+import work.lclpnet.kibu.translate.TranslationService;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-import static work.lclpnet.lobby.util.FormatWrapper.styled;
+import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class KingOfLadder {
 

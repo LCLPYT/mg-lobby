@@ -14,7 +14,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
-import work.lclpnet.lobby.service.TranslationService;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.util.WorldModifier;
 
 import javax.annotation.Nullable;

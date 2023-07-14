@@ -13,11 +13,12 @@ import work.lclpnet.activity.util.BossBarHandler;
 import work.lclpnet.activity.util.CustomBossBar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class BossBarComponent implements Component, DependentComponent, BossBarHandler {
+public class BossBarComponent implements Component, DependentComponent, BossBarHandler, BossBarProvider {
 
     private final BossBarManager bossBarManager;
     private final Set<CommandBossBar> bars = new HashSet<>();

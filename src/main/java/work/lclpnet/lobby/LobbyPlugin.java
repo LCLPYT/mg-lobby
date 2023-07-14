@@ -4,26 +4,32 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
-import work.lclpnet.kibu.plugin.KibuPlugin;
+import work.lclpnet.kibu.plugin.ext.KibuPlugin;
+import work.lclpnet.kibu.plugin.ext.TranslatedPlugin;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.activity.LobbyActivity;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.event.ConnectionListener;
 import work.lclpnet.lobby.io.LobbyWorldDownloader;
 import work.lclpnet.lobby.io.ServerPropertiesAdjuster;
 import work.lclpnet.mplugins.ext.WorldStateListener;
+import work.lclpnet.translations.loader.translation.SPITranslationLoader;
+import work.lclpnet.translations.loader.translation.TranslationLoader;
 
 import java.nio.file.Path;
 
-public class LobbyPlugin extends KibuPlugin implements WorldStateListener, LobbyAPI {
+public class LobbyPlugin extends KibuPlugin implements WorldStateListener, LobbyAPI, TranslatedPlugin {
 
     public static final String ID = "mg-lobby";
     private static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyPlugin instance = null;
-    private final LobbyManagerImpl manager = new LobbyManagerImpl(this, logger);
+    private TranslationService translationService = null;
+    private LobbyManagerImpl manager = null;
 
     @Override
     public void loadKibuPlugin() {
         instance = this;
+        manager = new LobbyManagerImpl(this, translationService, logger);
 
         registerHooks(new ConnectionListener());
 
@@ -66,5 +72,15 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
 
     public static Identifier identifier(String path) {
         return new Identifier(ID, path);
+    }
+
+    @Override
+    public void injectTranslationService(TranslationService translationService) {
+        this.translationService = translationService;
+    }
+
+    @Override
+    public TranslationLoader createTranslationLoader() {
+        return new SPITranslationLoader(getClass().getClassLoader());
     }
 }

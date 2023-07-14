@@ -3,7 +3,7 @@ package work.lclpnet.activity;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import work.lclpnet.activity.component.*;
-import work.lclpnet.kibu.plugin.PluginContext;
+import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.plugin.graph.DAG;
 
 import java.util.Collections;

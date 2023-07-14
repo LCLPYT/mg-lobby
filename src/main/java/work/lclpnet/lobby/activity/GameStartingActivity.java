@@ -9,17 +9,17 @@ import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BossBarComponent;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
-import work.lclpnet.kibu.plugin.PluginContext;
+import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
+import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.start.GameStarter;
-import work.lclpnet.lobby.service.TranslationService;
-import work.lclpnet.lobby.util.TranslatedBossBar;
 
-import static work.lclpnet.lobby.util.FormatWrapper.styled;
+import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class GameStartingActivity extends ComponentActivity implements SchedulerAction {
 

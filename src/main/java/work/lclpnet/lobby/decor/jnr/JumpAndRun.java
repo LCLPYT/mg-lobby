@@ -25,8 +25,8 @@ import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.scheduler.api.TaskHandle;
-import work.lclpnet.lobby.service.TranslationService;
-import work.lclpnet.lobby.util.FormatWrapper;
+import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.text.FormatWrapper;
 import work.lclpnet.lobby.util.WorldModifier;
 
 import java.util.*;

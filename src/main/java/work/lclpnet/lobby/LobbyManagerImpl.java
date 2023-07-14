@@ -13,14 +13,12 @@ import net.minecraft.world.GameMode;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
-import work.lclpnet.kibu.plugin.PluginContext;
+import work.lclpnet.kibu.plugin.ext.PluginContext;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.service.TranslationService;
-import work.lclpnet.translations.DefaultLanguageTranslator;
-import work.lclpnet.translations.loader.translation.SPITranslationLoader;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Path;
@@ -31,11 +29,10 @@ public class LobbyManagerImpl implements LobbyManager {
     private final ConfigHandler<LobbyConfig> configHandler;
     private final PluginContext pluginContext;
     private final Logger logger;
-    private final DefaultLanguageTranslator translator;
     private final TranslationService translationService;
     private final GameManager gameManager;
 
-    public LobbyManagerImpl(PluginContext pluginContext, Logger logger) {
+    public LobbyManagerImpl(PluginContext pluginContext, TranslationService translationService, Logger logger) {
         this.pluginContext = pluginContext;
         this.logger = logger;
 
@@ -45,10 +42,7 @@ public class LobbyManagerImpl implements LobbyManager {
 
         this.configHandler = new ConfigHandler<>(configFile, configSerializer, logger);
 
-        SPITranslationLoader translationLoader = new SPITranslationLoader(getClass().getClassLoader());
-        this.translator = new DefaultLanguageTranslator(translationLoader);
-
-        this.translationService = new TranslationService(translator);
+        this.translationService = translationService;
 
         this.gameManager = new GameManager(logger);
     }
@@ -130,7 +124,6 @@ public class LobbyManagerImpl implements LobbyManager {
 
     public void init() {
         configHandler.loadConfig();
-        translator.reload().join();
     }
 
     public void loadGames() {

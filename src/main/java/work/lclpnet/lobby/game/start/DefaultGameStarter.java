@@ -4,11 +4,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
-import work.lclpnet.kibu.plugin.PluginContext;
+import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.game.Game;
-import work.lclpnet.lobby.service.TranslationService;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
