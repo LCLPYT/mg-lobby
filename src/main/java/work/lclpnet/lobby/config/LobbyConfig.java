@@ -18,7 +18,7 @@ import java.util.Optional;
 public class LobbyConfig implements JsonConfig {
 
     public static final String DEFAULT_LOBBY_LEVEL_NAME = "lobby";
-    public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-1.19.4");
+    public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-1.20.1");
     public String lobbyLevelName = "lobby";
     public List<MazeConfig> mazeConfigs = new ArrayList<>(List.of(new MazeConfig()));  // one maze by default; mutable
     public BlockPos kingOfLadderGoal = null;

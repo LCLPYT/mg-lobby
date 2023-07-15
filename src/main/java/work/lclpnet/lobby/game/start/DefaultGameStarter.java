@@ -24,15 +24,18 @@ public class DefaultGameStarter implements GameStarter {
     private final AtomicBoolean gameStarting = new AtomicBoolean(false);
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
     private final Game game;
+    private final GameStartingActivity.Builder gsActivityBuilder;
 
     @AssistedInject
     public DefaultGameStarter(PluginContext pluginContext, HookRegistrar hookRegistrar, TranslationService translations,
-                              @Assisted ActivityManager activityManager, @Assisted Game game) {
+                              @Assisted ActivityManager activityManager, @Assisted Game game,
+                              GameStartingActivity.Builder gsActivityBuilder) {
         this.pluginContext = pluginContext;
         this.hookRegistrar = hookRegistrar;
         this.activityManager = activityManager;
         this.translations = translations;
         this.game = game;
+        this.gsActivityBuilder = gsActivityBuilder;
     }
 
     @Override
@@ -70,7 +73,8 @@ public class DefaultGameStarter implements GameStarter {
     private void initGameStart() {
         if (gameStarting.get()) return;
 
-        activityManager.startActivity(new GameStartingActivity(pluginContext, game.getConfig(), this, translations));
+        GameStartingActivity activity = gsActivityBuilder.create(game.getConfig(), this);
+        activityManager.startActivity(activity);
 
         gameStarting.set(true);
     }

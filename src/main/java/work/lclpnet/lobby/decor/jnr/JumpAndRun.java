@@ -24,7 +24,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
-import work.lclpnet.kibu.scheduler.api.TaskHandle;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.kibu.translate.text.FormatWrapper;
 import work.lclpnet.lobby.config.LobbyConfig;
@@ -74,11 +73,13 @@ public class JumpAndRun {
     private int destroyerDelay = 0;
 
     @Inject
-    public JumpAndRun(@Named("lobbyWorld") ServerWorld world, LobbyConfig config, WorldModifier modifier, Scheduler scheduler, TranslationService translations) {
+    public JumpAndRun(@Named("lobbyWorld") ServerWorld world, LobbyConfig config, WorldModifier modifier,
+                      Scheduler scheduler, TranslationService translations) {
         this(world, config.jumpAndRunStart, modifier, scheduler, translations);
     }
 
-    public JumpAndRun(ServerWorld world, BlockPos start, WorldModifier modifier, Scheduler scheduler, TranslationService translations) {
+    public JumpAndRun(ServerWorld world, BlockPos start, WorldModifier modifier, Scheduler scheduler,
+                      TranslationService translations) {
         this.world = world;
         this.start = start;
         this.modifier = modifier;
@@ -99,6 +100,7 @@ public class JumpAndRun {
         this.generator = new DefaultPosGenerator(world, nodes, config);
 
         setupTeams();
+
         startTask(scheduler);
 
         reset();
@@ -211,8 +213,8 @@ public class JumpAndRun {
         }
     }
 
-    private TaskHandle startTask(Scheduler scheduler) {
-        return scheduler.interval(() -> {
+    private void startTask(Scheduler scheduler) {
+        scheduler.interval(() -> {
             if (destroyerTimeout > 0) {
                 destroyerTimeout--;
                 return;

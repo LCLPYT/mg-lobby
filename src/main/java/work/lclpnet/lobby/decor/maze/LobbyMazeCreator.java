@@ -17,20 +17,24 @@ public class LobbyMazeCreator {
 
     private final ConfigAccess configAccess;
     private final Logger logger;
+    private final WorldModifier writer;
+    private final BlockView blockView;
 
     @Inject
-    public LobbyMazeCreator(ConfigAccess configAccess, Logger logger) {
+    public LobbyMazeCreator(ConfigAccess configAccess, Logger logger, WorldModifier writer, BlockView blockView) {
         this.configAccess = configAccess;
         this.logger = logger;
+        this.writer = writer;
+        this.blockView = blockView;
     }
 
-    public void create(WorldModifier writer, BlockView blockView) {
+    public void create() {
         for (MazeConfig mazeConfig : configAccess.getConfig().mazeConfigs) {
-            createFromConfig(writer, blockView, mazeConfig);
+            createFromConfig(mazeConfig);
         }
     }
 
-    private void createFromConfig(WorldModifier writer, BlockView blockView, MazeConfig mazeConfig) {
+    private void createFromConfig(MazeConfig mazeConfig) {
         if (mazeConfig.start == null) {
             logger.warn("Maze is not configured, aborting maze generation");
             return;

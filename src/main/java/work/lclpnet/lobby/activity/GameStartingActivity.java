@@ -1,5 +1,8 @@
 package work.lclpnet.lobby.activity;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.entity.boss.BossBar;
@@ -30,7 +33,9 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
     private int timer;
     private int colorIndex;
 
-    public GameStartingActivity(PluginContext context, GameConfig gameConfig, GameStarter starter, TranslationService translations) {
+    @AssistedInject
+    public GameStartingActivity(PluginContext context, TranslationService translations,
+                                @Assisted GameConfig gameConfig, @Assisted GameStarter starter) {
         super(context);
         this.gameConfig = gameConfig;
         this.starter = starter;
@@ -113,5 +118,10 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
         if (timer % 20 == 0) {
             updateBossBar();
         }
+    }
+
+    @AssistedFactory
+    public interface Builder {
+        GameStartingActivity create(GameConfig gameConfig, GameStarter starter);
     }
 }

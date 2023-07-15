@@ -30,7 +30,7 @@ public interface WorldCopier {
             return new DirectoryWorldCopier(path);
         } else if (Files.isRegularFile(path)) {
             try {
-                return new UrlWorldCopier(uri.toURL());
+                return new UrlWorldCopier(path.toUri().toURL());
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }

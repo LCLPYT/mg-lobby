@@ -33,7 +33,7 @@ public class LobbyWorldDownloader {
         try {
             removeIfExists(lobbyDir);
         } catch (IOException e) {
-            throw new RuntimeException("Could not cleanup old lobby file");
+            throw new RuntimeException("Could not cleanup old lobby file", e);
         }
 
         URI worldSource = configAccess.getConfig().lobbySource;

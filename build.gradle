@@ -64,6 +64,16 @@ dependencies {
         bundle it
     }
 
+    'org.tukaani:xz:1.9'.with {
+        implementation it
+        bundle it
+    }
+
+    'org.apache.tika:tika-core:2.5.0'.with {
+        implementation it
+        bundle it
+    }
+
     "work.lclpnet:maze-lib:${project.maze_lib_version}".with {
         implementation it
         bundle (it) { transitive = false }

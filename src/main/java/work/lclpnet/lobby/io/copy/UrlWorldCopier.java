@@ -1,5 +1,7 @@
 package work.lclpnet.lobby.io.copy;
 
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.apache.tika.Tika;
 import work.lclpnet.lobby.io.extract.ArchiveExtractor;
 import work.lclpnet.lobby.io.extract.TarExtractor;
 import work.lclpnet.lobby.io.extract.ZipExtractor;
@@ -21,8 +23,9 @@ public class UrlWorldCopier implements WorldCopier {
 
     @Override
     public void copyTo(Path path) throws IOException {
+        final String mime = new Tika().detect(url);
+
         URLConnection connection = url.openConnection();
-        final String mime = connection.getContentType();
 
         ArchiveExtractor extractor = switch (mime) {
             case "application/zip" -> {
@@ -39,6 +42,7 @@ public class UrlWorldCopier implements WorldCopier {
             }
             case "application/x-tar" -> new TarExtractor(connection.getInputStream());  // input streams will be closed by the TarExtractor
             case "application/gzip" -> new TarExtractor(new GZIPInputStream(connection.getInputStream()));
+            case "application/x-xz" -> new TarExtractor(new XZCompressorInputStream(connection.getInputStream()));
             default ->
                     throw new UnsupportedOperationException("Copying files of mime type '%s' is not supported".formatted(mime));
         };

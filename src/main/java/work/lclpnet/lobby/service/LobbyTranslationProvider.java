@@ -1,7 +1,6 @@
 package work.lclpnet.lobby.service;
 
-import org.slf4j.Logger;
-import work.lclpnet.lobby.LobbyAPI;
+import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.translations.loader.TranslationProvider;
 import work.lclpnet.translations.loader.language.LanguageLoader;
 import work.lclpnet.translations.loader.language.UrlLanguageLoader;
@@ -15,8 +14,7 @@ public class LobbyTranslationProvider implements TranslationProvider {
     public LanguageLoader create() {
         URL[] urls = UrlLanguageLoader.getResourceLocations(this);
         List<String> resourceDirectories = List.of("lang/");
-        Logger logger = LobbyAPI.getInstance().getManager().getLogger();
 
-        return new UrlLanguageLoader(urls, resourceDirectories, logger);
+        return new UrlLanguageLoader(urls, resourceDirectories, LobbyPlugin.logger);
     }
 }

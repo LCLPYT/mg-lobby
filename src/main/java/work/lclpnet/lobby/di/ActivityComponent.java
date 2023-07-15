@@ -19,7 +19,7 @@ public interface ActivityComponent {
 
     LobbyListener lobbyListener();
 
-    ResetWorldModifier resetWorldModifier();
+    ResetWorldModifier worldModifier();
 
     LobbyMazeCreator mazeGenerator();
 
@@ -37,7 +37,7 @@ public interface ActivityComponent {
 
     TicTacToeListener ticTacToeListener();
 
-    DefaultGameStarter.Factory defaultGameStarter();
+    DefaultGameStarter.Factory gameStarter();
 
     @Subcomponent.Builder
     interface Builder {

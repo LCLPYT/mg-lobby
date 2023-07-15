@@ -76,10 +76,10 @@ public class LobbyActivity extends ComponentActivity {
             lobbyManager.sendToLobby(player);
         }
 
-        worldModifier = component.resetWorldModifier();
+        worldModifier = component.worldModifier();
 
         // generate maze
-        component.mazeGenerator().create(worldModifier, lobbyWorld);
+        component.mazeGenerator().create();
 
         // init king of the ladder
         LobbyConfig config = lobbyManager.getConfig();
@@ -126,7 +126,7 @@ public class LobbyActivity extends ComponentActivity {
 
         if (game == null) return;
 
-        this.gameStarter = component.defaultGameStarter().create(childActivity, game);
+        this.gameStarter = component.gameStarter().create(childActivity, game);
         this.gameStarter.init();
     }
 

@@ -19,7 +19,7 @@ import work.lclpnet.translations.loader.translation.TranslationLoader;
 public class LobbyPlugin extends KibuPlugin implements WorldStateListener, LobbyAPI, TranslatedPlugin {
 
     public static final String ID = "mg-lobby";
-    private static final Logger logger = LoggerFactory.getLogger(ID);
+    public static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyPlugin instance = null;
     private TranslationService translationService = null;
     private LobbyManagerImpl manager = null;

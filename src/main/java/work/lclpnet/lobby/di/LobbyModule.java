@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.BlockView;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
@@ -30,6 +31,9 @@ public class LobbyModule {
 
         @Binds
         ConfigAccess bindConfigAccess(LobbyManager impl);
+
+        @Binds
+        BlockView bindBlockView(@Named("lobbyWorld") ServerWorld impl);
     }
 
     private final Logger logger;
