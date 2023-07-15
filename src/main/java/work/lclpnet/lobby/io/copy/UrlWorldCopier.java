@@ -40,7 +40,7 @@ public class UrlWorldCopier implements WorldCopier {
 
                 yield new ZipExtractor(tmp);
             }
-            case "application/x-tar" -> new TarExtractor(connection.getInputStream());  // input streams will be closed by the TarExtractor
+            case "application/x-tar", "application/x-gtar" -> new TarExtractor(connection.getInputStream());  // input streams will be closed by the TarExtractor
             case "application/gzip" -> new TarExtractor(new GZIPInputStream(connection.getInputStream()));
             case "application/x-xz" -> new TarExtractor(new XZCompressorInputStream(connection.getInputStream()));
             default ->
