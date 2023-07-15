@@ -7,11 +7,12 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
+import work.lclpnet.kibu.plugin.cmd.KibuCommand;
 import work.lclpnet.lobby.game.start.GameStarter;
 
 import java.util.function.Supplier;
 
-public class StartCommand {
+public class StartCommand implements KibuCommand {
 
     private final Supplier<GameStarter> starterSupplier;
 
@@ -19,6 +20,7 @@ public class StartCommand {
         this.starterSupplier = starterSupplier;
     }
 
+    @Override
     public void register(CommandRegistrar registrar) {
         registrar.registerCommand(command());
     }

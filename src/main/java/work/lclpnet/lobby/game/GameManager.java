@@ -10,11 +10,14 @@ import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.conf.MinecraftGameConfig;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+@Singleton
 public class GameManager {
 
     public static final String EMPTY_GAME_ID = "none";
@@ -23,6 +26,7 @@ public class GameManager {
     private final Map<String, Game> games = new HashMap<>();
     private Game currentGame = null;
 
+    @Inject
     public GameManager(Logger logger) {
         this.logger = logger;
         this.serviceLoader = ServiceLoader.load(GameProvider.class, getClass().getClassLoader());

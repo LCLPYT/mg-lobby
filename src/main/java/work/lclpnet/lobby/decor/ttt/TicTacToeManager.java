@@ -15,14 +15,20 @@ import net.minecraft.util.math.Vec3i;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+@ActivityScope
 public class TicTacToeManager {
 
     private final Map<TicTacToeTable, TicTacToeInstance> tables;
@@ -30,6 +36,12 @@ public class TicTacToeManager {
     private final Scheduler scheduler;
     private final Map<UUID, TicTacToeTable> playing = new HashMap<>();
     private final TicTacToeDisplay display;
+
+    @Inject
+    public TicTacToeManager(LobbyConfig config, TranslationService translations, Scheduler scheduler,
+                            @Named("lobbyWorld") ServerWorld world, WorldModifier worldModifier) {
+        this(getTables(config), translations, scheduler, world, worldModifier);
+    }
 
     public TicTacToeManager(Set<TicTacToeTable> tables, TranslationService translations, Scheduler scheduler, ServerWorld world, WorldModifier worldModifier) {
         this.tables = new HashMap<>();
@@ -41,6 +53,12 @@ public class TicTacToeManager {
         this.scheduler = scheduler;
         this.translations = translations;
         this.display = new TicTacToeDisplay(world, worldModifier);
+    }
+
+    private static Set<TicTacToeTable> getTables(LobbyConfig config) {
+        return config.ticTacToeTables.stream()
+                .map(TicTacToeTable::new)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public void startPlaying(ServerPlayerEntity player, BlockPos pos) {

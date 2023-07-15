@@ -14,7 +14,11 @@ import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.di.ActivityScope;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +26,7 @@ import java.util.UUID;
 
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
+@ActivityScope
 public class KingOfLadder {
 
     private final ServerWorld world;
@@ -31,6 +36,11 @@ public class KingOfLadder {
     private final Collection<UUID> contesting = new HashSet<>();
     private UUID king = null;
     private String kingName = null;
+
+    @Inject
+    public KingOfLadder(@Named("lobbyWorld") ServerWorld world, LobbyConfig config, TranslationService translations) {
+        this(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, translations);
+    }
 
     public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays, TranslationService translations) {
         this.world = world;

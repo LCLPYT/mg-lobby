@@ -29,12 +29,14 @@ import work.lclpnet.kibu.plugin.hook.HookListenerModule;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.api.LobbyManager;
 
+import javax.inject.Inject;
 import java.util.Set;
 
 public class LobbyListener implements HookListenerModule {
 
     private final LobbyManager lobbyManager;
 
+    @Inject
     public LobbyListener(LobbyManager lobbyManager) {
         this.lobbyManager = lobbyManager;
     }

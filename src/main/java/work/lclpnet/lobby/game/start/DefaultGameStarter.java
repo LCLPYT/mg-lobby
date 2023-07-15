@@ -1,5 +1,8 @@
 package work.lclpnet.lobby.game.start;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -22,7 +25,9 @@ public class DefaultGameStarter implements GameStarter {
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
     private final Game game;
 
-    public DefaultGameStarter(PluginContext pluginContext, HookRegistrar hookRegistrar, ActivityManager activityManager, TranslationService translations, Game game) {
+    @AssistedInject
+    public DefaultGameStarter(PluginContext pluginContext, HookRegistrar hookRegistrar, TranslationService translations,
+                              @Assisted ActivityManager activityManager, @Assisted Game game) {
         this.pluginContext = pluginContext;
         this.hookRegistrar = hookRegistrar;
         this.activityManager = activityManager;
@@ -94,5 +99,10 @@ public class DefaultGameStarter implements GameStarter {
     private Text onQuit(ServerPlayerEntity player, Text message) {
         updateGameStatus();
         return message;
+    }
+
+    @AssistedFactory
+    public interface Factory {
+        DefaultGameStarter create(ActivityManager manager, Game game);
     }
 }

@@ -27,10 +27,15 @@ import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.scheduler.api.TaskHandle;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.kibu.translate.text.FormatWrapper;
+import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.*;
 
+@ActivityScope
 public class JumpAndRun {
 
     private static final int DESTROYER_TIMEOUT_TICKS = 700;
@@ -67,6 +72,11 @@ public class JumpAndRun {
     private ShulkerEntity shulkerEntity;
     private int destroyerTimeout = DESTROYER_TIMEOUT_TICKS;
     private int destroyerDelay = 0;
+
+    @Inject
+    public JumpAndRun(@Named("lobbyWorld") ServerWorld world, LobbyConfig config, WorldModifier modifier, Scheduler scheduler, TranslationService translations) {
+        this(world, config.jumpAndRunStart, modifier, scheduler, translations);
+    }
 
     public JumpAndRun(ServerWorld world, BlockPos start, WorldModifier modifier, Scheduler scheduler, TranslationService translations) {
         this.world = world;

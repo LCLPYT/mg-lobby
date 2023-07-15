@@ -7,16 +7,14 @@ import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.plugin.ext.KibuPlugin;
 import work.lclpnet.kibu.plugin.ext.TranslatedPlugin;
 import work.lclpnet.kibu.translate.TranslationService;
-import work.lclpnet.lobby.activity.LobbyActivity;
 import work.lclpnet.lobby.api.LobbyManager;
+import work.lclpnet.lobby.di.DaggerLobbyComponent;
+import work.lclpnet.lobby.di.LobbyComponent;
+import work.lclpnet.lobby.di.LobbyModule;
 import work.lclpnet.lobby.event.ConnectionListener;
-import work.lclpnet.lobby.io.LobbyWorldDownloader;
-import work.lclpnet.lobby.io.ServerPropertiesAdjuster;
 import work.lclpnet.mplugins.ext.WorldStateListener;
 import work.lclpnet.translations.loader.translation.SPITranslationLoader;
 import work.lclpnet.translations.loader.translation.TranslationLoader;
-
-import java.nio.file.Path;
 
 public class LobbyPlugin extends KibuPlugin implements WorldStateListener, LobbyAPI, TranslatedPlugin {
 
@@ -25,11 +23,17 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     private static LobbyPlugin instance = null;
     private TranslationService translationService = null;
     private LobbyManagerImpl manager = null;
+    private LobbyComponent component = null;
 
     @Override
     public void loadKibuPlugin() {
         instance = this;
-        manager = new LobbyManagerImpl(this, translationService, logger);
+
+        component = DaggerLobbyComponent.builder()
+                .lobbyModule(new LobbyModule(logger, translationService, this))
+                .build();
+
+        manager = component.lobbyManager();
 
         registerHooks(new ConnectionListener());
 
@@ -39,8 +43,8 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
         // renew world on initial server startup
         if (getEnvironment().getServer() == null) {
             // adjust the level name in server.properties
-            new ServerPropertiesAdjuster(Path.of("server.properties"), manager, logger).adjust();
-            new LobbyWorldDownloader(manager).renewWorld();
+            component.serverPropertiesAdjuster().adjust();
+            component.lobbyWorldDownloader().renewWorld();
         }
 
         logger.info("Lobby loaded.");
@@ -50,7 +54,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     public void onWorldReady() {
         manager.loadGames();
 
-        ActivityManager.getInstance().startActivity(new LobbyActivity(this, manager));
+        ActivityManager.getInstance().startActivity(component.lobbyActivity());
     }
 
     @Override

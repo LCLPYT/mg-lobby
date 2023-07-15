@@ -7,6 +7,7 @@ import work.lclpnet.kibu.jnbt.io.NbtIOHelper;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.io.copy.WorldCopier;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -18,6 +19,7 @@ public class LobbyWorldDownloader {
     private final Path lobbyDir;
     private final ConfigAccess configAccess;
 
+    @Inject
     public LobbyWorldDownloader(ConfigAccess configAccess) {
         this(Path.of(configAccess.getConfig().getSafeLobbyLevelName()), configAccess);
     }

@@ -15,10 +15,13 @@ import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.decor.seat.PlayerSeatCallback;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
 
+import javax.inject.Inject;
+
 public class TicTacToeListener implements HookListenerModule {
 
     private final TicTacToeManager ticTacToeManager;
 
+    @Inject
     public TicTacToeListener(TicTacToeManager ticTacToeManager) {
         this.ticTacToeManager = ticTacToeManager;
     }

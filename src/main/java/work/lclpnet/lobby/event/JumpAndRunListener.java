@@ -7,10 +7,13 @@ import work.lclpnet.kibu.plugin.hook.HookListenerModule;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.decor.jnr.JumpAndRun;
 
+import javax.inject.Inject;
+
 public class JumpAndRunListener implements HookListenerModule {
 
     private final JumpAndRun jumpAndRun;
 
+    @Inject
     public JumpAndRunListener(JumpAndRun jumpAndRun) {
         this.jumpAndRun = jumpAndRun;
     }

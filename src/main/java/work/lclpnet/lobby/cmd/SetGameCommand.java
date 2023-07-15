@@ -8,13 +8,14 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
+import work.lclpnet.kibu.plugin.cmd.KibuCommand;
 import work.lclpnet.lobby.cmd.arg.GameSuggestionProvider;
 import work.lclpnet.lobby.game.Game;
 import work.lclpnet.lobby.game.GameManager;
 
 import java.util.function.Consumer;
 
-public class SetGameCommand {
+public class SetGameCommand implements KibuCommand {
 
     private final GameManager gameManager;
     private final Consumer<Game> consumer;
@@ -24,6 +25,7 @@ public class SetGameCommand {
         this.consumer = consumer;
     }
 
+    @Override
     public void register(CommandRegistrar commands) {
         commands.registerCommand(commands());
     }

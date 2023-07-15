@@ -1,6 +1,5 @@
 package work.lclpnet.lobby;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.item.ItemStack;
@@ -16,14 +15,15 @@ import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.api.LobbyManager;
-import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.game.GameManager;
 
 import javax.annotation.Nonnull;
-import java.nio.file.Path;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Optional;
 
+@Singleton
 public class LobbyManagerImpl implements LobbyManager {
 
     private final ConfigHandler<LobbyConfig> configHandler;
@@ -32,19 +32,14 @@ public class LobbyManagerImpl implements LobbyManager {
     private final TranslationService translationService;
     private final GameManager gameManager;
 
-    public LobbyManagerImpl(PluginContext pluginContext, TranslationService translationService, Logger logger) {
+    @Inject
+    public LobbyManagerImpl(PluginContext pluginContext, TranslationService translationService, Logger logger,
+                            GameManager gameManager, ConfigHandler<LobbyConfig> configHandler) {
         this.pluginContext = pluginContext;
         this.logger = logger;
-
-        var configSerializer = new ExtendedConfigSerializer<>(LobbyConfig.FACTORY, logger);
-        Path configFile = FabricLoader.getInstance().getConfigDir()
-                .resolve(LobbyPlugin.ID).resolve("config.json");
-
-        this.configHandler = new ConfigHandler<>(configFile, configSerializer, logger);
-
         this.translationService = translationService;
-
-        this.gameManager = new GameManager(logger);
+        this.gameManager = gameManager;
+        this.configHandler = configHandler;
     }
 
     @Override

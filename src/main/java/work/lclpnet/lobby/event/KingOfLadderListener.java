@@ -10,10 +10,13 @@ import work.lclpnet.kibu.plugin.hook.HookListenerModule;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.decor.KingOfLadder;
 
+import javax.inject.Inject;
+
 public class KingOfLadderListener implements HookListenerModule {
 
     private final KingOfLadder kingOfLadder;
 
+    @Inject
     public KingOfLadderListener(KingOfLadder kingOfLadder) {
         this.kingOfLadder = kingOfLadder;
     }

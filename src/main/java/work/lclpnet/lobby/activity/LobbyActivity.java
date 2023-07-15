@@ -1,7 +1,6 @@
 package work.lclpnet.lobby.activity;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import work.lclpnet.activity.ComponentActivity;
@@ -11,51 +10,46 @@ import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
-import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.cmd.SetGameCommand;
 import work.lclpnet.lobby.cmd.StartCommand;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
-import work.lclpnet.lobby.decor.jnr.JumpAndRun;
-import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
-import work.lclpnet.lobby.decor.seat.SeatHandler;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
-import work.lclpnet.lobby.decor.ttt.TicTacToeTable;
-import work.lclpnet.lobby.event.JumpAndRunListener;
-import work.lclpnet.lobby.event.KingOfLadderListener;
-import work.lclpnet.lobby.event.LobbyListener;
-import work.lclpnet.lobby.event.TicTacToeListener;
+import work.lclpnet.lobby.di.ActivityComponent;
+import work.lclpnet.lobby.di.ActivityModule;
 import work.lclpnet.lobby.game.Game;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.start.DefaultGameStarter;
 import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
 
 public class LobbyActivity extends ComponentActivity {
 
     private final LobbyManager lobbyManager;
-    private final LobbyMazeCreator mazeCreator;
     private final ActivityManager childActivity;
-    private final PluginContext context;
+    private final ActivityComponent.Builder componentBuilder;
+    private final ServerWorld lobbyWorld;
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
     private TicTacToeManager ticTacToeManager;
+    private ActivityComponent component;
 
-    public LobbyActivity(PluginContext context, LobbyManager lobbyManager) {
+    @Inject
+    public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
+                         @Named("lobbyWorld") ServerWorld lobbyWorld) {
         super(context);
         this.lobbyManager = lobbyManager;
-        this.mazeCreator = new LobbyMazeCreator(lobbyManager, lobbyManager.getLogger());
         this.childActivity = new SyncActivityManager();
-        this.context = context;
+        this.componentBuilder = componentBuilder;
+        this.lobbyWorld = lobbyWorld;
     }
 
     @Override
@@ -68,58 +62,54 @@ public class LobbyActivity extends ComponentActivity {
         super.start();
 
         HookRegistrar hooks = component(HOOKS).hooks();
-        hooks.registerHooks(new LobbyListener(lobbyManager));
+        Scheduler scheduler = component(SCHEDULER).scheduler();
+        CommandRegistrar commands = component(COMMANDS).commands();
 
-        MinecraftServer server = getServer();
+        component = componentBuilder
+                .activityModule(new ActivityModule(hooks, scheduler))
+                .build();
+
+        hooks.registerHooks(component.lobbyListener());
 
         // send every online player to the lobby
-        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+        for (ServerPlayerEntity player : PlayerLookup.all(getServer())) {
             lobbyManager.sendToLobby(player);
         }
 
+        worldModifier = component.resetWorldModifier();
+
         // generate maze
-        ServerWorld world = lobbyManager.getLobbyWorld();
-        worldModifier = new ResetWorldModifier(world, hooks);
-        mazeCreator.create(worldModifier, world);
+        component.mazeGenerator().create(worldModifier, lobbyWorld);
 
         // init king of the ladder
         LobbyConfig config = lobbyManager.getConfig();
-        Scheduler scheduler = component(SCHEDULER).scheduler();
-
-        final TranslationService translationService = lobbyManager.getTranslationService();
 
         if (config.kingOfLadderGoal != null) {
-            kingOfLadder = new KingOfLadder(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, translationService);
-            hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
+            kingOfLadder = component.kingOfLadder();
+            hooks.registerHooks(component.kingOfLadderListener());
             scheduler.interval(kingOfLadder::tick, 6);
         }
 
         // init geysers
         if (config.geysers != null) {
-            GeyserManager geyserManager = new GeyserManager(world, config.geysers);
+            GeyserManager geyserManager = component.geyserManager();
             scheduler.interval(geyserManager::tick, 1);
         }
 
         // jump and run
         if (config.jumpAndRunStart != null) {
-            JumpAndRun jumpAndRun = new JumpAndRun(world, config.jumpAndRunStart, worldModifier, scheduler, translationService);
-            hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
+            hooks.registerHooks(component.jumpAndRunListener());
         }
 
         // init seat handler
-        new SeatHandler(worldModifier).init(hooks);
+        component.seatHandler().init();
 
         // tic tac toe
-        Set<TicTacToeTable> tables = config.ticTacToeTables.stream()
-                .map(TicTacToeTable::new)
-                .collect(Collectors.toUnmodifiableSet());
-
-        ticTacToeManager = new TicTacToeManager(tables, translationService, scheduler, world, worldModifier);
-        hooks.registerHooks(new TicTacToeListener(ticTacToeManager));
+        ticTacToeManager = component.ticTacToeManager();
+        hooks.registerHooks(component.ticTacToeListener());
 
         // game stuff
         final GameManager gameManager = lobbyManager.getGameManager();
-        final CommandRegistrar commands = component(COMMANDS).commands();
 
         new StartCommand(() -> gameStarter).register(commands);
         new SetGameCommand(gameManager, this::changeGame).register(commands);
@@ -136,10 +126,7 @@ public class LobbyActivity extends ComponentActivity {
 
         if (game == null) return;
 
-        final HookRegistrar hooks = component(HOOKS).hooks();
-        final TranslationService translationService = lobbyManager.getTranslationService();
-
-        this.gameStarter = new DefaultGameStarter(context, hooks, childActivity, translationService, game);
+        this.gameStarter = component.defaultGameStarter().create(childActivity, game);
         this.gameStarter.init();
     }
 

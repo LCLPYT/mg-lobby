@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.config.LobbyConfig;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +18,8 @@ public class ServerPropertiesAdjuster {
     private final Logger logger;
     private final Properties properties = new Properties();
 
-    public ServerPropertiesAdjuster(Path path, ConfigAccess configAccess, Logger logger) {
+    @Inject
+    public ServerPropertiesAdjuster(@Named("serverProperties") Path path, ConfigAccess configAccess, Logger logger) {
         this.path = path;
         this.configAccess = configAccess;
         this.logger = logger;

@@ -4,15 +4,20 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import work.lclpnet.kibu.hook.entity.EntityRemovedCallback;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.lobby.di.ActivityScope;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@ActivityScope
 public class ResetWorldModifier implements WorldModifier {
 
     private final World world;
@@ -20,7 +25,8 @@ public class ResetWorldModifier implements WorldModifier {
     private final IntSet entities = new IntOpenHashSet();
     private final AtomicBoolean enabled = new AtomicBoolean(true);
 
-    public ResetWorldModifier(World world, HookRegistrar hookRegistrar) {
+    @Inject
+    public ResetWorldModifier(@Named("lobbyWorld") ServerWorld world, HookRegistrar hookRegistrar) {
         this.world = world;
 
         hookRegistrar.registerHook(EntityRemovedCallback.HOOK, this::onEntityRemoved);

@@ -13,29 +13,31 @@ import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerMountHooks;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+@ActivityScope
 public class SeatHandler {
 
     private final WorldModifier worldModifier;
     private final SeatProvider seatProvider;
     private final Map<UUID, Vec3d> positions = new HashMap<>();
+    private final HookRegistrar hookRegistrar;
 
-    public SeatHandler(WorldModifier worldModifier) {
-        this(worldModifier, DefaultSeatProvider.getInstance());
-    }
-
-    public SeatHandler(WorldModifier worldModifier, SeatProvider seatProvider) {
+    @Inject
+    public SeatHandler(WorldModifier worldModifier, SeatProvider seatProvider, HookRegistrar hookRegistrar) {
         this.seatProvider = seatProvider;
         this.worldModifier = worldModifier;
+        this.hookRegistrar = hookRegistrar;
     }
 
-    public void init(HookRegistrar hookRegistrar) {
+    public void init() {
         hookRegistrar.registerHook(PlayerInteractionHooks.USE_BLOCK, this::onRightClickBlock);
         hookRegistrar.registerHook(PlayerConnectionHooks.QUIT, ServerPlayerEntity::stopRiding);
         hookRegistrar.registerHook(PlayerMountHooks.DISMOUNTED, this::onDismount);
