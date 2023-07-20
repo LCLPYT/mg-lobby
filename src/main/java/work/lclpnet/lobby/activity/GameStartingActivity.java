@@ -32,6 +32,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
     private TranslatedBossBar bossBar;
     private int timer;
     private int colorIndex;
+    private boolean wasPaused = false;
 
     @AssistedInject
     public GameStartingActivity(PluginContext context, TranslationService translations,
@@ -74,6 +75,12 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
     }
 
     private Pair<String, Object[]> titleTranslation() {
+        if (wasPaused) {
+            return Pair.of("lobby.countdown.title.paused", new Object[] {
+                    styled(gameConfig.title(), Formatting.AQUA, Formatting.BOLD)
+            });
+        }
+
         int seconds = timer / 20;
         int minutes = seconds / 60;
         seconds = seconds % 60;
@@ -88,7 +95,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         return Pair.of("lobby.countdown.title.seconds", new Object[] {
                 styled(gameConfig.title(), Formatting.AQUA, Formatting.BOLD),
-                styled(seconds, Formatting.YELLOW)
+                seconds
         });
     }
 
@@ -108,6 +115,17 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
             task.cancel();
             return;
         }
+
+        if (starter.isPaused()) {
+            if (!wasPaused) {
+                wasPaused = true;
+                updateBossBar();
+            }
+
+            return;
+        }
+
+        wasPaused = false;
 
         if (timer-- == 0) {
             task.cancel();

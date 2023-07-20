@@ -7,6 +7,7 @@
   "lobby.jump_n_run.completed": "%s hat das Regenbogen- Jump 'n Run geschafft!",
   "lobby.countdown.title.minutes": "%s %smin %ssek",
   "lobby.countdown.title.seconds": "%s %ssek",
+  "lobby.countdown.title.paused": "%s pausiert",
   "lobby.tic_tac_toe.title": "Tic Tac Toe",
   "lobby.tic_tac_toe.waiting": "warten auf Mitspieler",
   "lobby.tic_tac_toe.start": "Los!",

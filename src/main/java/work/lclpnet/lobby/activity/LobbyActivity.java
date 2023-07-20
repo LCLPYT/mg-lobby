@@ -11,6 +11,8 @@ import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
+import work.lclpnet.lobby.cmd.PauseCommand;
+import work.lclpnet.lobby.cmd.ResumeCommand;
 import work.lclpnet.lobby.cmd.SetGameCommand;
 import work.lclpnet.lobby.cmd.StartCommand;
 import work.lclpnet.lobby.config.LobbyConfig;
@@ -27,6 +29,7 @@ import work.lclpnet.lobby.util.ResetWorldModifier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.function.Supplier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
 
@@ -111,8 +114,12 @@ public class LobbyActivity extends ComponentActivity {
         // game stuff
         final GameManager gameManager = lobbyManager.getGameManager();
 
-        new StartCommand(() -> gameStarter).register(commands);
+        Supplier<GameStarter> gameStarterSupplier = () -> gameStarter;
+
+        new StartCommand(gameStarterSupplier).register(commands);
         new SetGameCommand(gameManager, this::changeGame).register(commands);
+        new PauseCommand(gameStarterSupplier).register(commands);
+        new ResumeCommand(gameStarterSupplier).register(commands);
 
         changeGame(gameManager.getCurrentGame());
     }

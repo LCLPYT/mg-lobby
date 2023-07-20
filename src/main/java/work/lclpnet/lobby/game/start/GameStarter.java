@@ -8,5 +8,9 @@ public interface GameStarter {
 
     boolean isStarted();
 
+    void setPaused(boolean paused);
+
+    boolean isPaused();
+
     void destroy();
 }

@@ -25,6 +25,7 @@ public class DefaultGameStarter implements GameStarter {
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
     private final Game game;
     private final GameStartingActivity.Builder gsActivityBuilder;
+    private boolean paused = false;
 
     @AssistedInject
     public DefaultGameStarter(PluginContext pluginContext, HookRegistrar hookRegistrar, TranslationService translations,
@@ -93,6 +94,16 @@ public class DefaultGameStarter implements GameStarter {
 
         hookRegistrar.unregisterHook(PlayerConnectionHooks.JOIN_MESSAGE, this::onJoin);
         hookRegistrar.unregisterHook(PlayerConnectionHooks.QUIT_MESSAGE, this::onQuit);
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    @Override
+    public boolean isPaused() {
+        return paused;
     }
 
     private Text onJoin(ServerPlayerEntity player, Text message) {
