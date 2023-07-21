@@ -6,4 +6,7 @@ public interface ConfigAccess {
 
     @Nonnull
     LobbyConfig getConfig();
+
+    @Nonnull
+    LobbyWorldConfig getWorldConfig();
 }

@@ -16,6 +16,7 @@ import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -73,6 +74,11 @@ public class LobbyModule {
     @Provides
     LobbyConfig provideLobbyConfig(ConfigAccess configAccess) {
         return configAccess.getConfig();
+    }
+
+    @Provides
+    LobbyWorldConfig provideWorldConfig(ConfigAccess configAccess) {
+        return configAccess.getWorldConfig();
     }
 
     @Provides @Named("serverProperties")

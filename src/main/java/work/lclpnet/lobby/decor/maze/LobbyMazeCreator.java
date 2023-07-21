@@ -29,7 +29,7 @@ public class LobbyMazeCreator {
     }
 
     public void create() {
-        for (MazeConfig mazeConfig : configAccess.getConfig().mazeConfigs) {
+        for (MazeConfig mazeConfig : configAccess.getWorldConfig().mazeConfigs) {
             createFromConfig(mazeConfig);
         }
     }

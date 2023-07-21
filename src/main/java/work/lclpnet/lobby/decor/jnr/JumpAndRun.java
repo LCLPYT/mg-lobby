@@ -26,7 +26,7 @@ import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.kibu.translate.text.FormatWrapper;
-import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
@@ -73,7 +73,7 @@ public class JumpAndRun {
     private int destroyerDelay = 0;
 
     @Inject
-    public JumpAndRun(@Named("lobbyWorld") ServerWorld world, LobbyConfig config, WorldModifier modifier,
+    public JumpAndRun(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config, WorldModifier modifier,
                       Scheduler scheduler, TranslationService translations) {
         this(world, config.jumpAndRunStart, modifier, scheduler, translations);
     }

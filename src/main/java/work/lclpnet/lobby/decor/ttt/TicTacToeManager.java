@@ -15,7 +15,7 @@ import net.minecraft.util.math.Vec3i;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.TranslationService;
-import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
@@ -38,7 +38,7 @@ public class TicTacToeManager {
     private final TicTacToeDisplay display;
 
     @Inject
-    public TicTacToeManager(LobbyConfig config, TranslationService translations, Scheduler scheduler,
+    public TicTacToeManager(LobbyWorldConfig config, TranslationService translations, Scheduler scheduler,
                             @Named("lobbyWorld") ServerWorld world, WorldModifier worldModifier) {
         this(getTables(config), translations, scheduler, world, worldModifier);
     }
@@ -55,7 +55,7 @@ public class TicTacToeManager {
         this.display = new TicTacToeDisplay(world, worldModifier);
     }
 
-    private static Set<TicTacToeTable> getTables(LobbyConfig config) {
+    private static Set<TicTacToeTable> getTables(LobbyWorldConfig config) {
         return config.ticTacToeTables.stream()
                 .map(TicTacToeTable::new)
                 .collect(Collectors.toUnmodifiableSet());

@@ -9,18 +9,23 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.api.LobbyManager;
+import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
+import work.lclpnet.lobby.config.WorldConfigHandler;
 import work.lclpnet.lobby.game.GameManager;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.file.Path;
 import java.util.Optional;
 
 @Singleton
@@ -31,6 +36,7 @@ public class LobbyManagerImpl implements LobbyManager {
     private final Logger logger;
     private final TranslationService translationService;
     private final GameManager gameManager;
+    private volatile WorldConfigHandler<LobbyWorldConfig> worldConfigHandler = null;
 
     @Inject
     public LobbyManagerImpl(PluginContext pluginContext, TranslationService translationService, Logger logger,
@@ -50,7 +56,10 @@ public class LobbyManagerImpl implements LobbyManager {
     @Nonnull
     @Override
     public LobbyConfig getConfig() {
-        return configHandler.getConfig();
+        LobbyConfig config = configHandler.getConfig();
+        if (config == null) throw new IllegalStateException("Config not loaded");
+
+        return config;
     }
 
     @Override
@@ -117,11 +126,36 @@ public class LobbyManagerImpl implements LobbyManager {
         return gameManager;
     }
 
+    @Override
+    @NotNull
+    public LobbyWorldConfig getWorldConfig() {
+        final var worldConfigHandler = this.worldConfigHandler;
+
+        if (worldConfigHandler == null) {
+            throw new IllegalStateException("Server not loaded");
+        }
+
+        final LobbyWorldConfig config = worldConfigHandler.getConfig();
+
+        if (config == null) {
+            throw new IllegalStateException("World config not loaded");
+        }
+
+        return config;
+    }
+
     public void init() {
         configHandler.loadConfig();
     }
 
-    public void loadGames() {
+    public void onWorldReady() {
+        ServerWorld world = getLobbyWorld();
+        var serializer = new ExtendedConfigSerializer<>(LobbyWorldConfig.FACTORY, logger);
+        Path path = Path.of("config", "lobby.json");
+
+        worldConfigHandler = new WorldConfigHandler<>(world, path, serializer, logger);
+        worldConfigHandler.loadConfig();
+
         gameManager.reload();
     }
 }

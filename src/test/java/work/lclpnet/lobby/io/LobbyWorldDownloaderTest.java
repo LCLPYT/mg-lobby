@@ -2,10 +2,12 @@ package work.lclpnet.lobby.io;
 
 import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -17,10 +19,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LobbyWorldDownloaderTest {
 
-    private static final ConfigAccess TEST_CONFIG_ACCESS = () -> {
-        LobbyConfig lobbyConfig = new LobbyConfig();
-        lobbyConfig.lobbySource = Path.of("src", "test", "resources", "directory.tar.gz").toUri();
-        return lobbyConfig;
+    private static final ConfigAccess TEST_CONFIG_ACCESS = new ConfigAccess() {
+        @NotNull
+        @Override
+        public LobbyConfig getConfig() {
+            LobbyConfig lobbyConfig = new LobbyConfig();
+            lobbyConfig.lobbySource = Path.of("src", "test", "resources", "directory.tar.gz").toUri();
+            return lobbyConfig;
+        }
+
+        @NotNull
+        @Override
+        public LobbyWorldConfig getWorldConfig() {
+            throw new AssertionError();
+        }
     };
 
     @BeforeAll

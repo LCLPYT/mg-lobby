@@ -15,7 +15,7 @@ import work.lclpnet.lobby.cmd.PauseCommand;
 import work.lclpnet.lobby.cmd.ResumeCommand;
 import work.lclpnet.lobby.cmd.SetGameCommand;
 import work.lclpnet.lobby.cmd.StartCommand;
-import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
@@ -85,7 +85,7 @@ public class LobbyActivity extends ComponentActivity {
         component.mazeGenerator().create();
 
         // init king of the ladder
-        LobbyConfig config = lobbyManager.getConfig();
+        LobbyWorldConfig config = lobbyManager.getWorldConfig();
 
         if (config.kingOfLadderGoal != null) {
             kingOfLadder = component.kingOfLadder();

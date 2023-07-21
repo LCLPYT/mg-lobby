@@ -2,7 +2,7 @@ package work.lclpnet.lobby.decor;
 
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
 
 import javax.inject.Inject;
@@ -15,7 +15,7 @@ public class GeyserManager {
     private final Geyser[] geysers;
 
     @Inject
-    public GeyserManager(@Named("lobbyWorld") ServerWorld world, LobbyConfig config) {
+    public GeyserManager(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config) {
         this(world, config.geysers);
     }
 

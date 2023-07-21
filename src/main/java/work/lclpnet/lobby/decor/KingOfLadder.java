@@ -14,7 +14,7 @@ import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.TranslationService;
-import work.lclpnet.lobby.config.LobbyConfig;
+import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
 
 import javax.inject.Inject;
@@ -38,7 +38,7 @@ public class KingOfLadder {
     private String kingName = null;
 
     @Inject
-    public KingOfLadder(@Named("lobbyWorld") ServerWorld world, LobbyConfig config, TranslationService translations) {
+    public KingOfLadder(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config, TranslationService translations) {
         this(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, translations);
     }
 
