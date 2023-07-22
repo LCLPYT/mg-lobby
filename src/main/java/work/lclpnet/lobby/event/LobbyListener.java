@@ -9,15 +9,21 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+import work.lclpnet.kibu.access.VelocityModifier;
 import work.lclpnet.kibu.hook.ServerPlayConnectionHooks;
+import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.entity.ServerLivingEntityHooks;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
@@ -70,6 +76,23 @@ public class LobbyListener implements HookListenerModule {
         registrar.registerHook(PlayerInventoryHooks.DROP_ITEM, (player, slot) -> cancelLobbyAction(player));
         registrar.registerHook(ServerLivingEntityHooks.ALLOW_DAMAGE, this::allowDamage);
         registrar.registerHook(PlayerMoveCallback.HOOK, this::onMove);
+        registrar.registerHook(PlayerInteractionHooks.ATTACK_ENTITY, this::onAttack);
+    }
+
+    @SuppressWarnings("SameReturnValue")
+    private ActionResult onAttack(PlayerEntity player, World world, Hand hand, Entity entity,
+                                  @Nullable EntityHitResult hitResult) {
+
+        if (!isLobby(world) || !(entity instanceof ServerPlayerEntity target) || !(world instanceof ServerWorld serverWorld)) {
+            return ActionResult.PASS;
+        }
+
+        VelocityModifier.setVelocity(target, player.getRotationVector().multiply(0.25));
+
+        serverWorld.spawnParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY(), target.getZ(),
+                1, 0.1, 0, 0.1, 0.1);
+
+        return ActionResult.PASS;
     }
 
     private boolean onMove(ServerPlayerEntity player, PositionRotation from, PositionRotation to) {
