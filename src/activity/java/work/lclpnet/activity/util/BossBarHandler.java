@@ -4,6 +4,7 @@ import net.minecraft.entity.boss.CommandBossBar;
 import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import work.lclpnet.kibu.translate.bossbar.CustomBossBar;
 
 public interface BossBarHandler {
 

@@ -48,6 +48,7 @@ dependencies {
     modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
     pluginImplementation "work.lclpnet.mcserver-api:mcserver-api-kibu:${project.mcserver_api_version}"
+    pluginLocalRuntime "work.lclpnet.plugins:pal:${project.pal_version}"
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.json:json:20230227'
