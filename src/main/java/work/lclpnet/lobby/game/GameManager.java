@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer;
@@ -50,6 +51,12 @@ public class GameManager {
             games.put(id, game);
         }
 
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            registerTestGame();
+        }
+    }
+
+    private void registerTestGame() {
         games.put("test", new Game() {  // remove after testing is done
             @Override
             public GameConfig getConfig() {

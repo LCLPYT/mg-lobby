@@ -6,6 +6,9 @@ import dagger.assisted.AssistedInject;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.entity.boss.BossBar;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import work.lclpnet.activity.ComponentActivity;
@@ -135,6 +138,14 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         if (timer % 20 == 0) {
             updateBossBar();
+
+            int remaining = timer / 20;
+
+            if (remaining <= 5) {
+                for (ServerPlayerEntity player : PlayerLookup.all(getServer())) {
+                    player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.BLOCKS, 2f, 1f);
+                }
+            }
         }
     }
 

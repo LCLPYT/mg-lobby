@@ -4,12 +4,9 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
-import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.game.Game;
 
@@ -17,10 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultGameStarter implements GameStarter {
 
-    private final PluginContext pluginContext;
     private final HookRegistrar hookRegistrar;
     private final ActivityManager activityManager;
-    private final TranslationService translations;
     private final AtomicBoolean gameStarting = new AtomicBoolean(false);
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
     private final Game game;
@@ -28,21 +23,18 @@ public class DefaultGameStarter implements GameStarter {
     private boolean paused = false;
 
     @AssistedInject
-    public DefaultGameStarter(PluginContext pluginContext, HookRegistrar hookRegistrar, TranslationService translations,
-                              @Assisted ActivityManager activityManager, @Assisted Game game,
-                              GameStartingActivity.Builder gsActivityBuilder) {
-        this.pluginContext = pluginContext;
+    public DefaultGameStarter(HookRegistrar hookRegistrar, GameStartingActivity.Builder gsActivityBuilder,
+                              @Assisted ActivityManager activityManager, @Assisted Game game) {
         this.hookRegistrar = hookRegistrar;
         this.activityManager = activityManager;
-        this.translations = translations;
         this.game = game;
         this.gsActivityBuilder = gsActivityBuilder;
     }
 
     @Override
     public void init() {
-        hookRegistrar.registerHook(PlayerConnectionHooks.JOIN_MESSAGE, this::onJoin);
-        hookRegistrar.registerHook(PlayerConnectionHooks.QUIT_MESSAGE, this::onQuit);
+        hookRegistrar.registerHook(PlayerConnectionHooks.JOIN, this::onJoin);
+        hookRegistrar.registerHook(PlayerConnectionHooks.QUIT, this::onQuit);
 
         updateGameStatus();
     }
@@ -92,8 +84,8 @@ public class DefaultGameStarter implements GameStarter {
     public void destroy() {
         abortGameStart();
 
-        hookRegistrar.unregisterHook(PlayerConnectionHooks.JOIN_MESSAGE, this::onJoin);
-        hookRegistrar.unregisterHook(PlayerConnectionHooks.QUIT_MESSAGE, this::onQuit);
+        hookRegistrar.unregisterHook(PlayerConnectionHooks.JOIN, this::onJoin);
+        hookRegistrar.unregisterHook(PlayerConnectionHooks.QUIT, this::onQuit);
     }
 
     @Override
@@ -106,14 +98,12 @@ public class DefaultGameStarter implements GameStarter {
         return paused;
     }
 
-    private Text onJoin(ServerPlayerEntity player, Text message) {
+    private void onJoin(ServerPlayerEntity player) {
         updateGameStatus();
-        return message;
     }
 
-    private Text onQuit(ServerPlayerEntity player, Text message) {
+    private void onQuit(ServerPlayerEntity player) {
         updateGameStatus();
-        return message;
     }
 
     @AssistedFactory

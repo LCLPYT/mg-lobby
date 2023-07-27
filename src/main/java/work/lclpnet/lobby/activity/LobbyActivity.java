@@ -2,7 +2,6 @@ package work.lclpnet.lobby.activity;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -28,7 +27,6 @@ import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.function.Supplier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
@@ -38,7 +36,6 @@ public class LobbyActivity extends ComponentActivity {
     private final LobbyManager lobbyManager;
     private final ActivityManager childActivity;
     private final ActivityComponent.Builder componentBuilder;
-    private final ServerWorld lobbyWorld;
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
@@ -46,13 +43,11 @@ public class LobbyActivity extends ComponentActivity {
     private ActivityComponent component;
 
     @Inject
-    public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
-                         @Named("lobbyWorld") ServerWorld lobbyWorld) {
+    public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder) {
         super(context);
         this.lobbyManager = lobbyManager;
         this.childActivity = new SyncActivityManager();
         this.componentBuilder = componentBuilder;
-        this.lobbyWorld = lobbyWorld;
     }
 
     @Override
