@@ -1,14 +1,6 @@
 package work.lclpnet.lobby.game;
 
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
-import work.lclpnet.lobby.LobbyAPI;
-import work.lclpnet.lobby.game.conf.GameConfig;
-import work.lclpnet.lobby.game.conf.MinecraftGameConfig;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -38,7 +30,7 @@ public class GameManager {
             Game game = provider.provideGame();
             String id = game.getConfig().identifier();
 
-            if (reservedGameId(id)) {
+            if (isReservedGameId(id)) {
                 logger.error("The game id {} is reserved for internal use", id);
                 continue;
             }
@@ -50,33 +42,9 @@ public class GameManager {
 
             games.put(id, game);
         }
-
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            registerTestGame();
-        }
     }
 
-    private void registerTestGame() {
-        games.put("test", new Game() {  // remove after testing is done
-            @Override
-            public GameConfig getConfig() {
-                return new MinecraftGameConfig("test", "Test Game", new ItemStack(Items.STRUCTURE_VOID));
-            }
-
-            @Override
-            public boolean canStart() {
-                MinecraftServer server = LobbyAPI.getInstance().getManager().getLobbyWorld().getServer();
-                return !PlayerLookup.all(server).isEmpty();
-            }
-
-            @Override
-            public void start() {
-                System.out.println("The test game was started!");
-            }
-        });
-    }
-
-    private boolean reservedGameId(String id) {
+    private boolean isReservedGameId(String id) {
         return EMPTY_GAME_ID.equalsIgnoreCase(id);
     }
 

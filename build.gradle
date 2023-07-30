@@ -6,7 +6,7 @@ plugins {
     id 'fabric-loom' version '1.3.8'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.5.3'
-    id 'kibu-plugin-dev' version '0.10.0'
+    id 'kibu-plugin-dev' version '0.11.0'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -31,13 +31,22 @@ repositories {
     }
 }
 
-sourceSets {
-    activity
+// list of extra source set names that will have minecraft classpath and will be available in the main source set
+def extraSourceSets = ['activity', 'game', 'dev']
+// list of extra source set names that should not be merged into the produced artifacts ("localRuntimeOnly")
+def localExtraSourceSets = ['dev']
+// list of extra source set names that should have their own standalone jar artifact
+def artifactExtraSourceSets = ['activity']
 
-    main {
-        // make activity classes available in the main sourceSet
-        compileClasspath += activity.output
+extraSourceSets.each {
+    sourceSets.register(it).configure {
+        // make sourceSet classes available in the main sourceSet
+        sourceSets.main.compileClasspath += it.output
     }
+}
+
+sourceSets {
+    dev.compileClasspath += game.output
 }
 
 dependencies {
@@ -86,27 +95,6 @@ dependencies {
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }
 
-// add main dependencies to the activity sourceSet
-configurations {
-    activityImplementation.extendsFrom(implementation)
-
-    activityCompileClasspath.extendsFrom(modCompileClasspathMapped)
-    activityRuntimeClasspath.extendsFrom(modCompileClasspathMapped)
-}
-
-// add minecraft dependencies to activity sourceSet (only available after project evaluation)
-afterEvaluate {
-    configurations {
-        activityCompileClasspath.extendsFrom(minecraftNamedCompile)
-        activityRuntimeClasspath.extendsFrom(minecraftNamedRuntime)
-    }
-}
-
-kibu {
-    // add activity sources to the dev plugin loader
-    pluginPaths.from(sourceSets.activity.output)
-}
-
 loom {
     serverOnlyMinecraftJar()
 
@@ -129,8 +117,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 processResources {
-    dependsOn processActivityResources  // should process activity resources
-
     // replace placeholders in resources
     inputs.property "version", project.version
 
@@ -139,34 +125,75 @@ processResources {
     }
 }
 
-// add activity jar tasks
-tasks.register("activityJar", Jar.class) {
-    description 'Builds the standalone activity api jar.'
-    group 'build'
-    archiveClassifier.set("activity-dev")
-    destinationDirectory.set(new File(buildDir, "devlibs"))
+// add main dependencies to the extra sourceSets
+extraSourceSets.each { name ->
+    configurations.named("${name}Implementation").configure {
+        it.extendsFrom(configurations.implementation)
+    }
+
+    configurations.named("${name}CompileClasspath").configure {
+        it.extendsFrom(configurations.modCompileClasspathMapped)
+    }
+
+    configurations.named("${name}RuntimeClasspath").configure {
+        it.extendsFrom(configurations.modCompileClasspathMapped)
+    }
+
+    // add minecraft dependencies to extra sourceSet (only available after project evaluation)
+    afterEvaluate {
+        configurations.named("${name}CompileClasspath").get().extendsFrom(configurations.minecraftNamedCompile)
+        configurations.named("${name}RuntimeClasspath").get().extendsFrom(configurations.minecraftNamedRuntime)
+    }
+
+    kibu {
+        // add extra source sets to the dev plugin loader
+        pluginPaths.from(sourceSets.named(name).get().output)
+    }
+
+    if (!localExtraSourceSets.contains(name)) {
+        tasks.named("process${name.capitalize()}Resources").configure {
+            tasks.processResources.dependsOn(it)  // should process activity resources
+        }
+
+        // include extra sourceSet in main jar tasks
+        [jar, sourcesJar, shadowJar].each {
+            it.from sourceSets.named(name).get().output
+        }
+    }
 }
 
-tasks.register('remapActivityJar', RemapJarTask.class) {
-    dependsOn tasks.activityJar
+def licenseJarTasks = [jar, sourcesJar, shadowJar]
 
-    description 'Remaps the built activity jar to intermediary mappings.'
-    group 'fabric'
-    archiveClassifier.set('activity')
+artifactExtraSourceSets.each { name ->
+    // add extra jar tasks
+    def defaultJar = tasks.register("${name}Jar", Jar.class) {
+        from(sourceSets.named(name).get().output)
+        archiveClassifier.set("${name}-dev")
+        destinationDirectory.set(new File(buildDir, "devlibs"))
 
-    inputFile.convention(tasks.activityJar.archiveFile)
+        description "Builds the standalone ${name} api jar."
+        group 'build'
+    }.get()
+
+    def remappedJar = tasks.register("remap${name.capitalize()}Jar", RemapJarTask.class) {
+        dependsOn defaultJar
+
+        description "Remaps the built ${name} jar to intermediary mappings."
+        group 'fabric'
+        archiveClassifier.set(name)
+
+        inputFile.convention(defaultJar.archiveFile)
+    }.get()
+
+    [defaultJar, remappedJar].each {
+        tasks.assemble.dependsOn(it)
+    }
+
+    licenseJarTasks.add(defaultJar)
 }
 
-[activityJar, remapActivityJar].each {
-    tasks.assemble.dependsOn(it)
-}
-
-// tweak jar tasks
-[jar, sourcesJar, shadowJar, activityJar].each {
-    // include activity sourceSet
-    it.from sourceSets.activity.output
-
-    // include license file
+// include license file in jar tasks
+licenseJarTasks.each {
     it.from('LICENSE') {
         rename { "${it}_${project.archivesBaseName}" }
     }
@@ -201,6 +228,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
+            // manually configure artifacts
             artifact remapShadowJar
             artifact remapSourcesJar
             artifact remapActivityJar

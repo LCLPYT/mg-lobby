@@ -3,6 +3,7 @@ package work.lclpnet.lobby.di;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import net.minecraft.server.MinecraftServer;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.decor.seat.DefaultSeatProvider;
@@ -21,10 +22,12 @@ public class ActivityModule {
 
     private final HookRegistrar hookRegistrar;
     private final Scheduler scheduler;
+    private final MinecraftServer server;
 
-    public ActivityModule(HookRegistrar hookRegistrar, Scheduler scheduler) {
+    public ActivityModule(HookRegistrar hookRegistrar, Scheduler scheduler, MinecraftServer server) {
         this.hookRegistrar = hookRegistrar;
         this.scheduler = scheduler;
+        this.server = server;
     }
 
     @Provides
@@ -40,5 +43,10 @@ public class ActivityModule {
     @Provides
     SeatProvider provideSeatProvider() {
         return DefaultSeatProvider.getInstance();
+    }
+
+    @Provides
+    MinecraftServer provideMinecraftServer() {
+        return server;
     }
 }

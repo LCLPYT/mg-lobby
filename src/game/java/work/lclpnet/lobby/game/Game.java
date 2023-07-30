@@ -6,7 +6,7 @@ public interface Game {
 
     GameConfig getConfig();
 
-    boolean canStart();
+    boolean canStart(GameEnvironment environment);
 
-    void start();
+    void start(GameEnvironment environment);
 }

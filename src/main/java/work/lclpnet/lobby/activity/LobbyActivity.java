@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.activity;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
@@ -63,14 +64,16 @@ public class LobbyActivity extends ComponentActivity {
         Scheduler scheduler = component(SCHEDULER).scheduler();
         CommandRegistrar commands = component(COMMANDS).commands();
 
+        MinecraftServer server = getServer();
+
         component = componentBuilder
-                .activityModule(new ActivityModule(hooks, scheduler))
+                .activityModule(new ActivityModule(hooks, scheduler, server))
                 .build();
 
         hooks.registerHooks(component.lobbyListener());
 
         // send every online player to the lobby
-        for (ServerPlayerEntity player : PlayerLookup.all(getServer())) {
+        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
             lobbyManager.sendToLobby(player);
         }
 
