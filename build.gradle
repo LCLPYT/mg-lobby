@@ -150,6 +150,13 @@ extraSourceSets.each { name ->
         pluginPaths.from(sourceSets.named(name).get().output)
     }
 
+    def set = sourceSets.named(name).get()
+
+    sourceSets.named('test').configure {
+        it.compileClasspath += set.output
+        it.runtimeClasspath += set.output
+    }
+
     if (!localExtraSourceSets.contains(name)) {
         tasks.named("process${name.capitalize()}Resources").configure {
             tasks.processResources.dependsOn(it)  // should process activity resources
@@ -157,7 +164,7 @@ extraSourceSets.each { name ->
 
         // include extra sourceSet in main jar tasks
         [jar, sourcesJar, shadowJar].each {
-            it.from sourceSets.named(name).get().output
+            it.from set.output
         }
     }
 }
