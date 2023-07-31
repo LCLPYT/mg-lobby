@@ -2,7 +2,6 @@ package work.lclpnet.lobby.game.map;
 
 import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -10,15 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MapManagerTest {
+class MapManagerTest {
 
     private static final Logger logger = LoggerFactory.getLogger("test");
 
@@ -29,49 +28,30 @@ public class MapManagerTest {
     }
 
     @Test
-    void testGetMaps() throws IOException {
-        var repo = new TestMapRepository();
+    void pull() throws IOException {
+        URL url = Path.of("src", "test", "resources", "maps").toUri().toURL();
+
+        var repo = new UrlMapRepository(url, logger);
         var manager = new MapManager(repo, logger);
 
-        manager.load("test");
+        MapCollection mapCollection = manager.getMapCollection();
+        mapCollection.load("test");
 
-        assertEquals(2, manager.getMaps().size());
-    }
+        Path dir = Files.createTempDirectory("mgl_mmt");
 
-    @Test
-    void testGetMap() throws IOException {
-        var repo = new TestMapRepository();
-        var manager = new MapManager(repo, logger);
+        for (String name : List.of("map_one", "map_two", "map_three")) {
+            GameMap map = mapCollection.getMap(new Identifier("test", name)).orElseThrow();
 
-        manager.load("test");
+            Path path = manager.pull(map, dir);
 
-        Stream.of("map_one", "nested/map_two")
-                .map(id -> new Identifier("test", id))
-                .forEach(id -> assertTrue(manager.getMap(id).isPresent()));
-    }
-
-    @Test
-    void testMultiLoad() throws IOException {
-        var repo = new TestMapRepository();
-        var manager = new MapManager(repo, logger);
-
-        manager.load("test");
-        manager.load("foo");
-
-        assertEquals(Set.of("test:map_one", "test:nested/map_two", "foo:map_one", "foo:nested/map_two"),
-                manager.getMaps().stream()
-                        .map(map -> map.getIdentifier().toString())
-                        .collect(Collectors.toSet()));
-    }
-
-    private static class TestMapRepository implements MapRepository {
-
-        @Override
-        public Set<GameMap> getMaps(String namespace) {
-            return Set.of(
-                    new GameMap(new Identifier(namespace, "map_one"), Items.EMERALD),
-                    new GameMap(new Identifier(namespace, "nested/map_two"), Items.RED_CANDLE, Map.of("author", "LCLP"))
-            );
+            assertCopied(dir, path);
         }
+    }
+
+    private void assertCopied(Path dir, Path name) {
+        assertEquals("..", name.relativize(dir).toString());
+
+        Path path = dir.resolve(name).resolve("content.txt");
+        assertTrue(Files.isRegularFile(path));
     }
 }

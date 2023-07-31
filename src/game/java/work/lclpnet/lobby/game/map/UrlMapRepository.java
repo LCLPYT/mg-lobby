@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
+import net.minecraft.util.Identifier;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -59,5 +60,35 @@ public class UrlMapRepository implements MapRepository {
         }
 
         return maps;
+    }
+
+    @Override
+    public URI getMapSource(Identifier identifier) throws IOException {
+        URI namespaceUri;
+
+        try {
+            namespaceUri = url.toURI()
+                    .resolve(withSlash(identifier.getNamespace()))
+                    .resolve(withSlash(identifier.getPath()));
+
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
+
+        URL indexUrl = namespaceUri.resolve("index.json").toURL();
+        String content;
+
+        try (InputStream in = indexUrl.openStream()) {
+            content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+
+        JSONObject json = new JSONObject(content);
+        String source = json.getString("source");
+
+        return namespaceUri.resolve(source);
+    }
+
+    private String withSlash(String s) {
+        return s.endsWith("/") ? s : s.concat("/");
     }
 }
