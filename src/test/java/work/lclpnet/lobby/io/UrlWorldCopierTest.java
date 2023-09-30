@@ -1,46 +1,62 @@
 package work.lclpnet.lobby.io;
 
+import com.sun.net.httpserver.Headers;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import work.lclpnet.lobby.io.copy.UrlWorldCopier;
+import work.lclpnet.lobby.util.TestHttpServer;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static work.lclpnet.lobby.io.DirectoryWorldCopierTest.assertCopyCorrect;
+import static work.lclpnet.lobby.io.DirectoryWorldCopierTest.assertIsTestContent;
 
 class UrlWorldCopierTest {
 
     private static final Path TEST_RESOURCES = Path.of("src", "test", "resources");
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlWorldCopierTest.class);
 
     @Test
-    void testHttpsZip() throws IOException {
-        URL url = new URL("https://lclpnet.work/dl/lobby-dl");
+    void testHttpZip() throws IOException {
         Path dst = Files.createTempDirectory("mgl_uwc");
 
         try (var files = Files.list(dst)) {
             assertTrue(files.findAny().isEmpty());
         }
 
-        new UrlWorldCopier(url).copyTo(dst);
+        var builder = TestHttpServer.builder(LOGGER)
+                .address("localhost", 8000)
+                .route("GET", "/dl/lobby-dl", exchange -> {
+                    LOGGER.info("{} {} {}", exchange.getRemoteAddress(), exchange.getRequestMethod(), exchange.getRequestURI());
+                    Path file = TEST_RESOURCES.resolve("directory.zip");
+                    long size = Files.size(file);
 
-        List<Path> checks = List.of(
-                dst.resolve("lobby"),
-                dst.resolve("lobby").resolve("level.dat"),
-                dst.resolve("lobby").resolve("region"),
-                dst.resolve("lobby").resolve("region").resolve("r.0.0.mca")
-                // and more
-        );
+                    Headers responseHeaders = exchange.getResponseHeaders();
+                    responseHeaders.add("Content-Type", "application/zip");
+                    responseHeaders.add("Content-Disposition", "attachment; filename=directory.zip");
 
-        checks.forEach(path -> assertTrue(Files.exists(path)));
+                    try (var out = exchange.getResponseBody();
+                         var in = Files.newInputStream(file)) {
 
-        try (var files = Files.walk(dst)) {
-            assertEquals(20, files.count());
+                        exchange.sendResponseHeaders(200, size);
+                        in.transferTo(out);
+                    }
+                });
+
+        try (TestHttpServer server = builder.build()) {
+            server.start();
+
+            URL url = new URL("http://localhost:8000/dl/lobby-dl");
+
+            new UrlWorldCopier(url).copyTo(dst);
         }
+
+        assertIsTestContent(dst);
     }
 
     @Test
