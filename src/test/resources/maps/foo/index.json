@@ -2,6 +2,9 @@
   "maps": [
     {
       "id": "bar/baz"
+    },
+    {
+      "id": "bar/hi"
     }
   ]
 }

@@ -3,6 +3,7 @@ package work.lclpnet.lobby.game.map;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
@@ -41,6 +42,7 @@ public class MapCollection implements Iterable<GameMap> {
         return Optional.ofNullable(maps.get(id));
     }
 
+    @Nonnull
     @Override
     public Iterator<GameMap> iterator() {
         return getMaps().iterator();

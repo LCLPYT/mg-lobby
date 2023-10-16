@@ -44,7 +44,7 @@ public class UrlMapRepositoryTest {
         var repo = new UrlMapRepository(url, logger);
         var maps = repo.getMaps("foo");
 
-        assertEquals(Set.of("bar/baz"), maps.stream()
+        assertEquals(Set.of("bar/baz", "bar/hi"), maps.stream()
                 .map(map -> map.getIdentifier().getPath())
                 .collect(Collectors.toSet()));
     }

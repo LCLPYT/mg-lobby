@@ -26,6 +26,26 @@ public class UrlMapRepository implements MapRepository {
 
     @Override
     public Set<GameMap> getMaps(String namespace) throws IOException {
+        JSONObject index = getIndex(namespace);
+        JSONArray mapsArray = index.getJSONArray("maps");
+
+        Set<GameMap> maps = new HashSet<>();
+
+        for (Object obj : mapsArray) {
+            if (!(obj instanceof JSONObject json)) {
+                logger.warn("Invalid json map array entry");
+                continue;
+            }
+
+            GameMap map = GameMap.parse(json, namespace);
+
+            maps.add(map);
+        }
+
+        return maps;
+    }
+
+    private JSONObject getIndex(String namespace) throws IOException {
         URI namespaceUri;
 
         try {
@@ -43,23 +63,7 @@ public class UrlMapRepository implements MapRepository {
             content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
 
-        JSONObject index = new JSONObject(content);
-        JSONArray mapsArray = index.getJSONArray("maps");
-
-        Set<GameMap> maps = new HashSet<>();
-
-        for (Object obj : mapsArray) {
-            if (!(obj instanceof JSONObject json)) {
-                logger.warn("Invalid json map array entry");
-                continue;
-            }
-
-            GameMap map = GameMap.parse(json, namespace);
-
-            maps.add(map);
-        }
-
-        return maps;
+        return new JSONObject(content);
     }
 
     @Override
