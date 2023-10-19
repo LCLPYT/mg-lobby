@@ -1,3 +1,4 @@
 {
-  "source": "world"
+  "source": "world",
+  "extraProp": true
 }

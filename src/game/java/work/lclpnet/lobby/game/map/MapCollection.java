@@ -48,7 +48,27 @@ public class MapCollection implements Iterable<GameMap> {
         return getMaps().iterator();
     }
 
-    public URI getWorldSource(GameMap gameMap) throws IOException {
-        return mapRepository.getMapSource(gameMap.getIdentifier());
+    public void load(GameMap gameMap) throws IOException {
+        var data = mapRepository.getData(gameMap.getIdentifier());
+
+        gameMap.putProperties(data);
+    }
+
+    public Optional<URI> getWorldSource(GameMap gameMap) throws IOException {
+        final String property = "source";
+
+        Object source = gameMap.getProperty(property);
+
+        if (source instanceof URI uri) {
+            return Optional.of(uri);
+        }
+
+        load(gameMap);
+
+        var mapSource = mapRepository.getMapSource(gameMap.getProperties(), gameMap.getIdentifier());
+
+        mapSource.ifPresent(uri -> gameMap.putProperty(property, uri));
+
+        return mapSource;
     }
 }

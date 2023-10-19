@@ -14,8 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MapManagerTest {
 
@@ -28,7 +27,7 @@ class MapManagerTest {
     }
 
     @Test
-    void pull() throws IOException {
+    void pull_copied() throws IOException {
         URL url = Path.of("src", "test", "resources", "maps").toUri().toURL();
 
         var repo = new UrlMapRepository(url, logger);
@@ -47,6 +46,27 @@ class MapManagerTest {
 
             assertCopied(dir, path);
         }
+    }
+
+    @Test
+    void pull_propertiesMerged() throws IOException {
+        URL url = Path.of("src", "test", "resources", "maps").toUri().toURL();
+
+        var repo = new UrlMapRepository(url, logger);
+        var manager = new MapManager(repo, logger);
+
+        MapCollection mapCollection = manager.getMapCollection();
+        mapCollection.load("test");
+
+        Path dir = Files.createTempDirectory("mgl_mmt");
+
+        GameMap map = mapCollection.getMap(new Identifier("test", "map_one")).orElseThrow();
+
+        assertNull(map.getProperty("extraProp"));
+
+        manager.pull(map, dir.resolve("test").resolve("map_one"));
+
+        assertEquals(Boolean.TRUE, map.getProperty("extraProp"));
     }
 
     private void assertCopied(Path dir, Path name) {

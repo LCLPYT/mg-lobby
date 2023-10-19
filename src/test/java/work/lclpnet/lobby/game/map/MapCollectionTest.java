@@ -4,13 +4,13 @@ import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +18,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MapCollectionTest {
 
@@ -31,7 +34,7 @@ public class MapCollectionTest {
 
     @Test
     void testGetMaps() throws IOException {
-        var repo = new TestMapRepository();
+        var repo = getMapRepository();
         var manager = new MapCollection(repo, logger);
 
         manager.load("test");
@@ -41,7 +44,8 @@ public class MapCollectionTest {
 
     @Test
     void testGetMap() throws IOException {
-        var repo = new TestMapRepository();
+        MapRepository repo = getMapRepository();
+
         var manager = new MapCollection(repo, logger);
 
         manager.load("test");
@@ -53,7 +57,7 @@ public class MapCollectionTest {
 
     @Test
     void testMultiLoad() throws IOException {
-        var repo = new TestMapRepository();
+        var repo = getMapRepository();
         var manager = new MapCollection(repo, logger);
 
         manager.load("test");
@@ -65,19 +69,18 @@ public class MapCollectionTest {
                         .collect(Collectors.toSet()));
     }
 
-    private static class TestMapRepository implements MapRepository {
+    @NotNull
+    private static MapRepository getMapRepository() throws IOException {
+        MapRepository repo = mock();
 
-        @Override
-        public Set<GameMap> getMaps(String namespace) {
+        when(repo.getMaps(anyString())).thenAnswer(invocation -> {
+            String namespace = invocation.getArgument(0);
+
             return Set.of(
                     new GameMap(new Identifier(namespace, "map_one"), Items.EMERALD),
                     new GameMap(new Identifier(namespace, "nested/map_two"), Items.RED_CANDLE, Map.of("author", "LCLP"))
             );
-        }
-
-        @Override
-        public URI getMapSource(Identifier identifier) {
-            throw new AssertionError("Unimplemented");
-        }
+        });
+        return repo;
     }
 }

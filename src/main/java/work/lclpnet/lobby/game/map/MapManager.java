@@ -30,7 +30,7 @@ public class MapManager {
      * @throws IOException If there was an IO error
      */
     public void pull(GameMap map, Path target) throws IOException {
-        URI source = mapCollection.getWorldSource(map);
+        URI source = mapCollection.getWorldSource(map).orElseThrow();
 
         WorldCopier.get(source).copyTo(target);
     }

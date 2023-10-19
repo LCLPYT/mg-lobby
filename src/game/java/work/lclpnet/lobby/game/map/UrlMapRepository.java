@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.Identifier;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,6 +13,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class UrlMapRepository implements MapRepository {
@@ -67,17 +70,8 @@ public class UrlMapRepository implements MapRepository {
     }
 
     @Override
-    public URI getMapSource(Identifier identifier) throws IOException {
-        URI namespaceUri;
-
-        try {
-            namespaceUri = url.toURI()
-                    .resolve(withSlash(identifier.getNamespace()))
-                    .resolve(withSlash(identifier.getPath()));
-
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
-        }
+    public Map<String, Object> getData(Identifier identifier) throws IOException {
+        URI namespaceUri = getNamespaceUri(identifier);
 
         URL indexUrl = namespaceUri.resolve("index.json").toURL();
         String content;
@@ -87,9 +81,48 @@ public class UrlMapRepository implements MapRepository {
         }
 
         JSONObject json = new JSONObject(content);
-        String source = json.getString("source");
 
-        return namespaceUri.resolve(source);
+        var data = ImmutableMap.<String, Object>builder();
+
+        for (String key : json.keySet()) {
+            Object value = json.get(key);
+
+            if (value == null) continue;
+
+            data.put(key, value);
+        }
+
+        return data.build();
+    }
+
+    private URI getNamespaceUri(Identifier identifier) throws IOException {
+        URI namespaceUri;
+
+        try {
+            namespaceUri = url.toURI()
+                    .resolve(withSlash(identifier.getNamespace()))
+                    .resolve(withSlash(identifier.getPath()));
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
+
+        return namespaceUri;
+    }
+
+    @Override
+    public Optional<URI> getMapSource(Map<String, Object> data, Identifier identifier) throws IOException {
+        String propName = "source";
+
+        Object value = data.get(propName);
+
+        if (!(value instanceof String source)) {
+            logger.warn("String property \"{}\" doesn't exist for map {}", propName, identifier);
+            return Optional.empty();
+        }
+
+        URI namespaceUri = getNamespaceUri(identifier);
+
+        return Optional.of(namespaceUri.resolve(source));
     }
 
     private String withSlash(String s) {

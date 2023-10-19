@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -7,8 +8,12 @@ import net.minecraft.util.Identifier;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class GameMap {
 
@@ -17,6 +22,8 @@ public class GameMap {
     private final Identifier identifier;
     private final Item icon;
     private final Map<String, Object> properties;
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Lock readLock = lock.readLock(), writeLock = lock.writeLock();
 
     public GameMap(Identifier identifier, Item icon) {
         this(identifier, icon, Map.of());
@@ -25,7 +32,7 @@ public class GameMap {
     public GameMap(Identifier identifier, Item icon, Map<String, Object> properties) {
         this.identifier = identifier;
         this.icon = icon;
-        this.properties = properties;
+        this.properties = new Object2ObjectOpenHashMap<>(properties);
     }
 
     public Identifier getIdentifier() {
@@ -46,10 +53,40 @@ public class GameMap {
     @SuppressWarnings("unchecked")
     @Nullable
     public <T> T getProperty(String name) {
-        Object o = properties.get(name);
+        final Object o;
+
+        try {
+            readLock.lock();
+            o = properties.get(name);
+        } finally {
+            readLock.unlock();
+        }
+
         if (o == null) return null;
 
         return (T) o;
+    }
+
+    public void putProperties(Map<String, Object> extra) {
+        try {
+            writeLock.lock();
+            properties.putAll(extra);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public void putProperty(String key, Object value) {
+        try {
+            writeLock.lock();
+            properties.put(key, value);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public Map<String, Object> getProperties() {
+        return Collections.unmodifiableMap(properties);
     }
 
     public static GameMap parse(JSONObject json, String namespace) {
