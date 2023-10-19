@@ -1,6 +1,5 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import work.lclpnet.lobby.io.copy.WorldCopier;
 
@@ -27,20 +26,12 @@ public class MapManager {
     /**
      * Pulls the world save of a {@link GameMap} into a directory.
      * @param map The map
-     * @param directory The target directory
+     * @param target The target directory
      * @throws IOException If there was an IO error
      */
-    public Path pull(GameMap map, Path directory) throws IOException {
+    public void pull(GameMap map, Path target) throws IOException {
         URI source = mapCollection.getWorldSource(map);
-        Path target = directory.resolve(flattenIdentifier(map.getIdentifier()));
 
         WorldCopier.get(source).copyTo(target);
-
-        return target;
-    }
-
-    private String flattenIdentifier(Identifier identifier) {
-        String[] parts = identifier.getPath().split("/");
-        return parts[parts.length - 1];
     }
 }

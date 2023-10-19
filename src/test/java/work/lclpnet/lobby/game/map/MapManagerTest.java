@@ -42,7 +42,8 @@ class MapManagerTest {
         for (String name : List.of("map_one", "map_two", "map_three")) {
             GameMap map = mapCollection.getMap(new Identifier("test", name)).orElseThrow();
 
-            Path path = manager.pull(map, dir);
+            Path path = dir.resolve("test").resolve(name);
+            manager.pull(map, path);
 
             assertCopied(dir, path);
         }
