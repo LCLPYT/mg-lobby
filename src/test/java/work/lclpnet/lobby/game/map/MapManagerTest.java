@@ -50,7 +50,7 @@ class MapManagerTest {
     }
 
     private void assertCopied(Path dir, Path name) {
-        assertEquals("..", name.relativize(dir).toString());
+        assertEquals(Path.of("..", "..").toString(), name.relativize(dir).toString());
 
         Path path = dir.resolve(name).resolve("content.txt");
         assertTrue(Files.isRegularFile(path));
