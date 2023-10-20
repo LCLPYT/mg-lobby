@@ -33,6 +33,10 @@ repositories {
     }
 
     maven {
+        url 'https://repo.lclpnet.work/repository/snapshots'
+    }
+
+    maven {
         url = 'https://maven.nucleoid.xyz/'
     }
 }

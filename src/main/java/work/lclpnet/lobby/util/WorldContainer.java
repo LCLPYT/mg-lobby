@@ -1,20 +1,22 @@
 package work.lclpnet.lobby.util;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.World;
 import work.lclpnet.kibu.hook.world.ServerWorldHooks;
 import work.lclpnet.mplugins.ext.Unloadable;
 import xyz.nucleoid.fantasy.Fantasy;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.fantasy.RuntimeWorldHandle;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 public class WorldContainer implements Unloadable {
 
     private final MinecraftServer server;
-    private final Set<RuntimeWorldHandle> worlds = new HashSet<>();
+    private final Map<RegistryKey<World>, RuntimeWorldHandle> worlds = new Object2ObjectOpenHashMap<>();
 
     public WorldContainer(MinecraftServer server) {
         this.server = server;
@@ -24,24 +26,32 @@ public class WorldContainer implements Unloadable {
         ServerWorldHooks.UNLOAD.register(this::onWorldUnload);
     }
 
-    public RuntimeWorldHandle createWorld(RuntimeWorldConfig config) {
+    public RuntimeWorldHandle createTemporaryWorld(RuntimeWorldConfig config) {
         Fantasy fantasy = Fantasy.get(server);
 
         RuntimeWorldHandle handle = fantasy.openTemporaryWorld(config);
 
-        synchronized (this) {
-            worlds.add(handle);
-        }
+        trackHandle(handle);
 
         return handle;
+    }
+
+    public void trackHandle(RuntimeWorldHandle handle) {
+        synchronized (this) {
+            worlds.put(handle.getRegistryKey(), handle);
+        }
+    }
+
+    private void stopTracking(RegistryKey<World> key) {
+        synchronized (this) {
+            worlds.remove(key);
+        }
     }
 
     private void onWorldUnload(MinecraftServer server, ServerWorld world) {
         if (world == null) return;
 
-        synchronized (this) {
-            worlds.removeIf(handle -> world.equals(handle.asWorld()));
-        }
+        stopTracking(world.getRegistryKey());
     }
 
     @Override
@@ -49,7 +59,7 @@ public class WorldContainer implements Unloadable {
         ServerWorldHooks.UNLOAD.unregister(this::onWorldUnload);
 
         synchronized (this) {
-            worlds.forEach(RuntimeWorldHandle::delete);
+            worlds.values().forEach(RuntimeWorldHandle::delete);
             worlds.clear();
         }
     }

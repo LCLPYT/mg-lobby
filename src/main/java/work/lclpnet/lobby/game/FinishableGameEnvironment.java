@@ -6,11 +6,17 @@ import work.lclpnet.kibu.plugin.cmd.CommandStack;
 import work.lclpnet.kibu.plugin.hook.HookStack;
 import work.lclpnet.kibu.plugin.scheduler.SchedulerStack;
 import work.lclpnet.lobby.LobbyAPI;
+import work.lclpnet.mplugins.ext.Unloadable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class FinishableGameEnvironment implements GameEnvironment, GameFinisher {
 
     private final MinecraftServer server;
     private final Logger logger;
+    private volatile List<Unloadable> closeWhenDone = null;
     private volatile HookStack hookStack;
     private volatile CommandStack commandStack;
     private volatile SchedulerStack schedulerStack;
@@ -71,6 +77,19 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
+    public void closeWhenDone(Unloadable unloadable) {
+        Objects.requireNonNull(unloadable);
+
+        synchronized (this) {
+            if (closeWhenDone == null) {
+                closeWhenDone = new ArrayList<>();
+            }
+
+            closeWhenDone.add(unloadable);
+        }
+    }
+
+    @Override
     public GameFinisher getFinisher() {
         return this;
     }
@@ -88,6 +107,11 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
 
             if (schedulerStack != null) {
                 schedulerStack.unload();
+            }
+
+            if (closeWhenDone != null) {
+                closeWhenDone.forEach(Unloadable::unload);
+                closeWhenDone.clear();
             }
 
             LobbyAPI.getInstance().enterLobbyPhase();
