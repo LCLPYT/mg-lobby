@@ -12,6 +12,7 @@ import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.fantasy.RuntimeWorldHandle;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class WorldContainer implements Unloadable {
 
@@ -45,6 +46,12 @@ public class WorldContainer implements Unloadable {
     private void stopTracking(RegistryKey<World> key) {
         synchronized (this) {
             worlds.remove(key);
+        }
+    }
+
+    public Optional<RuntimeWorldHandle> getHandle(RegistryKey<World> key) {
+        synchronized (this) {
+            return Optional.ofNullable(worlds.get(key));
         }
     }
 
