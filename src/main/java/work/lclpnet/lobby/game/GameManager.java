@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game;
 
 import org.slf4j.Logger;
+import work.lclpnet.plugin.load.PluginClassLoader;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -26,6 +27,13 @@ public class GameManager {
     }
 
     public void reload() {
+        if (!(getClass().getClassLoader() instanceof PluginClassLoader)) {
+            logger.warn("Class loader of {} should be an instance of {} but is {}. Some features may not work as expected",
+                    GameManager.class.getName(), PluginClassLoader.class.getName(), getClass().getClassLoader().getClass().getName());
+        }
+
+        serviceLoader.reload();
+
         for (GameProvider provider : serviceLoader) {
             Game game = provider.provideGame();
             String id = game.getConfig().identifier();
