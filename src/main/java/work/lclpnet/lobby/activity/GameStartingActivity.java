@@ -22,7 +22,7 @@ import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.lobby.LobbyPlugin;
-import work.lclpnet.lobby.game.GameStarter;
+import work.lclpnet.lobby.game.api.GameStarter;
 import work.lclpnet.lobby.game.conf.GameConfig;
 
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;

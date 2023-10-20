@@ -6,6 +6,8 @@ import work.lclpnet.kibu.plugin.cmd.CommandStack;
 import work.lclpnet.kibu.plugin.hook.HookStack;
 import work.lclpnet.kibu.plugin.scheduler.SchedulerStack;
 import work.lclpnet.lobby.LobbyAPI;
+import work.lclpnet.lobby.game.api.GameEnvironment;
+import work.lclpnet.lobby.game.api.GameFinisher;
 import work.lclpnet.mplugins.ext.Unloadable;
 
 import java.util.ArrayList;

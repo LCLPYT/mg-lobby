@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game;
+package work.lclpnet.lobby.game.api;
 
 /**
  * An interface that can be used to end a game.

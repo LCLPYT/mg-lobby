@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game;
+package work.lclpnet.lobby.game.api;
 
 /**
  * An SPI for the {@link Game} interface.

@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.cmd.KibuCommand;
-import work.lclpnet.lobby.game.GameStarter;
+import work.lclpnet.lobby.game.api.GameStarter;
 
 import java.util.function.Supplier;
 

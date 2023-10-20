@@ -4,9 +4,9 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.lobby.LobbyPlugin;
-import work.lclpnet.lobby.game.GameEnvironment;
-import work.lclpnet.lobby.game.GameInstance;
-import work.lclpnet.lobby.game.GameStarter;
+import work.lclpnet.lobby.game.api.GameEnvironment;
+import work.lclpnet.lobby.game.api.GameInstance;
+import work.lclpnet.lobby.game.api.GameStarter;
 import work.lclpnet.lobby.game.start.ConditionGameStarter;
 
 import java.util.function.BooleanSupplier;

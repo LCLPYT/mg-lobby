@@ -4,8 +4,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.plugin.hook.HookStack;
 import work.lclpnet.lobby.activity.GameStartingActivity;
-import work.lclpnet.lobby.game.GameEnvironment;
-import work.lclpnet.lobby.game.GameStarter;
+import work.lclpnet.lobby.game.api.GameEnvironment;
+import work.lclpnet.lobby.game.api.GameStarter;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;

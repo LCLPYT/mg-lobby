@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game;
+package work.lclpnet.lobby.game.api;
 
 import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.mplugins.ext.PluginUnloader;

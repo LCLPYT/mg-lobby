@@ -4,7 +4,7 @@ import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.lobby.activity.GameStartingActivity;
-import work.lclpnet.lobby.game.GameStarter;
+import work.lclpnet.lobby.game.api.GameStarter;
 
 import java.util.function.Supplier;
 

@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.cmd.KibuCommand;
 import work.lclpnet.lobby.cmd.arg.GameSuggestionProvider;
-import work.lclpnet.lobby.game.Game;
 import work.lclpnet.lobby.game.GameManager;
+import work.lclpnet.lobby.game.api.Game;
 
 import java.util.function.Consumer;
 

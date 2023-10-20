@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.util;
+package work.lclpnet.lobby.game.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.registry.RegistryKey;

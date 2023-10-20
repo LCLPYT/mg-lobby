@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game;
+package work.lclpnet.lobby.game.api;
 
 import net.minecraft.server.MinecraftServer;
 import work.lclpnet.kibu.plugin.cmd.CommandStack;

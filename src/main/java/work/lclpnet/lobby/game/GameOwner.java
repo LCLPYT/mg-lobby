@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game;
 
+import work.lclpnet.lobby.game.api.GameFinisher;
 import work.lclpnet.mplugins.ext.Unloadable;
 
 public class GameOwner implements Unloadable {

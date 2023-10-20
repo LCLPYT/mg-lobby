@@ -1,6 +1,8 @@
 package work.lclpnet.lobby.game;
 
 import org.slf4j.Logger;
+import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.lobby.game.api.GameProvider;
 import work.lclpnet.plugin.load.PluginClassLoader;
 
 import javax.annotation.Nullable;

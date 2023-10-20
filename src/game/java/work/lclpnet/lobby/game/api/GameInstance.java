@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game;
+package work.lclpnet.lobby.game.api;
 
 /**
  * Represents an instance of a game.

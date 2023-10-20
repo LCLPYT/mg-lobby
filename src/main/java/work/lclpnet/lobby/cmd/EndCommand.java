@@ -8,7 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.cmd.KibuCommand;
-import work.lclpnet.lobby.game.GameFinisher;
+import work.lclpnet.lobby.game.api.GameFinisher;
 
 public class EndCommand implements KibuCommand {
 

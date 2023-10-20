@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game;
+package work.lclpnet.lobby.game.api;
 
 import work.lclpnet.activity.Activity;
 import work.lclpnet.kibu.plugin.ext.PluginContext;

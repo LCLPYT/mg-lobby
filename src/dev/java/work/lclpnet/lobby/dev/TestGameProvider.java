@@ -1,7 +1,7 @@
 package work.lclpnet.lobby.dev;
 
-import work.lclpnet.lobby.game.Game;
-import work.lclpnet.lobby.game.GameProvider;
+import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.lobby.game.api.GameProvider;
 
 public class TestGameProvider implements GameProvider {
 
