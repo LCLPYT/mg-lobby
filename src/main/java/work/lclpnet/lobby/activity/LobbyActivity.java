@@ -11,10 +11,7 @@ import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
-import work.lclpnet.lobby.cmd.PauseCommand;
-import work.lclpnet.lobby.cmd.ResumeCommand;
-import work.lclpnet.lobby.cmd.SetGameCommand;
-import work.lclpnet.lobby.cmd.StartCommand;
+import work.lclpnet.lobby.cmd.*;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
@@ -138,7 +135,13 @@ public class LobbyActivity extends ComponentActivity {
         GameInstance instance = game.createInstance(environment);
 
         var args = new LobbyArgs(context, childActivity);
-        gameStarter = instance.createStarter(args, instance::start);
+        gameStarter = instance.createStarter(args, () -> {
+            // register end command
+            new EndCommand(environment.getFinisher()).register(environment.getCommandStack());
+
+            // now actually start the instance
+            instance.start();
+        });
 
         args.injectStartingSupplier(() -> startingBuilder.create(game.getConfig(), gameStarter));
 
