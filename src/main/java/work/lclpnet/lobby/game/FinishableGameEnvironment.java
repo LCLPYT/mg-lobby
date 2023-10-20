@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import work.lclpnet.kibu.plugin.cmd.CommandStack;
 import work.lclpnet.kibu.plugin.hook.HookStack;
 import work.lclpnet.kibu.plugin.scheduler.SchedulerStack;
-import work.lclpnet.kibu.scheduler.KibuScheduling;
 import work.lclpnet.lobby.LobbyAPI;
 
 public class FinishableGameEnvironment implements GameEnvironment, GameFinisher {
@@ -78,7 +77,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
 
     @Override
     public void finishGame() {
-        KibuScheduling.getRootScheduler().immediate(() -> {
+        server.submit(() -> {
             if (hookStack != null) {
                 hookStack.unload();
             }
