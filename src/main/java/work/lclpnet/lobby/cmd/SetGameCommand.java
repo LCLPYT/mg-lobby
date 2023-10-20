@@ -7,6 +7,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.slf4j.Logger;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.cmd.KibuCommand;
 import work.lclpnet.lobby.cmd.arg.GameSuggestionProvider;
@@ -19,10 +20,12 @@ public class SetGameCommand implements KibuCommand {
 
     private final GameManager gameManager;
     private final Consumer<Game> consumer;
+    private final Logger logger;
 
-    public SetGameCommand(GameManager gameManager, Consumer<Game> consumer) {
+    public SetGameCommand(GameManager gameManager, Consumer<Game> consumer, Logger logger) {
         this.gameManager = gameManager;
         this.consumer = consumer;
+        this.logger = logger;
     }
 
     @Override
@@ -48,7 +51,12 @@ public class SetGameCommand implements KibuCommand {
                 .append(Text.literal("Set the current game to ").formatted(Formatting.GRAY))
                 .append(Text.literal(title).formatted(Formatting.YELLOW)));
 
-        ctx.getSource().getServer().submit(() -> consumer.accept(game));
+        ctx.getSource().getServer()
+                .submit(() -> consumer.accept(game))
+                .exceptionally(throwable -> {
+                    logger.error("Failed to change map", throwable);
+                    return null;
+                });
 
         return 0;
     }

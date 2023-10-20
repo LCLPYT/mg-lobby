@@ -12,15 +12,19 @@ import work.lclpnet.lobby.di.DaggerLobbyComponent;
 import work.lclpnet.lobby.di.LobbyComponent;
 import work.lclpnet.lobby.di.LobbyModule;
 import work.lclpnet.lobby.event.ConnectionListener;
+import work.lclpnet.lobby.game.GameOwnerCache;
 import work.lclpnet.mplugins.ext.WorldStateListener;
 import work.lclpnet.translations.loader.translation.SPITranslationLoader;
 import work.lclpnet.translations.loader.translation.TranslationLoader;
+
+import javax.annotation.Nonnull;
 
 public class LobbyPlugin extends KibuPlugin implements WorldStateListener, LobbyAPI, TranslatedPlugin {
 
     public static final String ID = "mg-lobby";
     public static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyPlugin instance = null;
+    private final GameOwnerCache gameOwnerCache = new GameOwnerCache();
     private TranslationService translationService = null;
     private LobbyManagerImpl manager = null;
     private LobbyComponent component = null;
@@ -73,7 +77,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
         ActivityManager.getInstance().startActivity(component.lobbyActivity());
     }
 
-    static LobbyPlugin getInstance() {
+    public static LobbyPlugin getInstance() {
         final LobbyPlugin ret = instance;
         if (instance == null) throw new IllegalStateException("Lobby plugin not loaded");
         return ret;
@@ -91,5 +95,10 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     @Override
     public TranslationLoader createTranslationLoader() {
         return new SPITranslationLoader(getClass().getClassLoader());
+    }
+
+    @Nonnull
+    public GameOwnerCache getGameOwnerCache() {
+        return gameOwnerCache;
     }
 }

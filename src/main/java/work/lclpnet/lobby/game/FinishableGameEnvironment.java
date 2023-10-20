@@ -20,10 +20,17 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     private volatile HookStack hookStack;
     private volatile CommandStack commandStack;
     private volatile SchedulerStack schedulerStack;
+    private GameOwner owner = null;
 
     public FinishableGameEnvironment(MinecraftServer server, Logger logger) {
         this.server = server;
         this.logger = logger;
+    }
+
+    public void bind(GameOwner owner) {
+        synchronized (this) {
+            this.owner = owner;
+        }
     }
 
     @Override
@@ -95,7 +102,11 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public void finishGame() {
+    public void finishGame(Reason reason) {
+        if (owner != null) {
+            owner.detach();
+        }
+
         server.submit(() -> {
             if (hookStack != null) {
                 hookStack.unload();
@@ -114,7 +125,9 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
                 closeWhenDone.clear();
             }
 
-            LobbyAPI.getInstance().enterLobbyPhase();
+            if (reason != Reason.UNLOADED) {
+                LobbyAPI.getInstance().enterLobbyPhase();
+            }
         });
     }
 }

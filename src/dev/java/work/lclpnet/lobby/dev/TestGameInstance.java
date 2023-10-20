@@ -3,7 +3,7 @@ package work.lclpnet.lobby.dev;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
-import work.lclpnet.lobby.LobbyAPI;
+import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.game.GameEnvironment;
 import work.lclpnet.lobby.game.GameInstance;
 import work.lclpnet.lobby.game.GameStarter;
@@ -30,8 +30,8 @@ public class TestGameInstance implements GameInstance {
     public void start() {
         System.out.println("The test game was started! (will end in 10 seconds)");
 
-        // normally, you would use a static getInstance() from your plugin
-        PluginContext context = (PluginContext) LobbyAPI.getInstance();
+        // normally, you would use static getInstance() of your plugin
+        PluginContext context = LobbyPlugin.getInstance();
 
         TestGameActivity activity = new TestGameActivity(context);
 

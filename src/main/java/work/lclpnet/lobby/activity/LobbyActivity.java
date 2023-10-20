@@ -10,6 +10,7 @@ import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
+import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.cmd.*;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
@@ -115,7 +116,7 @@ public class LobbyActivity extends ComponentActivity {
         Supplier<GameStarter> gameStarterSupplier = () -> gameStarter;
 
         new StartCommand(gameStarterSupplier).register(commands);
-        new SetGameCommand(gameManager, this::changeGame).register(commands);
+        new SetGameCommand(gameManager, this::changeGame, getLogger()).register(commands);
         new PauseCommand(gameStarterSupplier).register(commands);
         new ResumeCommand(gameStarterSupplier).register(commands);
 
@@ -132,6 +133,12 @@ public class LobbyActivity extends ComponentActivity {
         if (game == null) return;
 
         FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger());
+
+        // create a GameOwner that is responsible for properly unloading the game when the owning plugin is unloaded
+        GameOwner owner = LobbyPlugin.getInstance().getGameOwnerCache().getOwner(game.getOwner());
+        owner.setFinisher(environment.getFinisher());
+        environment.bind(owner);
+
         GameInstance instance = game.createInstance(environment);
 
         var args = new LobbyArgs(context, childActivity);

@@ -30,7 +30,7 @@ public class EndCommand implements KibuCommand {
     }
 
     private int end(CommandContext<ServerCommandSource> ctx) {
-        finisher.finishGame();
+        finisher.finishGame(GameFinisher.Reason.COMMAND);
 
         ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
                 .append(Text.literal("The current game has been ended.").formatted(Formatting.GRAY)));
