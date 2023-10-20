@@ -10,7 +10,6 @@ import work.lclpnet.lobby.event.JumpAndRunListener;
 import work.lclpnet.lobby.event.KingOfLadderListener;
 import work.lclpnet.lobby.event.LobbyListener;
 import work.lclpnet.lobby.event.TicTacToeListener;
-import work.lclpnet.lobby.game.start.DefaultGameStarter;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 
 @ActivityScope
@@ -36,8 +35,6 @@ public interface ActivityComponent {
     TicTacToeManager ticTacToeManager();
 
     TicTacToeListener ticTacToeListener();
-
-    DefaultGameStarter.Factory gameStarter();
 
     @Subcomponent.Builder
     interface Builder {

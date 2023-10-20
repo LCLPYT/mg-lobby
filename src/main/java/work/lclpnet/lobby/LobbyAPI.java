@@ -6,6 +6,8 @@ public interface LobbyAPI {
 
     LobbyManager getManager();
 
+    void enterLobbyPhase();
+
     static LobbyAPI getInstance() {
         return LobbyPlugin.getInstance();
     }

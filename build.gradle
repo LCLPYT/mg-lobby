@@ -37,14 +37,16 @@ repositories {
     }
 }
 
-// list of extra source set names that will have minecraft classpath and will be available in the main source set
-def extraSourceSets = ['activity', 'game', 'dev']
+// list of extra source set names that will have minecraft classpath
+def extraMcSourceSets = ['activity', 'game', 'dev']
+// list of extra source set names that will be available in the main source set
+def standaloneSourceSets = ['activity', 'game']
 // list of extra source set names that should not be merged into the produced artifacts ("localRuntimeOnly")
 def localExtraSourceSets = ['dev']
 // list of extra source set names that should have their own standalone jar artifact
 def artifactExtraSourceSets = ['activity']
 
-extraSourceSets.each {
+standaloneSourceSets.each {
     sourceSets.register(it).configure {
         // make sourceSet classes available in the main sourceSet
         sourceSets.main.compileClasspath += it.output
@@ -53,6 +55,9 @@ extraSourceSets.each {
 
 sourceSets {
     dev.compileClasspath += game.output
+    dev.compileClasspath += main.output
+    dev.compileClasspath += activity.output
+    game.compileClasspath += activity.output
 }
 
 dependencies {
@@ -134,7 +139,7 @@ processResources {
 }
 
 // add main dependencies to the extra sourceSets
-extraSourceSets.each { name ->
+extraMcSourceSets.each { name ->
     configurations.named("${name}Implementation").configure {
         it.extendsFrom(configurations.implementation)
     }

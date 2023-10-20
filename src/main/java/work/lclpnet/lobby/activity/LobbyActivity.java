@@ -21,9 +21,8 @@ import work.lclpnet.lobby.decor.KingOfLadder;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
 import work.lclpnet.lobby.di.ActivityComponent;
 import work.lclpnet.lobby.di.ActivityModule;
-import work.lclpnet.lobby.game.Game;
-import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.start.GameStarter;
+import work.lclpnet.lobby.game.*;
+import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 
@@ -37,18 +36,22 @@ public class LobbyActivity extends ComponentActivity {
     private final LobbyManager lobbyManager;
     private final ActivityManager childActivity;
     private final ActivityComponent.Builder componentBuilder;
+    private final GameStartingActivity.Builder startingBuilder;
+    private final PluginContext context;
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
     private TicTacToeManager ticTacToeManager;
-    private ActivityComponent component;
 
     @Inject
-    public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder) {
+    public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
+                         GameStartingActivity.Builder startingBuilder) {
         super(context);
+        this.context = context;
         this.lobbyManager = lobbyManager;
         this.childActivity = new SyncActivityManager();
         this.componentBuilder = componentBuilder;
+        this.startingBuilder = startingBuilder;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class LobbyActivity extends ComponentActivity {
 
         MinecraftServer server = getServer();
 
-        component = componentBuilder
+        ActivityComponent component = componentBuilder
                 .activityModule(new ActivityModule(hooks, scheduler, server))
                 .build();
 
@@ -131,8 +134,15 @@ public class LobbyActivity extends ComponentActivity {
 
         if (game == null) return;
 
-        this.gameStarter = component.gameStarter().create(childActivity, game);
-        this.gameStarter.init();
+        FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger());
+        GameInstance instance = game.createInstance(environment);
+
+        var args = new LobbyArgs(context, childActivity);
+        gameStarter = instance.createStarter(args, instance::start);
+
+        args.injectStartingSupplier(() -> startingBuilder.create(game.getConfig(), gameStarter));
+
+        gameStarter.start();
     }
 
     @Override

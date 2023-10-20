@@ -54,7 +54,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     public void onWorldReady() {
         manager.onWorldReady();
 
-        ActivityManager.getInstance().startActivity(component.lobbyActivity());
+        enterLobbyPhase();
     }
 
     @Override
@@ -66,6 +66,11 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     @Override
     public LobbyManager getManager() {
         return manager;
+    }
+
+    @Override
+    public void enterLobbyPhase() {
+        ActivityManager.getInstance().startActivity(component.lobbyActivity());
     }
 
     static LobbyPlugin getInstance() {

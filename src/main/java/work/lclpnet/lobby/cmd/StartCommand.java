@@ -8,7 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.cmd.KibuCommand;
-import work.lclpnet.lobby.game.start.GameStarter;
+import work.lclpnet.lobby.game.GameStarter;
 
 import java.util.function.Supplier;
 
@@ -47,7 +47,7 @@ public class StartCommand implements KibuCommand {
         ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
                 .append(Text.literal("Started the game.").formatted(Formatting.GRAY)));
 
-        starter.start();
+        starter.finish();
 
         return 0;
     }

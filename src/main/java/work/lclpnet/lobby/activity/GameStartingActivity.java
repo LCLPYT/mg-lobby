@@ -22,8 +22,8 @@ import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.lobby.LobbyPlugin;
+import work.lclpnet.lobby.game.GameStarter;
 import work.lclpnet.lobby.game.conf.GameConfig;
-import work.lclpnet.lobby.game.start.GameStarter;
 
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
@@ -132,7 +132,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         if (timer-- == 0) {
             task.cancel();
-            starter.start();
+            starter.finish();
             return;
         }
 
