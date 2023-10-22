@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.plugin.ext.KibuPlugin;
 import work.lclpnet.kibu.plugin.ext.TranslatedPlugin;
+import work.lclpnet.kibu.plugin.hook.PluginLifecycleHooks;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.di.DaggerLobbyComponent;
@@ -57,6 +58,9 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     @Override
     public void onWorldReady() {
         manager.onWorldReady();
+
+        // reload games after plugins were reloaded
+        registerHook(PluginLifecycleHooks.RELOADED, plugins -> manager.getGameManager().reload());
 
         enterLobbyPhase();
     }
