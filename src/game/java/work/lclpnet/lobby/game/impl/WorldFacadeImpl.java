@@ -131,7 +131,7 @@ public class WorldFacadeImpl implements WorldFacade {
         }
 
         // cleanup current map if requested
-        if (oldKey != null && oldOptions != null && oldOptions.shouldBeDeleted() && !newKey.equals(mapKey)) {
+        if (oldKey != null && oldOptions != null && oldOptions.shouldBeDeleted() && !newKey.equals(oldKey)) {
             worldContainer.getHandle(oldKey).ifPresent(RuntimeWorldHandle::delete);
         }
     }
