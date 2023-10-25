@@ -55,10 +55,16 @@ public class WorldFacadeImpl implements WorldFacade {
     }
 
     private void onPlayerJoin(ServerPlayNetworkHandler serverPlayNetworkHandler, PacketSender packetSender, MinecraftServer server) {
+        ServerPlayerEntity player = serverPlayNetworkHandler.getPlayer();
+
+        teleport(player);
+    }
+
+    @Override
+    public void teleport(ServerPlayerEntity player) {
         if (mapKey == null || spawn == null) return;
 
-        ServerPlayerEntity player = serverPlayNetworkHandler.getPlayer();
-        ServerWorld world = server.getWorld(mapKey);
+        ServerWorld world = this.server.getWorld(mapKey);
 
         if (world == null) {
             throw new IllegalStateException("World %s is not loaded".formatted(mapKey.getValue()));

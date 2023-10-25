@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.api;
 
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +16,12 @@ public interface WorldFacade {
      */
     CompletableFuture<Void> changeMap(Identifier identifier, MapOptions options);
 
+    /**
+     * Teleport a player to the current map.
+     * If no map is currently loaded, nothing happens.
+     * @param player The player to teleport.
+     */
+    void teleport(ServerPlayerEntity player);
 
     default CompletableFuture<Void> changeMap(Identifier identifier) {
         return changeMap(identifier, MapOptions.TEMPORARY);
