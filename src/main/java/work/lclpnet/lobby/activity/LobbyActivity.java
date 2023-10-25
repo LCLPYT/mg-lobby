@@ -25,6 +25,9 @@ import work.lclpnet.lobby.game.GameOwner;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameInstance;
 import work.lclpnet.lobby.game.api.GameStarter;
+import work.lclpnet.lobby.game.api.prot.scope.EntityBlockScope;
+import work.lclpnet.lobby.game.api.prot.scope.PlayerScope;
+import work.lclpnet.lobby.game.component.ProtectorComponent;
 import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
@@ -33,6 +36,7 @@ import javax.inject.Inject;
 import java.util.function.Supplier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
+import static work.lclpnet.lobby.game.impl.prot.ProtectionTypes.*;
 
 public class LobbyActivity extends ComponentActivity {
 
@@ -59,12 +63,23 @@ public class LobbyActivity extends ComponentActivity {
 
     @Override
     protected void registerComponents(ComponentBundle components) {
-        components.add(HOOKS).add(SCHEDULER).add(COMMANDS);
+        components.add(HOOKS).add(SCHEDULER).add(COMMANDS).add(ProtectorComponent.KEY);
     }
 
     @Override
     public void start() {
         super.start();
+
+        component(ProtectorComponent.KEY).configure(config -> {
+            config.disallowAll();
+
+            // allow breaking and placing
+            config.allow(EntityBlockScope.CREATIVE_OP, BREAK_BLOCKS, PLACE_BLOCKS, USE_ITEM_ON_BLOCK, PICKUP_FLUID,
+                    PICKUP_FLUID, CHARGE_RESPAWN_ANCHOR, COMPOSTER, EAT_CAKE, EXPLODE_RESPAWN_LOCATION, PRIME_TNT,
+                    EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK);
+
+            config.allow(DROP_ITEM, PlayerScope.CREATIVE_OP);
+        });
 
         HookRegistrar hooks = component(HOOKS).hooks();
         Scheduler scheduler = component(SCHEDULER).scheduler();
