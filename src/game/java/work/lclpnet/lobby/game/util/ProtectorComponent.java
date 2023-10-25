@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game.component;
+package work.lclpnet.lobby.game.util;
 
 import work.lclpnet.activity.component.Component;
 import work.lclpnet.activity.component.ComponentKey;
