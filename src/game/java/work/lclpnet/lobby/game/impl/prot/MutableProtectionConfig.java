@@ -71,4 +71,9 @@ public class MutableProtectionConfig implements ProtectionConfig {
     public final <T> void disallow(T scope, ProtectionType<T>... types) {
         ProtectionConfig.super.disallow(scope, types);
     }
+
+    @Override
+    public void allowAll() {
+        disallow.clear();
+    }
 }

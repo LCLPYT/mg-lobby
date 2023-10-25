@@ -49,10 +49,20 @@ public interface ProtectionConfig {
     }
 
     /**
+     * Allows all builtin protection types from {@link ProtectionTypes}.
+     */
+    default void allowAll() {
+        for (ProtectionType<?> type : ProtectionTypes.getTypes()) {
+            allow(type);
+        }
+    }
+
+    /**
      * Disallows all builtin protection types from {@link ProtectionTypes}.
      */
     default void disallowAll() {
-        disallow(ProtectionTypes.getTypes()
-                .toArray(ProtectionType[]::new));
+        for (ProtectionType<?> type : ProtectionTypes.getTypes()) {
+            disallow(type);
+        }
     }
 }
