@@ -10,6 +10,7 @@ import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.cmd.*;
@@ -47,6 +48,7 @@ public class LobbyActivity extends ComponentActivity {
     private final GameStartingActivity.Builder startingBuilder;
     private final PluginContext context;
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
+    private final TranslationService translationService;
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
@@ -54,13 +56,14 @@ public class LobbyActivity extends ComponentActivity {
 
     @Inject
     public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
-                         GameStartingActivity.Builder startingBuilder) {
+                         GameStartingActivity.Builder startingBuilder, TranslationService translationService) {
         super(context);
         this.context = context;
         this.lobbyManager = lobbyManager;
         this.childActivity = new SyncActivityManager();
         this.componentBuilder = componentBuilder;
         this.startingBuilder = startingBuilder;
+        this.translationService = translationService;
     }
 
     @Override
@@ -140,7 +143,7 @@ public class LobbyActivity extends ComponentActivity {
         Supplier<GameStarter> gameStarterSupplier = () -> gameStarter;
 
         new StartCommand(gameStarterSupplier).register(commands);
-        new SetGameCommand(gameManager, this::changeGame, getLogger()).register(commands);
+        new SetGameCommand(gameManager, this::changeGame, getLogger(), translationService).register(commands);
         new PauseCommand(gameStarterSupplier).register(commands);
         new ResumeCommand(gameStarterSupplier).register(commands);
 

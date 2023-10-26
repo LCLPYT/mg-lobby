@@ -14,7 +14,7 @@ public class TestGame implements Game {
 
     @Override
     public GameConfig getConfig() {
-        return new MinecraftGameConfig("test", "Test Game", new ItemStack(Items.STRUCTURE_VOID));
+        return new MinecraftGameConfig("test", new ItemStack(Items.STRUCTURE_VOID));
     }
 
     @Override

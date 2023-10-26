@@ -10,6 +10,7 @@ import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.kibu.plugin.cmd.KibuCommand;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.cmd.arg.GameSuggestionProvider;
 import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.api.Game;
@@ -21,11 +22,14 @@ public class SetGameCommand implements KibuCommand {
     private final GameManager gameManager;
     private final Consumer<Game> consumer;
     private final Logger logger;
+    private final TranslationService translations;
 
-    public SetGameCommand(GameManager gameManager, Consumer<Game> consumer, Logger logger) {
+    public SetGameCommand(GameManager gameManager, Consumer<Game> consumer, Logger logger,
+                          TranslationService translations) {
         this.gameManager = gameManager;
         this.consumer = consumer;
         this.logger = logger;
+        this.translations = translations;
     }
 
     @Override
@@ -45,11 +49,18 @@ public class SetGameCommand implements KibuCommand {
         String gameId = StringArgumentType.getString(ctx, "game");
         Game game = gameManager.getGame(gameId);
 
-        String title = game != null ? game.getConfig().title() : "None";
+        Text title;
+
+        if (game == null) {
+            title = Text.literal("None").formatted(Formatting.YELLOW);
+        } else {
+            title = translations.translateText("en_us", game.getConfig().titleKey())
+                    .formatted(Formatting.YELLOW);
+        }
 
         ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
                 .append(Text.literal("Set the current game to ").formatted(Formatting.GRAY))
-                .append(Text.literal(title).formatted(Formatting.YELLOW)));
+                .append(title));
 
         ctx.getSource().getServer()
                 .submit(() -> consumer.accept(game))

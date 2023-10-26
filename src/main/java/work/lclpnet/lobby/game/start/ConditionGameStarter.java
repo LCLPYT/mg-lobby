@@ -16,7 +16,6 @@ import work.lclpnet.kibu.scheduler.Ticks;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
-import work.lclpnet.kibu.translate.text.FormatWrapper;
 import work.lclpnet.kibu.translate.util.Partial;
 import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.activity.GameStartingActivity;
@@ -105,6 +104,7 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
     @Override
     public void destroy() {
         abortGameStart();
+        hideBossBar();
 
         unload();
     }
@@ -128,6 +128,7 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
                 initGameStart();
             } else {
                 abortGameStart();
+                showBossBar();
             }
         });
     }
@@ -149,11 +150,6 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
     }
 
     private void abortGameStart() {
-        if (!gameStarting.get()) {
-            showBossBar();
-            return;
-        }
-
         args.stopChildActivity();
 
         gameStarting.set(false);
@@ -200,7 +196,8 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
         Identifier barId = LobbyPlugin.identifier("waiting_condition");
 
         configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",
-                        FormatWrapper.styled(environment.getGameConfig().title(), Formatting.AQUA, Formatting.BOLD)
+                        translations.translateText(environment.getGameConfig().titleKey())
+                                .formatted(Formatting.AQUA, Formatting.BOLD)
                                 .styled(style -> style.withItalic(false)),
                         value),
                 bar -> bar.formatted(Formatting.YELLOW, Formatting.ITALIC));
@@ -208,6 +205,7 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
 
     public void configureConditionBossBar(Partial<TranslatedBossBar, BossBarProvider> bossBarPartial, Consumer<TranslatedBossBar> action) {
         hideBossBar();
+        bossBar = null;
 
         if (!(args instanceof LobbyArgs lobbyArgs)) {
             throw new RuntimeException("Expected argument type of " + LobbyArgs.class.getName());

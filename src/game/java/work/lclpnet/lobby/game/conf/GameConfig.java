@@ -13,10 +13,12 @@ public interface GameConfig {
     String identifier();
 
     /**
-     * The human-readable title of the game.
+     * The translation key of  title of the game.
      * @return The game title.
      */
-    String title();
+    default String titleKey() {
+        return "game.%s.title".formatted(identifier());
+    }
 
     /**
      * An icon for visually displaying the game.

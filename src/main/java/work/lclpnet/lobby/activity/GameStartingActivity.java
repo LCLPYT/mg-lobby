@@ -25,8 +25,6 @@ import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.game.api.GameStarter;
 import work.lclpnet.lobby.game.conf.GameConfig;
 
-import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
-
 public class GameStartingActivity extends ComponentActivity implements SchedulerAction {
 
     private final GameConfig gameConfig;
@@ -80,7 +78,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
     private Pair<String, Object[]> titleTranslation() {
         if (wasPaused) {
             return Pair.of("lobby.countdown.title.paused", new Object[] {
-                    styled(gameConfig.title(), Formatting.AQUA, Formatting.BOLD)
+                    translations.translateText(gameConfig.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD)
             });
         }
 
@@ -90,14 +88,14 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         if (minutes > 0) {
             return Pair.of("lobby.countdown.title.minutes", new Object[] {
-                    styled(gameConfig.title(), Formatting.AQUA, Formatting.BOLD),
+                    translations.translateText(gameConfig.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
                     minutes,
                     seconds
             });
         }
 
         return Pair.of("lobby.countdown.title.seconds", new Object[] {
-                styled(gameConfig.title(), Formatting.AQUA, Formatting.BOLD),
+                translations.translateText(gameConfig.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
                 seconds
         });
     }
