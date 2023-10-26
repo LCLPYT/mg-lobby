@@ -16,6 +16,7 @@ import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 import work.lclpnet.kibu.translate.bossbar.CustomBossBar;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class BossBarComponent implements Component, DependentComponent, BossBarHandler, BossBarProvider {
@@ -49,6 +50,14 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
         });
 
         hookRegistrar.registerHook(PlayerConnectionHooks.QUIT, player -> {
+            for (CommandBossBar bossBar : bars) {
+                bossBar.removePlayer(player);
+            }
+
+            for (ServerBossBar bossBar : showOnJoin) {
+                bossBar.removePlayer(player);
+            }
+
             for (CustomBossBar bossBar : removeOnQuit) {
                 bossBar.removePlayer(player);
             }
@@ -59,6 +68,11 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
     public void dismount() {
         bars.forEach(this::removeBossBarInternal);
         bars.clear();
+
+        showOnJoin.forEach(ServerBossBar::clearPlayers);
+        showOnJoin.clear();
+
+        removeOnQuit.clear();
     }
 
     @Override
@@ -82,6 +96,7 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
 
     @Override
     public void showOnJoin(ServerBossBar bossBar) {
+        Objects.requireNonNull(bossBar);
         showOnJoin.add(bossBar);
     }
 

@@ -22,13 +22,14 @@ import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameStarter;
+import work.lclpnet.mplugins.ext.Unloadable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ConditionGameStarter implements GameStarter {
+public class ConditionGameStarter implements GameStarter, Unloadable {
 
     private final BooleanSupplier condition;
     private final Args args;
@@ -73,7 +74,17 @@ public class ConditionGameStarter implements GameStarter {
 
         gameStarted.set(true);
 
+        hideBossBar();
+
+        unload();
+
         onStart.start();
+    }
+
+    @Override
+    public void unload() {
+        environment.getHookStack().pop();
+        environment.getSchedulerStack().pop();
     }
 
     @Override
@@ -95,8 +106,7 @@ public class ConditionGameStarter implements GameStarter {
     public void destroy() {
         abortGameStart();
 
-        environment.getHookStack().pop();
-        environment.getSchedulerStack().pop();
+        unload();
     }
 
     private void periodicCheck() {
