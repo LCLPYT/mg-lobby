@@ -44,7 +44,7 @@ public class WorldUnloader {
         var handle = worldContainer.getHandle(key);
 
         if (handle.isEmpty()) {
-            var error = new IllegalStateException("World is not managed by this container");
+            var error = new IllegalStateException("World %s is not managed by this container".formatted(key.getValue()));
             return CompletableFuture.failedFuture(error);
         }
 

@@ -2,6 +2,7 @@ package work.lclpnet.lobby.game.start;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
+import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
 import work.lclpnet.kibu.plugin.hook.HookStack;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.game.api.GameEnvironment;
@@ -32,8 +33,8 @@ public class ConditionGameStarter implements GameStarter {
         HookStack hookStack = environment.getHookStack();
         hookStack.push();
 
-        hookStack.registerHook(PlayerConnectionHooks.JOIN, this::onJoin);  // TODO find better event
-        hookStack.registerHook(PlayerConnectionHooks.QUIT, this::onQuit);  // TODO find better event
+        hookStack.registerHook(PlayerSpawnLocationCallback.HOOK, this::onJoin);
+        hookStack.registerHook(PlayerConnectionHooks.QUIT, this::onQuit);
 
         updateGameStatus();
     }
@@ -103,7 +104,9 @@ public class ConditionGameStarter implements GameStarter {
         gameStarting.set(false);
     }
 
-    private void onJoin(ServerPlayerEntity player) {
+    private void onJoin(PlayerSpawnLocationCallback.LocationData data) {
+        if (!data.isJoin()) return;
+
         updateGameStatus();
     }
 

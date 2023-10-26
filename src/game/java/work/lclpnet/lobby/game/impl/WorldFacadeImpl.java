@@ -1,11 +1,9 @@
 package work.lclpnet.lobby.game.impl;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -13,7 +11,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.apache.commons.io.FileUtils;
-import work.lclpnet.kibu.hook.ServerPlayConnectionHooks;
+import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.world.KibuWorlds;
 import work.lclpnet.kibu.world.mixin.MinecraftServerAccessor;
@@ -49,15 +47,22 @@ public class WorldFacadeImpl implements WorldFacade {
     }
 
     public void init(HookRegistrar registrar) {
-        registrar.registerHook(ServerPlayConnectionHooks.JOIN, this::onPlayerJoin);
+        registrar.registerHook(PlayerSpawnLocationCallback.HOOK, this::modifySpawnLocation);
 
         worldUnloader.init(registrar);
     }
 
-    private void onPlayerJoin(ServerPlayNetworkHandler serverPlayNetworkHandler, PacketSender packetSender, MinecraftServer server) {
-        ServerPlayerEntity player = serverPlayNetworkHandler.getPlayer();
+    private void modifySpawnLocation(PlayerSpawnLocationCallback.LocationData data) {
+        if (mapKey == null || spawn == null) return;
 
-        teleport(player);
+        ServerWorld world = this.server.getWorld(mapKey);
+
+        if (world == null) {
+            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.getValue()));
+        }
+
+        data.setWorld(world);
+        data.setPosition(spawn);
     }
 
     @Override
