@@ -9,6 +9,7 @@ import work.lclpnet.lobby.LobbyAPI;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameFinisher;
 import work.lclpnet.lobby.game.api.WorldFacade;
+import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.impl.WorldContainer;
 import work.lclpnet.lobby.game.impl.WorldFacadeImpl;
 import work.lclpnet.lobby.game.map.MapManager;
@@ -23,6 +24,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
 
     private final MinecraftServer server;
     private final Logger logger;
+    private final GameConfig gameConfig;
     private volatile boolean destroyed = false;
     private volatile List<Unloadable> closeWhenDone = null;
     private volatile HookStack hookStack;
@@ -32,9 +34,10 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     private WorldContainer worldContainer;
     private GameOwner owner = null;
 
-    public FinishableGameEnvironment(MinecraftServer server, Logger logger) {
+    public FinishableGameEnvironment(MinecraftServer server, Logger logger, GameConfig gameConfig) {
         this.server = server;
         this.logger = logger;
+        this.gameConfig = gameConfig;
     }
 
     public void bind(GameOwner owner) {
@@ -119,6 +122,11 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
         worldFacade.init(hookStack);
 
         return worldFacade;
+    }
+
+    @Override
+    public GameConfig getGameConfig() {
+        return gameConfig;
     }
 
     @Override

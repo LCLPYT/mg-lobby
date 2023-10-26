@@ -13,5 +13,8 @@
   "lobby.tic_tac_toe.start": "Los!",
   "lobby.tic_tac_toe.you_won": "Du hast gewonnen",
   "lobby.tic_tac_toe.you_lost": "Du hast verloren",
-  "lobby.tic_tac_toe.draw": "Unentschieden"
+  "lobby.tic_tac_toe.draw": "Unentschieden",
+  "lobby.game.waiting_for_players": "Warten auf Spieler",
+  "lobby.game.waiting_boss_bar": "%s %s",
+  "lobby.game.not_enough_players": "Es müssen mindestens %s Spieler online sein, damit das Spiel beginnen kann."
 }

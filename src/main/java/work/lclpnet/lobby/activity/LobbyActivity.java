@@ -26,6 +26,7 @@ import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameInstance;
 import work.lclpnet.lobby.game.api.GameStarter;
 import work.lclpnet.lobby.game.start.LobbyArgs;
+import work.lclpnet.lobby.game.start.LobbyGameConfigurator;
 import work.lclpnet.lobby.game.util.ProtectorComponent;
 import work.lclpnet.lobby.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
@@ -45,6 +46,7 @@ public class LobbyActivity extends ComponentActivity {
     private final ActivityComponent.Builder componentBuilder;
     private final GameStartingActivity.Builder startingBuilder;
     private final PluginContext context;
+    private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
@@ -63,12 +65,19 @@ public class LobbyActivity extends ComponentActivity {
 
     @Override
     protected void registerComponents(ComponentBundle components) {
-        components.add(HOOKS).add(SCHEDULER).add(COMMANDS).add(ProtectorComponent.KEY);
+        components
+                .add(HOOKS)
+                .add(SCHEDULER)
+                .add(COMMANDS)
+                .add(BOSS_BAR)
+                .add(ProtectorComponent.KEY);
     }
 
     @Override
     public void start() {
         super.start();
+
+        configurator.setActivity(this);
 
         component(ProtectorComponent.KEY).configure(config -> {
             config.disallowAll();
@@ -185,7 +194,7 @@ public class LobbyActivity extends ComponentActivity {
 
         if (game == null) return;
 
-        FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger());
+        FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig());
 
         // create a GameOwner that is responsible for properly unloading the game when the owning plugin is unloaded
         GameOwner owner = LobbyPlugin.getInstance().getGameOwnerCache().getOwner(game.getOwner());
@@ -194,7 +203,8 @@ public class LobbyActivity extends ComponentActivity {
 
         GameInstance instance = game.createInstance(environment);
 
-        var args = new LobbyArgs(context, childActivity);
+        var args = new LobbyArgs(context, childActivity, configurator);
+
         gameStarter = instance.createStarter(args, () -> {
             // register end command
             new EndCommand(environment.getFinisher()).register(environment.getCommandStack());
@@ -211,6 +221,8 @@ public class LobbyActivity extends ComponentActivity {
     @Override
     public void stop() {
         super.stop();
+
+        configurator.setActivity(null);
 
         worldModifier.undo();
 

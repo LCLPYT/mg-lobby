@@ -105,4 +105,8 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     public GameOwnerCache getGameOwnerCache() {
         return gameOwnerCache;
     }
+
+    public TranslationService getTranslationService() {
+        return translationService;
+    }
 }

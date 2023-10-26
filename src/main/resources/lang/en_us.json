@@ -13,5 +13,8 @@
   "lobby.tic_tac_toe.start": "Go!",
   "lobby.tic_tac_toe.you_won": "You won",
   "lobby.tic_tac_toe.you_lost": "You lost",
-  "lobby.tic_tac_toe.draw": "Draw"
+  "lobby.tic_tac_toe.draw": "Draw",
+  "lobby.game.waiting_for_players": "Waiting for players",
+  "lobby.game.waiting_boss_bar": "%s %s",
+  "lobby.game.not_enough_players": "There must be at least %s players online to start the game."
 }
