@@ -31,7 +31,9 @@ import work.lclpnet.lobby.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.util.Random;
 import java.util.function.Supplier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
@@ -134,6 +136,44 @@ public class LobbyActivity extends ComponentActivity {
         new ResumeCommand(gameStarterSupplier).register(commands);
 
         changeGame(gameManager.getCurrentGame());
+
+        gameManager.addStateChangeListener(this::onGameRestored);
+    }
+
+    /**
+     * Callback method that tries to change the game to the last played.
+     */
+    private void onGameRestored() {
+        if (gameStarter != null) return;
+
+        Game game = lobbyManager.getGameManager().getCurrentGame();
+
+        if (game == null) {
+            game = chooseRandomGame();
+
+            if (game == null) {
+                getLogger().warn("Failed to auto-start: There are no games.");
+                return;
+            }
+        }
+
+        final Game nextGame = game;
+
+        getServer().submit(() -> changeGame(nextGame));
+    }
+
+    @Nullable
+    private Game chooseRandomGame() {
+        var games = lobbyManager.getGameManager().getGames();
+
+        if (games.isEmpty()) return null;
+
+        Random random = new Random();
+
+        return games.stream()
+                .skip(random.nextInt(games.size()))
+                .findFirst()
+                .orElse(null);
     }
 
     private void changeGame(Game game) {
@@ -181,5 +221,8 @@ public class LobbyActivity extends ComponentActivity {
         ticTacToeManager.reset();
 
         childActivity.stop();
+
+        GameManager gameManager = lobbyManager.getGameManager();
+        gameManager.removeStateChangeListener(this::onGameRestored);
     }
 }

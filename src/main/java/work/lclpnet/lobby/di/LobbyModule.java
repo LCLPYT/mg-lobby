@@ -17,6 +17,8 @@ import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
+import work.lclpnet.lobby.game.AsyncGameStateIo;
+import work.lclpnet.lobby.game.GameStateIo;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -35,6 +37,9 @@ public class LobbyModule {
 
         @Binds
         BlockView bindBlockView(@Named("lobbyWorld") ServerWorld impl);
+
+        @Binds
+        GameStateIo bindGameManagerStateManager(AsyncGameStateIo impl);
     }
 
     private final Logger logger;
@@ -84,6 +89,11 @@ public class LobbyModule {
     @Provides @Named("serverProperties")
     Path provideServerPropertiesPath() {
         return Path.of("server.properties");
+    }
+
+    @Provides @Named("gameManagerStatePath")
+    Path provideGameManagerStatePath() {
+        return FabricLoader.getInstance().getConfigDir().resolve(LobbyPlugin.ID).resolve("gameManagerState.dat");
     }
 
     @Provides @Named("lobbyWorld")
