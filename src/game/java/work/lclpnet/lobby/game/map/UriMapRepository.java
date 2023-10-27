@@ -26,6 +26,10 @@ public class UriMapRepository implements MapRepository {
     public Collection<MapRef> getMapList(String path) throws IOException {
         URI indexUri = root.resolve(path + "/index.json");
 
+        if (!indexUri.getPath().startsWith(root.getPath())) {
+            throw new IOException("Path outside of repository");
+        }
+
         JSONObject index = fetchJsonObject(indexUri);
         JSONArray mapsArray = index.getJSONArray("maps");
 
@@ -50,6 +54,10 @@ public class UriMapRepository implements MapRepository {
 
     private MapInfo getMapInfo(URI root, String path, final int maxLinkDepth) throws IOException {
         URI mapUri = root.resolve(path + "/map.json");
+
+        if (!mapUri.getPath().startsWith(root.getPath())) {
+            throw new IOException("Path outside of repository");
+        }
 
         JSONObject json = fetchJsonObject(mapUri);
         var props = json.toMap();

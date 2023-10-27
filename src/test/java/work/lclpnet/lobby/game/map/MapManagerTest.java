@@ -113,6 +113,25 @@ class MapManagerTest {
         assertCopied(dir, path);
     }
 
+    @Test
+    void pull_escaped_throws() throws IOException {
+        URI uri = Path.of("src", "test", "resources", "maps").toUri();
+
+        var repo = new UriMapRepository(uri, logger);
+        var manager = new MapManager(new RepositoryMapLookup(repo));
+
+        manager.loadAll(new MapDescriptor("broken", "escape", ""));
+
+        var maps = manager.getCollection();
+
+        Path dir = Files.createTempDirectory("mgl_mmt");
+
+        GameMap map = maps.getMap(new Identifier("broken", "escape/../../../test")).orElseThrow();
+
+        Path path = dir.resolve("broken").resolve("map_three");
+        assertThrows(IOException.class, () -> manager.pull(map, path));
+    }
+
     private void assertCopied(Path dir, Path name) {
         assertEquals(Path.of("..", "..").toString(), name.relativize(dir).toString());
 

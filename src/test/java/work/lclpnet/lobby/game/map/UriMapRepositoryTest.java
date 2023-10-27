@@ -147,4 +147,22 @@ public class UriMapRepositoryTest {
 
         assertNull(info.properties().get("target"));
     }
+
+    @Test
+    void testInfoLinkOutsideOfRepoThrows() {
+        URI uri = Path.of("src", "test", "resources", "maps").toUri();
+
+        var repo = new UriMapRepository(uri, logger);
+
+        assertThrows(IOException.class, () -> repo.getMapInfo("broken/escape"));
+    }
+
+    @Test
+    void testGetMapsPathOutsideOfRepoThrows() {
+        URI uri = Path.of("src", "test", "resources", "maps").toUri();
+
+        var repo = new UriMapRepository(uri, logger);
+
+        assertThrows(IOException.class, () -> repo.getMapList("../escaped"));
+    }
 }
