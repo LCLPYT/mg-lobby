@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game.api;
 
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +15,7 @@ public interface WorldFacade {
      * Newly joining players will be moved to the new map as well.
      * @param identifier The map id.
      */
-    CompletableFuture<Void> changeMap(Identifier identifier, MapOptions options);
+    CompletableFuture<ServerWorld> changeMap(Identifier identifier, MapOptions options);
 
     /**
      * Teleport a player to the current map.
@@ -23,7 +24,7 @@ public interface WorldFacade {
      */
     void teleport(ServerPlayerEntity player);
 
-    default CompletableFuture<Void> changeMap(Identifier identifier) {
+    default CompletableFuture<ServerWorld> changeMap(Identifier identifier) {
         return changeMap(identifier, MapOptions.TEMPORARY);
     }
 }

@@ -19,6 +19,7 @@ public class MutableProtectionConfig implements ProtectionConfig {
     @Override
     public <T> void disallow(ProtectionType<T> type) {
         disallow.put(type, type.getGlobalScope());
+        allow.remove(type);
     }
 
     @Override

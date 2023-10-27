@@ -79,7 +79,7 @@ public class WorldFacadeImpl implements WorldFacade {
     }
 
     @Override
-    public CompletableFuture<Void> changeMap(Identifier identifier, MapOptions options) {
+    public CompletableFuture<ServerWorld> changeMap(Identifier identifier, MapOptions options) {
         var map = mapManager.getMapCollection().getMap(identifier);
 
         if (map.isEmpty()) {
@@ -102,7 +102,7 @@ public class WorldFacadeImpl implements WorldFacade {
         return changeToYetUnloadedMap(map.get(), newKey, options);
     }
 
-    private CompletableFuture<Void> changeToYetUnloadedMap(GameMap map, RegistryKey<World> newKey, MapOptions options) {
+    private CompletableFuture<ServerWorld> changeToYetUnloadedMap(GameMap map, RegistryKey<World> newKey, MapOptions options) {
         LevelStorage.Session session = ((MinecraftServerAccessor) server).getSession();
         Path directory = session.getWorldDirectory(newKey);
 
@@ -126,10 +126,11 @@ public class WorldFacadeImpl implements WorldFacade {
             ServerWorld world = handle.asWorld();
 
             onWorldLoaded(map, newKey, world, options);
+            return world;
         }));
     }
 
-    private void onWorldLoaded(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
+    private ServerWorld onWorldLoaded(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
         RegistryKey<World> oldKey = this.mapKey;
         MapOptions oldOptions = this.mapOptions;
 
@@ -145,5 +146,7 @@ public class WorldFacadeImpl implements WorldFacade {
         if (oldKey != null && oldOptions != null && oldOptions.shouldBeDeleted() && !newKey.equals(oldKey)) {
             worldContainer.getHandle(oldKey).ifPresent(RuntimeWorldHandle::delete);
         }
+
+        return world;
     }
 }
