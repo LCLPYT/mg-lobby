@@ -1,6 +1,5 @@
 package work.lclpnet.lobby.game.map;
 
-import org.slf4j.Logger;
 import work.lclpnet.lobby.io.copy.WorldCopier;
 
 import java.io.IOException;
@@ -9,18 +8,20 @@ import java.nio.file.Path;
 
 public class MapManager {
 
-    private final MapCollection mapCollection;
+    private final MapCollection collection;
+    private final MapLookup lookup;
 
-    public MapManager(MapRepository mapRepository, Logger logger) {
-        this(new MapCollection(mapRepository, logger));
+    public MapManager(MapLookup lookup) {
+        this(new SimpleMapCollection(), lookup);
     }
 
-    public MapManager(MapCollection mapCollection) {
-        this.mapCollection = mapCollection;
+    public MapManager(MapCollection maps, MapLookup lookup) {
+        this.collection = maps;
+        this.lookup = lookup;
     }
 
-    public MapCollection getMapCollection() {
-        return mapCollection;
+    public MapCollection getCollection() {
+        return collection;
     }
 
     /**
@@ -30,8 +31,22 @@ public class MapManager {
      * @throws IOException If there was an IO error
      */
     public void pull(GameMap map, Path target) throws IOException {
-        URI source = mapCollection.getWorldSource(map).orElseThrow();
+        URI source = lookup.getSource(map).orElseThrow();
 
         WorldCopier.get(source).copyTo(target);
+    }
+
+    /**
+     * Loads all maps from a given map path.<br>
+     * Examples:
+     * <code>loadAll(new MapDescriptor("hns", "", "1.20")</code>
+     * will load all hide and seek maps with version 1.20.
+     * <code>loadAll(new MapDescriptor("ap2", "spleef", "1.20"))</code>
+     * will load all spleef maps for ArcadeParty2 with version 1.20.
+     * @param descriptor The map descriptor; will load all children.
+     */
+    public void loadAll(MapDescriptor descriptor) throws IOException {
+        var maps = lookup.getMaps(descriptor);
+        collection.add(maps);
     }
 }

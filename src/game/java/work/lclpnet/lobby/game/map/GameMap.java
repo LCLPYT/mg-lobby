@@ -5,7 +5,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -19,24 +18,24 @@ public class GameMap {
 
     public static final Item DEFAULT_ICON = Items.GRASS_BLOCK;
 
-    private final Identifier identifier;
+    private final MapDescriptor descriptor;
     private final Item icon;
     private final Map<String, Object> properties;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock readLock = lock.readLock(), writeLock = lock.writeLock();
 
-    public GameMap(Identifier identifier, Item icon) {
-        this(identifier, icon, Map.of());
+    public GameMap(MapDescriptor descriptor, Item icon) {
+        this(descriptor, icon, Map.of());
     }
 
-    public GameMap(Identifier identifier, Item icon, Map<String, Object> properties) {
-        this.identifier = identifier;
+    public GameMap(MapDescriptor descriptor, Item icon, Map<String, Object> properties) {
+        this.descriptor = descriptor;
         this.icon = icon;
         this.properties = new Object2ObjectOpenHashMap<>(properties);
     }
 
-    public Identifier getIdentifier() {
-        return identifier;
+    public MapDescriptor getDescriptor() {
+        return descriptor;
     }
 
     public Item getIcon() {
@@ -89,29 +88,37 @@ public class GameMap {
         return Collections.unmodifiableMap(properties);
     }
 
-    public static GameMap parse(JSONObject json, String namespace) {
-        Identifier id = new Identifier(namespace, json.getString("id"));
+    public static GameMap parse(Map<String, Object> properties, MapDescriptor parentDescriptor) {
+        Object pathObj = properties.get("path");
+
+        if (!(pathObj instanceof String path)) {
+            throw new IllegalArgumentException("String property \"path\" is missing");
+        }
+
+        MapDescriptor descriptor = parentDescriptor.resolve(path);
 
         Item icon = null;
 
-        if (json.has("icon")) {
-            Identifier iconId = new Identifier(json.getString("icon"));
+        Object iconObj = properties.get("icon");
+
+        if (iconObj instanceof String iconStr) {
+            Identifier iconId = new Identifier(iconStr);
             icon = Registries.ITEM.get(iconId);
         }
 
-        if (icon == null) {
+        if (icon == null || icon == Items.AIR) {
             icon = DEFAULT_ICON;
         }
 
-        Map<String, Object> properties = new HashMap<>();
+        var props = new HashMap<String, Object>(properties.size());
 
-        for (String key : json.keySet()) {
-            properties.put(key, json.get(key));
-        }
+        props.putAll(properties);
 
-        properties.put("id", id);
-        properties.put("icon", icon);
+        props.put("icon", icon);
 
-        return new GameMap(id, icon, properties);
+        props.remove("path");
+        props.remove("target");
+
+        return new GameMap(descriptor, icon, props);
     }
 }

@@ -1,18 +1,36 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.util.Identifier;
-
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Map;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
 public interface MapRepository {
 
-    Set<GameMap> getMaps(String namespace) throws IOException;
+    Collection<MapRef> getMapList(String path) throws IOException;
 
-    Map<String, Object> getData(Identifier identifier) throws IOException;
+    MapInfo getMapInfo(String path) throws IOException;
 
-    Optional<URI> getMapSource(Map<String, Object> data, Identifier identifier) throws IOException;
+    default Optional<URI> getMapSource(MapInfo info) {
+        String source = info.getSource();
+
+        if (source == null) {
+            return Optional.empty();
+        }
+
+        try {
+            URL url = new URL(source);
+
+            return Optional.of(url.toURI());
+        } catch (URISyntaxException e) {
+            return Optional.empty();
+        } catch (MalformedURLException ignored) {}
+
+        var uri = info.uri().resolve(source.replace('\\', '/'));
+
+        return Optional.of(uri);
+    }
 }

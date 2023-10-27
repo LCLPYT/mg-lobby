@@ -49,12 +49,12 @@ public class GameManager implements GameMangerLoader {
             String id = game.getConfig().identifier();
 
             if (isReservedGameId(id)) {
-                logger.error("The game id {} is reserved for internal use", id);
+                logger.error("The game path {} is reserved for internal use", id);
                 continue;
             }
 
             if (games.containsKey(id)) {
-                logger.error("A game with id {} already exists (trying to register {})", id, game.getClass().getName());
+                logger.error("A game with path {} already exists (trying to register {})", id, game.getClass().getName());
                 continue;
             }
 

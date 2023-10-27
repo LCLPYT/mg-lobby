@@ -1,14 +1,14 @@
 {
   "maps": [
     {
-      "id": "map_one"
+      "path": "map_one"
     },
     {
-      "id": "map_two",
+      "path": "map_two",
       "icon": "minecraft:diamond"
     },
     {
-      "id": "map_three",
+      "path": "map_three",
       "authors": ["LCLP", "b_o_p_s"],
       "any_property": {
         "weight": 0.75

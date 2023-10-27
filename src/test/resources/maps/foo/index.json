@@ -1,10 +1,10 @@
 {
   "maps": [
     {
-      "id": "bar/baz"
+      "path": "bar/baz"
     },
     {
-      "id": "bar/hi"
+      "path": "bar/hi"
     }
   ]
 }

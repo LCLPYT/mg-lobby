@@ -80,7 +80,7 @@ public class WorldFacadeImpl implements WorldFacade {
 
     @Override
     public CompletableFuture<ServerWorld> changeMap(Identifier identifier, MapOptions options) {
-        var map = mapManager.getMapCollection().getMap(identifier);
+        var map = mapManager.getCollection().getMap(identifier);
 
         if (map.isEmpty()) {
             return CompletableFuture.failedFuture(new IllegalStateException("Unknown map %s".formatted(identifier)));

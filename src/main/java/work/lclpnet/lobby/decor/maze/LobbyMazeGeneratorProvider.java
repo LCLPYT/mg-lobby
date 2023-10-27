@@ -73,7 +73,7 @@ public class LobbyMazeGeneratorProvider implements MazeGeneratorProvider<Positio
             graph.removeEdge(maze.getNodeId(from), maze.getNodeId(to));
         }
 
-        // find start node id
+        // find start node path
         int start = maze.getNodeId(startNode);
 
         return new BasicMazeGenerator<>(maze, start);

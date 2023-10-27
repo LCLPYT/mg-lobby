@@ -8,7 +8,7 @@ public interface GameConfig {
 
     /**
      * A unique string identifier of the game.
-     * @return The game id.
+     * @return The game path.
      */
     String identifier();
 
