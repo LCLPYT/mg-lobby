@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class UriMapRepository implements MapRepository {
 
@@ -41,7 +39,13 @@ public class UriMapRepository implements MapRepository {
                 continue;
             }
 
-            maps.add(new MapRef(json.toMap()));
+            Map<String, Object> props = new HashMap<>();
+
+            for (String key : json.keySet()) {
+                props.put(key, json.get(key));
+            }
+
+            maps.add(new MapRef(props));
         }
 
         return maps;
@@ -60,7 +64,13 @@ public class UriMapRepository implements MapRepository {
         }
 
         JSONObject json = fetchJsonObject(mapUri);
-        var props = json.toMap();
+
+        Map<String, Object> props = new HashMap<>();
+
+        for (String key : json.keySet()) {
+            props.put(key, json.get(key));
+        }
+
         Object targetObj = props.get("target");
 
         MapInfo info;
