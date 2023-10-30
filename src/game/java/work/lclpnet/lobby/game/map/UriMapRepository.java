@@ -59,7 +59,7 @@ public class UriMapRepository implements MapRepository {
     private MapInfo getMapInfo(URI root, String path, final int maxLinkDepth) throws IOException {
         URI mapUri = root.resolve(path + "/map.json");
 
-        if (!mapUri.getPath().startsWith(root.getPath())) {
+        if (!mapUri.getPath().startsWith(this.root.getPath())) {
             throw new IOException("Path outside of repository");
         }
 
