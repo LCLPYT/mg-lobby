@@ -111,6 +111,13 @@ public class BasicProtector implements Protector, Unloadable {
 
         protect(PICKUP_ITEM, PlayerInventoryHooks.PLAYER_PICKUP, scope
                 -> scope::isWithinScope);
+
+        protect(BLOCK_ITEM_DROP, WorldPhysicsHooks.BLOCK_ITEM_DROP, scope
+                -> scope::isWithinScope);
+
+        protect(BLOCK_XP_DROP, WorldPhysicsHooks.BLOCK_XP_DROP, scope
+                -> (world, pos, xp)
+                -> scope.isWithinScope(world, pos));
     }
 
     @Override
