@@ -2,14 +2,8 @@ package work.lclpnet.lobby.game.impl.prot;
 
 import com.google.common.collect.ImmutableSet;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
-import work.lclpnet.lobby.game.api.prot.scope.EntityBlockScope;
-import work.lclpnet.lobby.game.api.prot.scope.EntityDamageSourceScope;
-import work.lclpnet.lobby.game.api.prot.scope.PlayerScope;
-import work.lclpnet.lobby.game.api.prot.scope.WorldBlockScope;
-import work.lclpnet.lobby.game.impl.prot.type.EntityBlockProtectionType;
-import work.lclpnet.lobby.game.impl.prot.type.EntityDamageSourceProtectionType;
-import work.lclpnet.lobby.game.impl.prot.type.PlayerProtectionType;
-import work.lclpnet.lobby.game.impl.prot.type.WorldBlockProtectionType;
+import work.lclpnet.lobby.game.api.prot.scope.*;
+import work.lclpnet.lobby.game.impl.prot.type.*;
 
 import java.util.Set;
 
@@ -42,8 +36,9 @@ public class ProtectionTypes {
     public static final ProtectionType<WorldBlockScope> SNOW_FALL;
     public static final ProtectionType<WorldBlockScope> CAULDRON_PRECIPITATION;
     public static final ProtectionType<EntityBlockScope> FROST_WALKER_FREEZE;
-    public static final ProtectionType<PlayerScope> DROP_ITEM;
+    public static final ProtectionType<PlayerIntScope> DROP_ITEM;
     public static final ProtectionType<EntityDamageSourceScope> ALLOW_DAMAGE;
+    public static final ProtectionType<PlayerItemEntityScope> PICKUP_ITEM;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -72,8 +67,9 @@ public class ProtectionTypes {
                 .add(SNOW_FALL = new WorldBlockProtectionType())
                 .add(CAULDRON_PRECIPITATION = new WorldBlockProtectionType())
                 .add(FROST_WALKER_FREEZE = new EntityBlockProtectionType())
-                .add(DROP_ITEM = new PlayerProtectionType())
+                .add(DROP_ITEM = new PlayerIntProtectionType())
                 .add(ALLOW_DAMAGE = new EntityDamageSourceProtectionType())
+                .add(PICKUP_ITEM = new PlayerItemEntityProtectionType())
                 .build();
     }
 

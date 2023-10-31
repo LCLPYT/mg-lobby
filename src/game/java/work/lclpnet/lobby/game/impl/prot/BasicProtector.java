@@ -103,12 +103,14 @@ public class BasicProtector implements Protector, Unloadable {
                 -> scope.isWithinScope(entity, pos));
 
         protect(DROP_ITEM, PlayerInventoryHooks.DROP_ITEM, scope
-                -> (player, slot)
-                -> scope.isWithinScope(player));
+                -> scope::isWithinScope);
 
         protect(ALLOW_DAMAGE, ServerLivingEntityHooks.ALLOW_DAMAGE, scope
                 -> (entity, source, amount)
                 -> source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) || !scope.isWithinScope(entity, source));  // allow damage is inverted
+
+        protect(PICKUP_ITEM, PlayerInventoryHooks.PLAYER_PICKUP, scope
+                -> scope::isWithinScope);
     }
 
     @Override
