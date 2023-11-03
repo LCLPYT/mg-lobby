@@ -14,11 +14,13 @@ public class MultiMapRepository implements MapRepository {
     }
 
     @Override
-    public Collection<MapRef> getMapList(String path) throws IOException {
+    public Collection<MapRef> getMapList(String path) {
         Set<MapRef> refs = new HashSet<>();
 
         for (MapRepository repo : children) {
-            refs.addAll(repo.getMapList(path));
+            try {
+                refs.addAll(repo.getMapList(path));
+            } catch (IOException ignored) {}
         }
 
         return refs;
