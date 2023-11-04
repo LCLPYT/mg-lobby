@@ -1,5 +1,7 @@
 package work.lclpnet.lobby.game.api;
 
+import net.minecraft.server.world.ServerWorld;
+
 public interface MapOptions {
 
     /**
@@ -43,4 +45,6 @@ public interface MapOptions {
      * @return Whether an existing instance of the map should be deleted first before loading a clean version.
      */
     boolean isCleanMapRequired();
+
+    default void bootstrapWorld(ServerWorld world) {}
 }

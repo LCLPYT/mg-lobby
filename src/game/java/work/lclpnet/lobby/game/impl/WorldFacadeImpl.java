@@ -131,6 +131,8 @@ public class WorldFacadeImpl implements WorldFacade {
     }
 
     private ServerWorld onWorldLoaded(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
+        options.bootstrapWorld(world);
+
         RegistryKey<World> oldKey = this.mapKey;
         MapOptions oldOptions = this.mapOptions;
 
