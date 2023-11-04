@@ -6,10 +6,12 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -64,6 +66,24 @@ public class GameMap {
         if (o == null) return null;
 
         return (T) o;
+    }
+
+    @Nonnull
+    public <T> T requireProperty(String name) {
+        T prop = getProperty(name);
+        return Objects.requireNonNull(prop, "Property \"%s\" is undefined".formatted(name));
+    }
+
+    public boolean hasProperty(String name) {
+        return getProperty(name) != null;
+    }
+
+    public boolean hasProperty(String name, Class<?> type) {
+        Object prop = getProperty(name);
+
+        if (prop == null) return false;
+
+        return type.isInstance(prop);
     }
 
     public void putProperties(Map<String, Object> extra) {
