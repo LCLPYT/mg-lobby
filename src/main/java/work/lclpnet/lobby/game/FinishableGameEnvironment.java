@@ -114,7 +114,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
             if (worldFacade != null) return worldFacade;
 
             worldContainer = new WorldContainer(server);
-            worldFacade = new WorldFacadeImpl(server, mapManagerSupplier.get(), worldContainer);
+            worldFacade = new WorldFacadeImpl(server, mapManagerSupplier.get(), worldContainer, logger);
         }
 
         HookStack hookStack = getHookStack();

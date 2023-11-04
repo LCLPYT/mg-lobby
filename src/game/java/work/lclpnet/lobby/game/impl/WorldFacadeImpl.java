@@ -11,6 +11,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
 import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.world.KibuWorlds;
@@ -35,14 +36,16 @@ public class WorldFacadeImpl implements WorldFacade {
     private final MapManager mapManager;
     private final WorldContainer worldContainer;
     private final WorldUnloader worldUnloader;
+    private final Logger logger;
     private MapOptions mapOptions = null;
     private RegistryKey<World> mapKey = null;
     private Vec3d spawn = null;
 
-    public WorldFacadeImpl(MinecraftServer server, MapManager mapManager, WorldContainer worldContainer) {
+    public WorldFacadeImpl(MinecraftServer server, MapManager mapManager, WorldContainer worldContainer, Logger logger) {
         this.server = server;
         this.mapManager = mapManager;
         this.worldContainer = worldContainer;
+        this.logger = logger;
         this.worldUnloader = new WorldUnloader(server, worldContainer);
     }
 
@@ -96,7 +99,9 @@ public class WorldFacadeImpl implements WorldFacade {
                         .thenCompose(nil -> changeToYetUnloadedMap(map.get(), newKey, options));
             }
 
-            return server.submit(() -> onWorldLoaded(map.get(), newKey, existingWorld, options));
+            return CompletableFuture.completedFuture(null).thenComposeAsync(nil -> server.submit(
+                    () -> onWorldLoaded(map.get(), newKey, existingWorld, options)
+            ).join());
         }
 
         return changeToYetUnloadedMap(map.get(), newKey, options);
@@ -116,7 +121,7 @@ public class WorldFacadeImpl implements WorldFacade {
             } catch (IOException e) {
                 throw new CompletionException(e);
             }
-        }).thenCompose(nil -> server.submit(() -> {
+        }).thenComposeAsync(nil -> server.submit(() -> {
             var optHandle = KibuWorlds.getInstance().getWorldManager(server).openPersistentWorld(newKey.getValue());
 
             RuntimeWorldHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
@@ -125,14 +130,20 @@ public class WorldFacadeImpl implements WorldFacade {
 
             ServerWorld world = handle.asWorld();
 
-            onWorldLoaded(map, newKey, world, options);
-            return world;
-        }));
+            return onWorldLoaded(map, newKey, world, options);
+        }).join());
     }
 
-    private ServerWorld onWorldLoaded(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
-        options.bootstrapWorld(world);
+    private CompletableFuture<ServerWorld> onWorldLoaded(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
+        return options.bootstrapWorld(world, map)
+                .exceptionally(throwable -> {
+                    logger.error("Failed to bootstrap map. Continuing without bootrap...", throwable);
+                    return null;
+                })
+                .thenCompose(nil -> server.submit(() -> onWorldBootstrapped(map, newKey, world, options)));
+    }
 
+    private ServerWorld onWorldBootstrapped(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
         RegistryKey<World> oldKey = this.mapKey;
         MapOptions oldOptions = this.mapOptions;
 
