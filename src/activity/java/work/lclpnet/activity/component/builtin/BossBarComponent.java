@@ -92,7 +92,6 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
         bossBar.clearPlayers();
         bossBarManager.remove(bossBar);
         showOnJoin.remove(bossBar);
-        bossBarManager.remove(bossBar);
     }
 
     @Override
