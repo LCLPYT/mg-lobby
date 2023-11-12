@@ -118,6 +118,9 @@ public class BasicProtector implements Protector, Unloadable {
         protect(BLOCK_XP_DROP, WorldPhysicsHooks.BLOCK_XP_DROP, scope
                 -> (world, pos, xp)
                 -> scope.isWithinScope(world, pos));
+
+        protect(SWAP_HAND_ITEMS, PlayerInventoryHooks.SWAP_HANDS, scope
+                -> scope::isWithinScope);
     }
 
     @Override

@@ -41,6 +41,7 @@ public class ProtectionTypes {
     public static final ProtectionType<PlayerItemEntityScope> PICKUP_ITEM;
     public static final ProtectionType<WorldBlockItemStackScope> BLOCK_ITEM_DROP;
     public static final ProtectionType<WorldBlockScope> BLOCK_XP_DROP;
+    public static final ProtectionType<PlayerIntScope> SWAP_HAND_ITEMS;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -74,6 +75,7 @@ public class ProtectionTypes {
                 .add(PICKUP_ITEM = new PlayerItemEntityProtectionType())
                 .add(BLOCK_ITEM_DROP = new WorldBlockItemStackProtectionType())
                 .add(BLOCK_XP_DROP = new WorldBlockProtectionType())
+                .add(SWAP_HAND_ITEMS = new PlayerIntProtectionType())
                 .build();
     }
 
