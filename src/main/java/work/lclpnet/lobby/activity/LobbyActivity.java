@@ -3,6 +3,7 @@ package work.lclpnet.lobby.activity;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameRules;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -99,6 +100,9 @@ public class LobbyActivity extends ComponentActivity {
                 .build();
 
         hooks.registerHooks(component.lobbyListener());
+
+        GameRules gameRules = lobbyManager.getLobbyWorld().getGameRules();
+        gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(false, server);
 
         // send every online player to the lobby
         for (ServerPlayerEntity player : PlayerLookup.all(server)) {
