@@ -17,10 +17,7 @@ import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @ActivityScope
 public class SeatHandler {
@@ -28,6 +25,7 @@ public class SeatHandler {
     private final WorldModifier worldModifier;
     private final SeatProvider seatProvider;
     private final Map<UUID, Vec3d> positions = new HashMap<>();
+    private final Set<UUID> changedSeat = new HashSet<>();
     private final HookRegistrar hookRegistrar;
 
     @Inject
@@ -62,7 +60,11 @@ public class SeatHandler {
 
         vehicle.discard();
 
-        Vec3d prev = positions.remove(player.getUuid());
+        UUID uuid = player.getUuid();
+
+        if (changedSeat.remove(uuid)) return;
+
+        Vec3d prev = positions.remove(uuid);
         if (prev == null) return;
 
         player.teleport(player.getServerWorld(), prev.getX(), prev.getY(), prev.getZ(), Set.of(), player.getYaw(), player.getPitch());
@@ -77,7 +79,12 @@ public class SeatHandler {
 
         worldModifier.spawnEntity(seatEntity);
 
-        positions.putIfAbsent(player.getUuid(), player.getPos());
+        UUID uuid = player.getUuid();
+        positions.putIfAbsent(uuid, player.getPos());
+
+        if (player.getVehicle() != null) {
+            changedSeat.add(uuid);
+        }
 
         player.startRiding(seatEntity, true);
 
