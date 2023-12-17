@@ -5,6 +5,10 @@ import work.lclpnet.lobby.game.api.prot.scope.EntityBlockScope;
 
 public class EntityBlockProtectionType implements ProtectionType<EntityBlockScope> {
 
+    public static final EntityBlockProtectionType INSTANCE = new EntityBlockProtectionType();
+
+    private EntityBlockProtectionType() {}
+
     @Override
     public EntityBlockScope getGlobalScope() {
         return (entity, pos) -> true;

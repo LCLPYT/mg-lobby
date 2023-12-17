@@ -21,6 +21,8 @@ import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.config.WorldConfigHandler;
 import work.lclpnet.lobby.game.GameManager;
+import work.lclpnet.lobby.service.PalService;
+import work.lclpnet.mplugins.MPluginsAPI;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -157,5 +159,20 @@ public class LobbyManagerImpl implements LobbyManager {
         worldConfigHandler.loadConfig();
 
         gameManager.reload();
+
+        configurePal();
+    }
+
+    private void configurePal() {
+        if (!MPluginsAPI.get().getPluginFrame().getPluginManager().isPluginLoaded("pal")) return;
+
+        try {
+            Class.forName("work.lclpnet.pal.PalApi", false, getClass().getClassLoader());
+        } catch (ClassNotFoundException e) {
+            logger.warn("Could not find class 'work.lclpnet.pal.PalApi', although pal is installed. Perhaps this version is incompatible with mg-lobby?");
+            return;
+        }
+
+        PalService.configurePal();
     }
 }

@@ -1,13 +1,11 @@
 import net.fabricmc.loom.task.RemapJarTask
 import work.lclpnet.build.task.GithubDeploymentTask
 
-import java.util.stream.Stream
-
 plugins {
     id 'java'
     id 'fabric-loom' version '1.3.8'
     id 'maven-publish'
-    id 'gradle-build-utils' version '1.5.3'
+    id 'gradle-build-utils' version '1.7.0'
     id 'kibu-plugin-dev' version '0.11.0'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
@@ -74,7 +72,7 @@ dependencies {
     modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
     modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
     pluginImplementation "work.lclpnet.mcserver-api:mcserver-api-kibu:${project.mcserver_api_version}"
-    pluginLocalRuntime "work.lclpnet.plugins:pal:${project.pal_version}"
+    pluginCompileOnly(pluginLocalRuntime("work.lclpnet.plugins:pal:${project.pal_version}"))
 
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.json:json:20230227'
@@ -246,24 +244,7 @@ tasks.register("github", GithubDeploymentTask) {
 }
 
 publishing {
-    if (project.version.toString().endsWith('-SNAPSHOT')) {
-        if (!Stream.of("snapshotUrl", "mavenUser", "mavenPassword").allMatch(props::containsKey)) {
-            throw new IllegalStateException("Missing properties. Make sure 'snapshotUrl', 'mavenUser' and 'mavenPassword' are set.");
-        }
-
-        repositories {
-            maven {
-                url = props.get('snapshotUrl')
-
-                credentials {
-                    username = props.get('mavenUser')
-                    password = props.get('mavenPassword')
-                }
-            }
-        }
-    } else {
-        buildUtils.setupPublishRepository(repositories, props)
-    }
+    buildUtils.setupPublishRepository(repositories, props)
 
     publications {
         mavenJava(MavenPublication) {

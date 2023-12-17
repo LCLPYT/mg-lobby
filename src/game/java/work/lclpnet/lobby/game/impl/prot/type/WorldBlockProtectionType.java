@@ -5,6 +5,10 @@ import work.lclpnet.lobby.game.api.prot.scope.WorldBlockScope;
 
 public class WorldBlockProtectionType implements ProtectionType<WorldBlockScope> {
 
+    public static final WorldBlockProtectionType INSTANCE = new WorldBlockProtectionType();
+
+    private WorldBlockProtectionType() {}
+
     @Override
     public WorldBlockScope getGlobalScope() {
         return (world, pos) -> true;

@@ -1,9 +1,10 @@
 package work.lclpnet.lobby.game.impl.prot;
 
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import work.lclpnet.kibu.hook.Hook;
-import work.lclpnet.kibu.hook.entity.ServerLivingEntityHooks;
+import work.lclpnet.kibu.hook.entity.*;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
@@ -105,6 +106,16 @@ public class BasicProtector implements Protector, Unloadable {
         protect(DROP_ITEM, PlayerInventoryHooks.DROP_ITEM, scope
                 -> scope::isWithinScope);
 
+        protect(ALLOW_DAMAGE, scope -> {
+            // allow damage - true means allow
+            hooks.registerHook(ServerLivingEntityHooks.ALLOW_DAMAGE, (entity, source, amount)
+                    -> source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) || !scope.isWithinScope(entity, source));
+
+            // non-living damage - true means cancel (no damage)
+            hooks.registerHook(NonLivingDamageCallback.HOOK, (entity, source, amount)
+                    -> !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) && scope.isWithinScope(entity, source));
+        });
+
         protect(ALLOW_DAMAGE, ServerLivingEntityHooks.ALLOW_DAMAGE, scope
                 -> (entity, source, amount)
                 -> source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) || !scope.isWithinScope(entity, source));  // allow damage is inverted
@@ -120,6 +131,46 @@ public class BasicProtector implements Protector, Unloadable {
                 -> scope.isWithinScope(world, pos));
 
         protect(SWAP_HAND_ITEMS, PlayerInventoryHooks.SWAP_HANDS, scope
+                -> scope::isWithinScope);
+
+        protect(ITEM_FRAME_SET_ITEM, ItemFramePutItemCallback.HOOK, scope
+                -> (itemFrame, stack, player, hand)
+                -> scope.isWithinScope(player, itemFrame));
+
+        protect(ITEM_FRAME_REMOVE_ITEM, ItemFrameRemoveItemCallback.HOOK, scope
+                -> (itemFrame, attacker)
+                -> attacker instanceof ServerPlayerEntity player && scope.isWithinScope(player, itemFrame));
+
+        protect(ITEM_FRAME_ROTATE_ITEM, ItemFrameRotateCallback.HOOK, scope
+                -> (itemFrame, player, hand)
+                -> scope.isWithinScope(player, itemFrame));
+
+        protect(ARMOR_STAND_MANIPULATE, ArmorStandManipulateCallback.HOOK, scope
+                -> (armorStand, player, slot, stack, hand)
+                -> scope.isWithinScope(player, armorStand));
+
+        protect(USE_ITEM_ON_ENTITY, ItemUseOnEntityCallback.HOOK, scope
+                -> (player, entity, hand, stack)
+                -> scope.isWithinScope(player, entity));
+
+        protect(ATTACH_LEASH, LeashAttachCallback.HOOK, scope
+                -> (player, world, pos)
+                -> scope.isWithinScope(player, pos));
+
+        protect(DETACH_LEASH, LeashDetachCallback.HOOK, scope
+                -> scope::isWithinScope);
+
+        protect(LEASH_MOB, LeashEntityCallback.HOOK, scope
+                -> scope::isWithinScope);
+
+        protect(UNLEASH_MOB, UnleashEntityCallback.HOOK, scope
+                -> scope::isWithinScope);
+
+        protect(LEASH_MOB_TO_BLOCK, LeashEntityToBlockCallback.HOOK, scope
+                -> (player, entity, leashKnot)
+                -> scope.isWithinScope(player, entity));
+
+        protect(PICKUP_PROJECTILE, ProjectilePickupCallback.HOOK, scope
                 -> scope::isWithinScope);
     }
 

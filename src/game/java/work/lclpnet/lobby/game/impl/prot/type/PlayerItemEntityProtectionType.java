@@ -5,6 +5,10 @@ import work.lclpnet.lobby.game.api.prot.scope.PlayerItemEntityScope;
 
 public class PlayerItemEntityProtectionType implements ProtectionType<PlayerItemEntityScope> {
 
+    public static final PlayerItemEntityProtectionType INSTANCE = new PlayerItemEntityProtectionType();
+
+    private PlayerItemEntityProtectionType() {}
+
     @Override
     public PlayerItemEntityScope getGlobalScope() {
         return (player, itemEntity) -> true;

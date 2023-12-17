@@ -5,6 +5,10 @@ import work.lclpnet.lobby.game.api.prot.scope.WorldBlockItemStackScope;
 
 public class WorldBlockItemStackProtectionType implements ProtectionType<WorldBlockItemStackScope> {
 
+    public static final WorldBlockItemStackProtectionType INSTANCE = new WorldBlockItemStackProtectionType();
+
+    private WorldBlockItemStackProtectionType() {}
+
     @Override
     public WorldBlockItemStackScope getGlobalScope() {
         return (world, pos, stack) -> true;
