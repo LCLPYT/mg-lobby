@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,6 +22,12 @@ public class MapUtils {
         }
 
         throw missingProperty("spawn");
+    }
+
+    public static float getSpawnYaw(GameMap gameMap) {
+        if (!(gameMap.getProperty("spawn-yaw") instanceof Number number)) return 0f;
+
+        return MathHelper.wrapDegrees(number.floatValue());
     }
 
     @Nonnull

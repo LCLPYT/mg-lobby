@@ -40,6 +40,7 @@ public class WorldFacadeImpl implements WorldFacade {
     private MapOptions mapOptions = null;
     private RegistryKey<World> mapKey = null;
     private Vec3d spawn = null;
+    private float yaw = 0f;
 
     public WorldFacadeImpl(MinecraftServer server, MapManager mapManager, WorldContainer worldContainer, Logger logger) {
         this.server = server;
@@ -66,6 +67,7 @@ public class WorldFacadeImpl implements WorldFacade {
 
         data.setWorld(world);
         data.setPosition(spawn);
+        data.setYaw(yaw);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class WorldFacadeImpl implements WorldFacade {
             throw new IllegalStateException("World %s is not loaded".formatted(mapKey.getValue()));
         }
 
-        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), 0F, 0F);
+        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), yaw, 0F);
     }
 
     @Override
@@ -150,9 +152,10 @@ public class WorldFacadeImpl implements WorldFacade {
         this.mapKey = newKey;
         this.mapOptions = options;
         this.spawn = MapUtils.getSpawnPosition(map);
+        this.yaw = MapUtils.getSpawnYaw(map);
 
         for (ServerPlayerEntity player : PlayerLookup.all(server)) {
-            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), 0, 0);
+            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), yaw, 0);
         }
 
         // cleanup current map if requested
