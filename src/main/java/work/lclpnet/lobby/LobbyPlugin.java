@@ -13,6 +13,7 @@ import work.lclpnet.lobby.di.DaggerLobbyComponent;
 import work.lclpnet.lobby.di.LobbyComponent;
 import work.lclpnet.lobby.di.LobbyModule;
 import work.lclpnet.lobby.event.ConnectionListener;
+import work.lclpnet.lobby.event.RuntimeWorldListener;
 import work.lclpnet.lobby.game.GameOwnerCache;
 import work.lclpnet.mplugins.ext.WorldStateListener;
 import work.lclpnet.translations.loader.translation.SPITranslationLoader;
@@ -41,6 +42,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
         manager = component.lobbyManager();
 
         registerHooks(new ConnectionListener());
+        registerHooks(new RuntimeWorldListener());
 
         // load config etc.
         manager.init();
