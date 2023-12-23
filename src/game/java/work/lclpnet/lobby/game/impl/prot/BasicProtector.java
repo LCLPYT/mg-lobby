@@ -172,6 +172,9 @@ public class BasicProtector implements Protector, Unloadable {
 
         protect(PICKUP_PROJECTILE, ProjectilePickupCallback.HOOK, scope
                 -> scope::isWithinScope);
+
+        protect(MODIFY_INVENTORY, PlayerInventoryHooks.MODIFY_INVENTORY, scope
+                -> scope::isWithinScope);
     }
 
     @Override
