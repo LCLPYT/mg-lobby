@@ -18,6 +18,7 @@ import work.lclpnet.lobby.cmd.*;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
+import work.lclpnet.lobby.decor.greet.GreetingDisplay;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
 import work.lclpnet.lobby.di.ActivityComponent;
 import work.lclpnet.lobby.di.ActivityModule;
@@ -154,6 +155,9 @@ public class LobbyActivity extends ComponentActivity {
         changeGame(gameManager.getCurrentGame());
 
         gameManager.addStateChangeListener(this::onGameRestored);
+
+        GreetingDisplay greetingDisplay = component.greetingDisplay();
+        greetingDisplay.show();
     }
 
     /**

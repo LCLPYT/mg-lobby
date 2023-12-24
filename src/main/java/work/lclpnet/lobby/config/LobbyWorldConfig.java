@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
 import work.lclpnet.config.json.JsonConfigFactory;
-import work.lclpnet.lobby.decor.lava.Bounds;
+import work.lclpnet.lobby.decor.greet.GreetingConfig;
 import work.lclpnet.lobby.decor.lava.LavaLevitation;
 import work.lclpnet.lobby.decor.maze.MazeConfig;
 
@@ -23,6 +23,7 @@ public class LobbyWorldConfig implements JsonConfig {
     public BlockPos jumpAndRunStart = null;
     public List<Pair<BlockPos, BlockPos>> ticTacToeTables = new ArrayList<>();
     public LavaLevitation lavaLevitation = null;
+    public GreetingConfig greetingConfig = null;
 
     public LobbyWorldConfig() {}
 
@@ -115,21 +116,11 @@ public class LobbyWorldConfig implements JsonConfig {
         }
 
         if (obj.has("lava_levitation") && !obj.isNull("lava_levitation")) {
-            JSONObject src = obj.getJSONObject("lava_levitation");
-            JSONArray rawBounds = src.getJSONArray("bounds");
+            lavaLevitation = LavaLevitation.parse(obj.getJSONObject("lava_levitation"));
+        }
 
-            List<Bounds> bounds = new ArrayList<>();
-
-            for (Object entry : rawBounds) {
-                if (!(entry instanceof JSONArray tuple)) continue;
-
-                Bounds bound = Bounds.parse(tuple);
-                bounds.add(bound);
-            }
-
-            int durationTicks = src.getInt("duration_ticks");
-
-            lavaLevitation = new LavaLevitation(bounds, durationTicks);
+        if (obj.has("welcome_hologram") && !obj.isNull("welcome_hologram")) {
+            greetingConfig = GreetingConfig.parse(obj.getJSONObject("welcome_hologram"));
         }
     }
 
@@ -203,6 +194,8 @@ public class LobbyWorldConfig implements JsonConfig {
         }
 
         json.put("lava_levitation", lavaLevitation != null ? lavaLevitation.asJson() : JSONObject.NULL);
+
+        json.put("welcome_hologram", greetingConfig != null ? greetingConfig.asJson() : JSONObject.NULL);
 
         return json;
     }

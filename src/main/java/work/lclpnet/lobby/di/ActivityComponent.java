@@ -3,6 +3,7 @@ package work.lclpnet.lobby.di;
 import dagger.Subcomponent;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
+import work.lclpnet.lobby.decor.greet.GreetingDisplay;
 import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
 import work.lclpnet.lobby.decor.seat.SeatHandler;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
@@ -35,6 +36,8 @@ public interface ActivityComponent {
     TicTacToeManager ticTacToeManager();
 
     TicTacToeListener ticTacToeListener();
+
+    GreetingDisplay greetingDisplay();
 
     @Subcomponent.Builder
     interface Builder {
