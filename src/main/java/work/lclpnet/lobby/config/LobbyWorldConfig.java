@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
 import work.lclpnet.config.json.JsonConfigFactory;
+import work.lclpnet.lobby.decor.lava.Bounds;
+import work.lclpnet.lobby.decor.lava.LavaLevitation;
 import work.lclpnet.lobby.decor.maze.MazeConfig;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ public class LobbyWorldConfig implements JsonConfig {
     public List<BlockPos> geysers = new ArrayList<>();
     public BlockPos jumpAndRunStart = null;
     public List<Pair<BlockPos, BlockPos>> ticTacToeTables = new ArrayList<>();
+    public LavaLevitation lavaLevitation = null;
 
     public LobbyWorldConfig() {}
 
@@ -110,62 +113,96 @@ public class LobbyWorldConfig implements JsonConfig {
                 jumpAndRunStart = ConfigUtil.getBlockPos(tuple);
             }
         }
+
+        if (obj.has("lava_levitation") && !obj.isNull("lava_levitation")) {
+            JSONObject src = obj.getJSONObject("lava_levitation");
+            JSONArray rawBounds = src.getJSONArray("bounds");
+
+            List<Bounds> bounds = new ArrayList<>();
+
+            for (Object entry : rawBounds) {
+                if (!(entry instanceof JSONArray tuple)) continue;
+
+                Bounds bound = Bounds.parse(tuple);
+                bounds.add(bound);
+            }
+
+            int durationTicks = src.getInt("duration_ticks");
+
+            lavaLevitation = new LavaLevitation(bounds, durationTicks);
+        }
     }
 
     @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
 
-        JSONArray mazes = new JSONArray();
-        for (MazeConfig mazeConfig : this.mazeConfigs) {
-            mazes.put(mazeConfig.toJson());
-        }
-        json.put("mazes", mazes);
-
-        JSONObject kol = new JSONObject();
-        kol.put("goal", kingOfLadderGoal != null ? ConfigUtil.writeBlockPos(kingOfLadderGoal) : JSONObject.NULL);
-
-        JSONArray displays = new JSONArray();
-        for (Vec3d pos : kingOfLadderDisplays) {
-            displays.put(ConfigUtil.writeVec3d(pos));
-        }
-
-        kol.put("displays", displays);
-
-        json.put("king_of_ladder", kol);
-
-        JSONObject decoration = new JSONObject();
-        JSONArray geysers = new JSONArray();
-
-        if (this.geysers != null) {
-            for (BlockPos pos : this.geysers) {
-                JSONArray tuple = ConfigUtil.writeBlockPos(pos);
-                geysers.put(tuple);
+        {
+            JSONArray mazes = new JSONArray();
+            for (MazeConfig mazeConfig : this.mazeConfigs) {
+                mazes.put(mazeConfig.toJson());
             }
+            json.put("mazes", mazes);
         }
 
-        decoration.put("geysers", geysers);
+        {
+            JSONObject kol = new JSONObject();
+            kol.put("goal", kingOfLadderGoal != null ? ConfigUtil.writeBlockPos(kingOfLadderGoal) : JSONObject.NULL);
 
-        JSONObject ticTacToe = new JSONObject();
-        JSONArray tables = new JSONArray();
+            JSONArray displays = new JSONArray();
+            for (Vec3d pos : kingOfLadderDisplays) {
+                displays.put(ConfigUtil.writeVec3d(pos));
+            }
 
-        for (var table : ticTacToeTables) {
-            JSONArray tuple = new JSONArray();
+            kol.put("displays", displays);
 
-            tuple.put(ConfigUtil.writeBlockPos(table.left()));
-            tuple.put(ConfigUtil.writeBlockPos(table.right()));
-
-            tables.put(tuple);
+            json.put("king_of_ladder", kol);
         }
 
-        ticTacToe.put("tables", tables);
-        decoration.put("tic_tac_toe", ticTacToe);
-        json.put("decoration", decoration);
+        {
+            JSONObject decoration = new JSONObject();
 
-        JSONObject jumpAndRun = new JSONObject();
-        jumpAndRun.put("start", jumpAndRunStart != null ? ConfigUtil.writeBlockPos(jumpAndRunStart) : JSONObject.NULL);
+            {
+                JSONArray geysers = new JSONArray();
 
-        json.put("jump_and_run", jumpAndRun);
+                if (this.geysers != null) {
+                    for (BlockPos pos : this.geysers) {
+                        JSONArray tuple = ConfigUtil.writeBlockPos(pos);
+                        geysers.put(tuple);
+                    }
+                }
+
+                decoration.put("geysers", geysers);
+            }
+
+            {
+                JSONObject ticTacToe = new JSONObject();
+                JSONArray tables = new JSONArray();
+
+                for (var table : ticTacToeTables) {
+                    JSONArray tuple = new JSONArray();
+
+                    tuple.put(ConfigUtil.writeBlockPos(table.left()));
+                    tuple.put(ConfigUtil.writeBlockPos(table.right()));
+
+                    tables.put(tuple);
+                }
+
+                ticTacToe.put("tables", tables);
+                decoration.put("tic_tac_toe", ticTacToe);
+            }
+
+            json.put("decoration", decoration);
+        }
+
+        {
+            JSONObject jumpAndRun = new JSONObject();
+            jumpAndRun.put("start", jumpAndRunStart != null ? ConfigUtil.writeBlockPos(jumpAndRunStart) : JSONObject.NULL);
+
+            json.put("jump_and_run", jumpAndRun);
+        }
+
+        json.put("lava_levitation", lavaLevitation != null ? lavaLevitation.asJson() : JSONObject.NULL);
 
         return json;
     }
