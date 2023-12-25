@@ -60,6 +60,7 @@ public class ProtectionTypes {
     public static final ProtectionType<PlayerEntityScope<MobEntity>> LEASH_MOB_TO_BLOCK;
     public static final ProtectionType<PlayerEntityScope<ProjectileEntity>> PICKUP_PROJECTILE;
     public static final ProtectionType<ClickEventScope> MODIFY_INVENTORY;
+    public static final ProtectionType<EntityBlockScope> EDIT_SIGN;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -106,6 +107,7 @@ public class ProtectionTypes {
                 .add(LEASH_MOB_TO_BLOCK = PlayerEntityProtectionType.instance())
                 .add(PICKUP_PROJECTILE = PlayerEntityProtectionType.instance())
                 .add(MODIFY_INVENTORY = ClickEventProtectionType.INSTANCE)
+                .add(EDIT_SIGN = EntityBlockProtectionType.INSTANCE)
                 .build();
     }
 

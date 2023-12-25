@@ -175,6 +175,10 @@ public class BasicProtector implements Protector, Unloadable {
 
         protect(MODIFY_INVENTORY, PlayerInventoryHooks.MODIFY_INVENTORY, scope
                 -> scope::isWithinScope);
+
+        protect(EDIT_SIGN, BlockModificationHooks.EDIT_SIGN, scope
+                -> (world, pos, entity)
+                -> scope.isWithinScope(entity, pos));
     }
 
     @Override
