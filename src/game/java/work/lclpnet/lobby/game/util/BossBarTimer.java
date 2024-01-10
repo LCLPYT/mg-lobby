@@ -58,6 +58,8 @@ public class BossBarTimer implements SchedulerAction {
     }
 
     public void stop() {
+        if (taskHandle == null) return;
+
         taskHandle.cancel();
         taskHandle = null;
     }
