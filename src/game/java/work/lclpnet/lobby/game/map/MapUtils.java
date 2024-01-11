@@ -5,6 +5,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import work.lclpnet.kibu.hook.util.PositionRotation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MapUtils {
     public static float getSpawnYaw(GameMap gameMap) {
         if (!(gameMap.getProperty("spawn-yaw") instanceof Number number)) return 0f;
 
-        return MathHelper.wrapDegrees(number.floatValue());
+        return getAngle(number);
     }
 
     @Nonnull
@@ -60,6 +61,48 @@ public class MapUtils {
 
             if (value instanceof JSONArray elemArray) {
                 spawns.put(key, getSpawnVec3d(elemArray));
+                continue;
+            }
+
+            if (value instanceof JSONObject elemObj) {
+                if (!elemObj.has("spawn")) continue;
+
+                JSONArray array = elemObj.getJSONArray("spawn");
+                spawns.put(key, getSpawnVec3d(array));
+            }
+        }
+
+        return spawns;
+    }
+
+    @Nonnull
+    public static Map<String, PositionRotation> getNamedSpawnPositionsAndRotation(GameMap gameMap) {
+        if (!(gameMap.getProperty("spawns") instanceof JSONObject object)) {
+            throw missingProperty("spawns");
+        }
+
+        Map<String, PositionRotation> spawns = new Object2ObjectOpenHashMap<>();
+
+        for (String key : object.keySet()) {
+            Object value = object.get(key);
+
+            if (value instanceof JSONObject elemObj) {
+                if (!elemObj.has("spawn")) continue;
+
+                JSONArray array = elemObj.getJSONArray("spawn");
+                Vec3d spawn = getSpawnVec3d(array);
+
+                float yaw = 0, pitch = 0;
+
+                if (elemObj.has("yaw")) {
+                    yaw = getAngle(elemObj.getNumber("yaw"));
+                }
+
+                if (elemObj.has("pitch")) {
+                    pitch = getAngle(elemObj.getNumber("pitch"));
+                }
+
+                spawns.put(key, new PositionRotation(spawn.x, spawn.y, spawn.z, yaw, pitch));
             }
         }
 
@@ -89,6 +132,10 @@ public class MapUtils {
         }
 
         return d;
+    }
+
+    private static float getAngle(Number number) {
+        return MathHelper.wrapDegrees(number.floatValue());
     }
 
     private static IllegalStateException missingProperty(String property) {
