@@ -1,8 +1,15 @@
 package work.lclpnet.lobby.game.impl.prot;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.math.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.entity.*;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
@@ -16,6 +23,9 @@ import work.lclpnet.lobby.game.api.prot.Protector;
 import work.lclpnet.lobby.game.api.prot.scope.EntityBlockScope;
 import work.lclpnet.mplugins.ext.Unloadable;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -25,10 +35,12 @@ public class BasicProtector implements Protector, Unloadable {
 
     private final ProtectionConfig config;
     private final HookContainer hooks;
+    private final Set<Block> functionalBlocks;
 
     public BasicProtector(ProtectionConfig config) {
         this.config = config;
         this.hooks = new HookContainer();
+        this.functionalBlocks = collectFunctionalBlocks();
     }
 
     public void activate() {
@@ -179,6 +191,17 @@ public class BasicProtector implements Protector, Unloadable {
         protect(EDIT_SIGN, BlockModificationHooks.EDIT_SIGN, scope
                 -> (world, pos, entity)
                 -> scope.isWithinScope(entity, pos));
+
+        protect(USE_BLOCK, PlayerInteractionHooks.USE_BLOCK, scope -> (player, world, hand, hitResult) -> {
+            BlockPos pos = hitResult.getBlockPos();
+            BlockState state = world.getBlockState(pos);
+
+            if (functionalBlocks.contains(state.getBlock()) && scope.isWithinScope(player, pos)) {
+                return ActionResult.FAIL;
+            }
+
+            return ActionResult.PASS;
+        });
     }
 
     @Override
@@ -189,6 +212,57 @@ public class BasicProtector implements Protector, Unloadable {
     @Override
     public void unload() {
         deactivate();
+    }
+
+    private Set<Block> collectFunctionalBlocks() {
+        Set<Block> blocks = new HashSet<>();
+
+        addBlocks(blocks, BlockTags.BEDS);
+        addBlocks(blocks, BlockTags.CAMPFIRES);
+        addBlocks(blocks, BlockTags.SHULKER_BOXES);
+        addBlocks(blocks, BlockTags.ANVIL);
+        blocks.add(Blocks.LECTERN);
+        blocks.add(Blocks.CRAFTING_TABLE);
+        blocks.add(Blocks.DROPPER);
+        blocks.add(Blocks.DISPENSER);
+        blocks.add(Blocks.FLETCHING_TABLE);
+        blocks.add(Blocks.SMITHING_TABLE);
+        blocks.add(Blocks.FURNACE);
+        blocks.add(Blocks.BLAST_FURNACE);
+        blocks.add(Blocks.SMOKER);
+        blocks.add(Blocks.STONECUTTER);
+        blocks.add(Blocks.CARTOGRAPHY_TABLE);
+        blocks.add(Blocks.GRINDSTONE);
+        blocks.add(Blocks.LOOM);
+        blocks.add(Blocks.NOTE_BLOCK);
+        blocks.add(Blocks.JUKEBOX);
+        blocks.add(Blocks.CHEST);
+        blocks.add(Blocks.TRAPPED_CHEST);
+        blocks.add(Blocks.ENDER_CHEST);
+        blocks.add(Blocks.BARREL);
+        blocks.add(Blocks.ENCHANTING_TABLE);
+        blocks.add(Blocks.BREWING_STAND);
+        blocks.add(Blocks.BELL);
+        blocks.add(Blocks.BEACON);
+        blocks.add(Blocks.END_PORTAL_FRAME);
+        blocks.add(Blocks.REPEATER);
+        blocks.add(Blocks.COMPARATOR);
+        blocks.add(Blocks.REDSTONE_WIRE);
+        blocks.add(Blocks.DAYLIGHT_DETECTOR);
+        blocks.add(Blocks.HOPPER);
+        blocks.add(Blocks.CHISELED_BOOKSHELF);
+        blocks.add(Blocks.CAULDRON);
+        blocks.add(Blocks.SWEET_BERRY_BUSH);
+        blocks.add(Blocks.SPAWNER);
+
+        return Collections.unmodifiableSet(blocks);
+    }
+
+    private void addBlocks(Set<Block> blocks, TagKey<Block> tag) {
+        for (var entry : Registries.BLOCK.iterateEntries(tag)) {
+            Block block = entry.value();
+            blocks.add(block);
+        }
     }
 
     private static BlockModificationHooks.BlockModifyHook onModify(EntityBlockScope scope) {

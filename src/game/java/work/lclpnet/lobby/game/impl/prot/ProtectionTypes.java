@@ -61,6 +61,12 @@ public class ProtectionTypes {
     public static final ProtectionType<PlayerEntityScope<ProjectileEntity>> PICKUP_PROJECTILE;
     public static final ProtectionType<ClickEventScope> MODIFY_INVENTORY;
     public static final ProtectionType<EntityBlockScope> EDIT_SIGN;
+    /**
+     * Block usage protection.
+     * Only used for blocks that have special functionality, e.g. beds, chests, crafting tables etc.
+     * {@link work.lclpnet.lobby.game.api.prot.Protector} implementations can choose which blocks should be accounted for.
+     */
+    public static final ProtectionType<EntityBlockScope> USE_BLOCK;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -108,6 +114,7 @@ public class ProtectionTypes {
                 .add(PICKUP_PROJECTILE = new PlayerEntityProtectionType<>())
                 .add(MODIFY_INVENTORY = new ClickEventProtectionType())
                 .add(EDIT_SIGN = new EntityBlockProtectionType())
+                .add(USE_BLOCK = new EntityBlockProtectionType())
                 .build();
     }
 
