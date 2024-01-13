@@ -5,10 +5,6 @@ import work.lclpnet.lobby.game.api.prot.scope.PlayerIntScope;
 
 public class PlayerIntProtectionType implements ProtectionType<PlayerIntScope> {
 
-    public static final PlayerIntProtectionType INSTANCE = new PlayerIntProtectionType();
-
-    private PlayerIntProtectionType() {}
-
     @Override
     public PlayerIntScope getGlobalScope() {
         return (player, i) -> true;

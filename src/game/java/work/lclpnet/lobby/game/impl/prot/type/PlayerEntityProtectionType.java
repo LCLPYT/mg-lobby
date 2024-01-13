@@ -6,10 +6,6 @@ import work.lclpnet.lobby.game.api.prot.scope.PlayerEntityScope;
 
 public class PlayerEntityProtectionType<E extends Entity> implements ProtectionType<PlayerEntityScope<E>> {
 
-    public static final PlayerEntityProtectionType<?> INSTANCE = new PlayerEntityProtectionType<>();
-
-    private PlayerEntityProtectionType() {}
-
     @Override
     public PlayerEntityScope<E> getGlobalScope() {
         return (player, entity) -> true;
@@ -18,10 +14,5 @@ public class PlayerEntityProtectionType<E extends Entity> implements ProtectionT
     @Override
     public PlayerEntityScope<E> getResultingScope(PlayerEntityScope<E> disallowed, PlayerEntityScope<E> allowed) {
         return (player, entity) -> disallowed.isWithinScope(player, entity) && !allowed.isWithinScope(player, entity);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <E extends Entity> PlayerEntityProtectionType<E> instance() {
-        return (PlayerEntityProtectionType<E>) INSTANCE;
     }
 }

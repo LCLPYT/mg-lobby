@@ -5,10 +5,6 @@ import work.lclpnet.lobby.game.api.prot.scope.ClickEventScope;
 
 public class ClickEventProtectionType implements ProtectionType<ClickEventScope> {
 
-    public static final ClickEventProtectionType INSTANCE = new ClickEventProtectionType();
-
-    private ClickEventProtectionType() {}
-
     @Override
     public ClickEventScope getGlobalScope() {
         return event -> true;

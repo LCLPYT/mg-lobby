@@ -5,10 +5,6 @@ import work.lclpnet.lobby.game.api.prot.scope.EntityDamageSourceScope;
 
 public class EntityDamageSourceProtectionType implements ProtectionType<EntityDamageSourceScope> {
 
-    public static final EntityDamageSourceProtectionType INSTANCE = new EntityDamageSourceProtectionType();
-
-    private EntityDamageSourceProtectionType() {}
-
     @Override
     public EntityDamageSourceScope getGlobalScope() {
         return (entity, source) -> true;
