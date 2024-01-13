@@ -13,7 +13,8 @@ public class ProtectorUtils {
                 PICKUP_FLUID, CHARGE_RESPAWN_ANCHOR, COMPOSTER, EAT_CAKE, EXPLODE_RESPAWN_LOCATION, PRIME_TNT,
                 EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, ATTACH_LEASH, EDIT_SIGN);
 
-        config.allow(PlayerIntScope.CREATIVE_OP, DROP_ITEM, SWAP_HAND_ITEMS);
+        config.allow(SWAP_HAND_ITEMS, PlayerIntScope.CREATIVE_OP);
+        config.allow(DROP_ITEM, PlayerIntBoolScope.CREATIVE_OP);
         config.allow(PICKUP_ITEM, PlayerItemEntityScope.CREATIVE_OP);
 
         config.allow(PlayerEntityScope.creativeOp(), ITEM_FRAME_SET_ITEM, ITEM_FRAME_REMOVE_ITEM,

@@ -42,7 +42,7 @@ public class ProtectionTypes {
     public static final ProtectionType<WorldBlockScope> SNOW_FALL;
     public static final ProtectionType<WorldBlockScope> CAULDRON_PRECIPITATION;
     public static final ProtectionType<EntityBlockScope> FROST_WALKER_FREEZE;
-    public static final ProtectionType<PlayerIntScope> DROP_ITEM;
+    public static final ProtectionType<PlayerIntBoolScope> DROP_ITEM;
     public static final ProtectionType<EntityDamageSourceScope> ALLOW_DAMAGE;
     public static final ProtectionType<PlayerItemEntityScope> PICKUP_ITEM;
     public static final ProtectionType<WorldBlockItemStackScope> BLOCK_ITEM_DROP;
@@ -89,7 +89,7 @@ public class ProtectionTypes {
                 .add(SNOW_FALL = new WorldBlockProtectionType())
                 .add(CAULDRON_PRECIPITATION = new WorldBlockProtectionType())
                 .add(FROST_WALKER_FREEZE = new EntityBlockProtectionType())
-                .add(DROP_ITEM = new PlayerIntProtectionType())
+                .add(DROP_ITEM = new PlayerIntBoolProtectionType())
                 .add(ALLOW_DAMAGE = new EntityDamageSourceProtectionType())
                 .add(PICKUP_ITEM = new PlayerItemEntityProtectionType())
                 .add(BLOCK_ITEM_DROP = new WorldBlockItemStackProtectionType())
