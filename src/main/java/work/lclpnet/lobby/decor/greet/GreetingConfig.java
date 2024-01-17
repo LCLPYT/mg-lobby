@@ -13,7 +13,7 @@ public record GreetingConfig(Vec3d pos, float scale, float rotationY, Text text)
         json.put("position", ConfigUtil.writeVec3d(pos));
         json.put("scale", scale);
         json.put("rotation_y", rotationY);
-        json.put("text", Text.Serializer.toJson(text));
+        json.put("text", Text.Serialization.toJsonString(text));
 
         return json;
     }
@@ -22,7 +22,7 @@ public record GreetingConfig(Vec3d pos, float scale, float rotationY, Text text)
         Vec3d position = ConfigUtil.readVec3d(json.getJSONArray("position"));
         float scale = ConfigUtil.readFloat(json.getNumber("scale"));
         float rotationY = ConfigUtil.readAngle(json.getNumber("rotation_y"));
-        Text text = Text.Serializer.fromJson(json.getString("text"));
+        Text text = Text.Serialization.fromJson(json.getString("text"));
 
         return new GreetingConfig(position, scale, rotationY, text);
     }

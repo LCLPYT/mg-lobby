@@ -96,7 +96,7 @@ public class DefaultSeatProvider implements SeatProvider {
         if (shape.isEmpty()) return false;
 
         Box box = shape.getBoundingBox();
-        return box.getYLength() >= 1 && box.getXLength() >= 1 && box.getZLength() >= 1;
+        return box.getLengthY() >= 1 && box.getLengthX() >= 1 && box.getLengthZ() >= 1;
     }
 
     private Vec3d getSeatPosition(BlockState state, BlockPos pos) {

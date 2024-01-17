@@ -17,11 +17,11 @@ public class ConnectionListener implements HookListenerModule {
 
     private Text onJoinMessage(ServerPlayerEntity player, Text joinMessage) {
         return Text.literal("Join> ").formatted(Formatting.DARK_GRAY)
-                .append(Text.literal(player.getEntityName()).formatted(Formatting.GRAY));
+                .append(Text.literal(player.getNameForScoreboard()).formatted(Formatting.GRAY));
     }
 
     private Text onQuitMessage(ServerPlayerEntity player, Text joinMessage) {
         return Text.literal("Quit> ").formatted(Formatting.DARK_GRAY)
-                .append(Text.literal(player.getEntityName()).formatted(Formatting.GRAY));
+                .append(Text.literal(player.getNameForScoreboard()).formatted(Formatting.GRAY));
     }
 }

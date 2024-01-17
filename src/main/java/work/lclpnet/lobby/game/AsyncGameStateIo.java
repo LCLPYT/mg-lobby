@@ -2,6 +2,7 @@ package work.lclpnet.lobby.game;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtSizeTracker;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -70,7 +71,7 @@ public class AsyncGameStateIo implements GameStateIo {
             NbtCompound nbt;
 
             try (var in = Files.newInputStream(path)) {
-                nbt = NbtIo.readCompressed(in);
+                nbt = NbtIo.readCompressed(in, NbtSizeTracker.ofUnlimitedBytes());
             }
 
             state.fromNbt(nbt, loader);

@@ -148,7 +148,7 @@ public class JumpAndRun {
     private void win(ServerPlayerEntity player) {
         var players = PlayerLookup.all(world.getServer());
 
-        translations.translateText("lobby.jump_n_run.completed", FormatWrapper.styled(player.getEntityName(), Formatting.YELLOW, Formatting.BOLD))
+        translations.translateText("lobby.jump_n_run.completed", FormatWrapper.styled(player.getNameForScoreboard(), Formatting.YELLOW, Formatting.BOLD))
                 .formatted(Formatting.GOLD, Formatting.BOLD)
                 .prefixed(Text.literal("Lobby> ").formatted(Formatting.BLUE))
                 .sendTo(players);
@@ -184,7 +184,7 @@ public class JumpAndRun {
         shulkerEntity.setInvulnerable(true);
         shulkerEntity.setVariant(dyeColor(block));
         shulkerEntity.setInvisible(true);
-        shulkerEntity.getWorld().getScoreboard().addPlayerToTeam(shulkerEntity.getEntityName(), team);
+        shulkerEntity.getWorld().getScoreboard().addScoreHolderToTeam(shulkerEntity.getNameForScoreboard(), team);
 
         modifier.spawnEntity(shulkerEntity);
     }

@@ -110,7 +110,7 @@ public class Geyser {
         double y = pos.getY();
         double z = pos.getZ();
 
-        double height = box.getYLength();
+        double height = box.getLengthY();
         double half = height * 0.5;
         double dy = half * 0.5 - 1;
 

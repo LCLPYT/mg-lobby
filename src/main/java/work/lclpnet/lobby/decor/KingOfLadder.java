@@ -88,7 +88,7 @@ public class KingOfLadder {
         UUID formerKing = king;
 
         king = player.getUuid();
-        kingName = player.getEntityName();
+        kingName = player.getNameForScoreboard();
 
         // announce new king
         announceKing();
