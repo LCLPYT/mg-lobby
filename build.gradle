@@ -3,24 +3,20 @@ import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
     id 'java'
-    id 'fabric-loom' version '1.3.8'
+    id 'fabric-loom' version '1.5-SNAPSHOT'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
-    id 'kibu-plugin-dev' version '0.11.0'
+    id 'kibu-plugin-dev' version '0.13.0'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
 group = project.maven_group
 version = buildUtils.gitVersion()
-archivesBaseName = project.archives_base_name
 
-if (props.containsKey('versionOverride')) {
-    version = props.get('versionOverride')
+base {
+    archivesName = project.archives_base_name
 }
 
 repositories {
@@ -125,10 +121,13 @@ test {
 
 java {
     withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release.convention(17)
+    it.options.release.set(17)
 }
 
 processResources {
@@ -243,6 +242,10 @@ tasks.register("github", GithubDeploymentTask) {
     assets.add(tasks.remapShadowJar.archiveFile.get())
 }
 
+kibu {
+    addArtifact(remapActivityJar)
+}
+
 publishing {
     buildUtils.setupPublishRepository(repositories, props)
 
@@ -250,10 +253,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
-            // manually configure artifacts
-            artifact remapShadowJar
-            artifact remapSourcesJar
-            artifact remapActivityJar
+            from components.kibu
 
             pom {
                 name = 'Minigame Lobby'
