@@ -202,6 +202,13 @@ public class BasicProtector implements Protector, Unloadable {
 
             return ActionResult.PASS;
         });
+
+        protect(DECORATED_POT_STORE, BlockModificationHooks.DECORATIVE_POT_STORE, scope
+                -> (world, pos, entity)
+                -> scope.isWithinScope(entity, pos));
+
+        protect(PROJECTILE_BREAK_DECORATED_POT, ProjectileHooks.BREAK_DECORATED_POT, scope
+                -> scope::isWithinScope);
     }
 
     @Override

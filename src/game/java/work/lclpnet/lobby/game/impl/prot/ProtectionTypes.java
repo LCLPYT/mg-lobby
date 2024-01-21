@@ -67,6 +67,8 @@ public class ProtectionTypes {
      * {@link work.lclpnet.lobby.game.api.prot.Protector} implementations can choose which blocks should be accounted for.
      */
     public static final ProtectionType<EntityBlockScope> USE_BLOCK;
+    public static final ProtectionType<EntityBlockScope> DECORATED_POT_STORE;
+    public static final ProtectionType<ProjectileHitScope> PROJECTILE_BREAK_DECORATED_POT;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -115,6 +117,8 @@ public class ProtectionTypes {
                 .add(MODIFY_INVENTORY = new ClickEventProtectionType())
                 .add(EDIT_SIGN = new EntityBlockProtectionType())
                 .add(USE_BLOCK = new EntityBlockProtectionType())
+                .add(DECORATED_POT_STORE = new EntityBlockProtectionType())
+                .add(PROJECTILE_BREAK_DECORATED_POT = new ProjectileHitProtectionType())
                 .build();
     }
 

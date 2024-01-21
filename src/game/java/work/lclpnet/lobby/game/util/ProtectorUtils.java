@@ -11,7 +11,7 @@ public class ProtectorUtils {
     public static void allowCreativeOperatorBypass(MutableProtectionConfig config) {
         config.allow(EntityBlockScope.CREATIVE_OP, BREAK_BLOCKS, PLACE_BLOCKS, USE_ITEM_ON_BLOCK, PICKUP_FLUID,
                 PICKUP_FLUID, CHARGE_RESPAWN_ANCHOR, COMPOSTER, EAT_CAKE, EXPLODE_RESPAWN_LOCATION, PRIME_TNT,
-                EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, ATTACH_LEASH, EDIT_SIGN, USE_BLOCK);
+                EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, ATTACH_LEASH, EDIT_SIGN, USE_BLOCK, DECORATED_POT_STORE);
 
         config.allow(SWAP_HAND_ITEMS, PlayerIntScope.CREATIVE_OP);
         config.allow(DROP_ITEM, PlayerIntBoolScope.CREATIVE_OP);
@@ -36,6 +36,8 @@ public class ProtectorUtils {
                                                        && player.isCreativeLevelTwoOp());
 
         config.allow(MODIFY_INVENTORY, ClickEventScope.CREATIVE_OP);
+
+        config.allow(PROJECTILE_BREAK_DECORATED_POT, ProjectileHitScope.CREATIVE_OP);
     }
 
     private ProtectorUtils() {}
