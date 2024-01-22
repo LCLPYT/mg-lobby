@@ -14,6 +14,7 @@ import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.entity.*;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
+import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
 import work.lclpnet.kibu.hook.world.WorldPhysicsHooks;
 import work.lclpnet.kibu.plugin.hook.HookContainer;
@@ -197,6 +198,10 @@ public class BasicProtector implements Protector, Unloadable {
             BlockState state = world.getBlockState(pos);
 
             if (functionalBlocks.contains(state.getBlock()) && scope.isWithinScope(player, pos)) {
+                if (!player.isCreative() && !player.isSpectator()) {
+                    PlayerUtils.syncPlayerItems(player);
+                }
+
                 return ActionResult.FAIL;
             }
 
