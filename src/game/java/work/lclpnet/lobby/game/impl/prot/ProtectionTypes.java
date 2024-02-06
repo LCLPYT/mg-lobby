@@ -69,6 +69,8 @@ public class ProtectionTypes {
     public static final ProtectionType<EntityBlockScope> USE_BLOCK;
     public static final ProtectionType<EntityBlockScope> DECORATED_POT_STORE;
     public static final ProtectionType<ProjectileHitScope> PROJECTILE_BREAK_DECORATED_POT;
+    public static final ProtectionType<ItemScatterScope> ITEM_SCATTER;
+    public static final ProtectionType<EntityItemEntityScope> ENTITY_ITEM_DROP;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -119,6 +121,8 @@ public class ProtectionTypes {
                 .add(USE_BLOCK = new EntityBlockProtectionType())
                 .add(DECORATED_POT_STORE = new EntityBlockProtectionType())
                 .add(PROJECTILE_BREAK_DECORATED_POT = new ProjectileHitProtectionType())
+                .add(ITEM_SCATTER = new ItemScatterProtectionType())
+                .add(ENTITY_ITEM_DROP = new EntityItemEntityProtectionType())
                 .build();
     }
 

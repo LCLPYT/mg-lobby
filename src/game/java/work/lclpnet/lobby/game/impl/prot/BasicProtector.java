@@ -16,6 +16,7 @@ import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
+import work.lclpnet.kibu.hook.world.ItemScatterCallback;
 import work.lclpnet.kibu.hook.world.WorldPhysicsHooks;
 import work.lclpnet.kibu.plugin.hook.HookContainer;
 import work.lclpnet.lobby.game.api.prot.ProtectionConfig;
@@ -214,6 +215,13 @@ public class BasicProtector implements Protector, Unloadable {
 
         protect(PROJECTILE_BREAK_DECORATED_POT, ProjectileHooks.BREAK_DECORATED_POT, scope
                 -> scope::isWithinScope);
+
+        protect(ITEM_SCATTER, ItemScatterCallback.HOOK, scope
+                -> scope::isWithinScope);
+
+        protect(ENTITY_ITEM_DROP, EntityDropItemCallback.HOOK, scope
+                -> (world, entity, itemEntity)
+                -> scope.isWithinScope(entity, itemEntity));
     }
 
     @Override
