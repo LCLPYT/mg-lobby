@@ -20,6 +20,8 @@ import javax.annotation.Nullable;
 
 public class DefaultSeatProvider implements SeatProvider {
 
+    private static final float OFFSET_Y = 0.5f;
+
     private DefaultSeatProvider() {}
 
     @Nullable
@@ -105,7 +107,7 @@ public class DefaultSeatProvider implements SeatProvider {
         final var properties = state.getProperties();
 
         if (!properties.contains(Properties.HORIZONTAL_FACING)) {
-            return new Vec3d(x + 0.5, y + 0.25, z + 0.5);
+            return new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);
         }
 
         final Direction direction = state.get(Properties.HORIZONTAL_FACING);
@@ -113,31 +115,31 @@ public class DefaultSeatProvider implements SeatProvider {
 
         if (!properties.contains(Properties.STAIR_SHAPE) || (shape = state.get(Properties.STAIR_SHAPE)) == StairShape.STRAIGHT) {
             return switch (direction) {
-                case NORTH -> new Vec3d(x + 0.5, y + 0.25, z + 0.75);
-                case SOUTH -> new Vec3d(x + 0.5, y + 0.25, z + 0.25);
-                case WEST -> new Vec3d(x + 0.75, y + 0.25, z + 0.5);
-                case EAST -> new Vec3d(x + 0.25, y + 0.25, z + 0.5);
-                default -> new Vec3d(x + 0.5, y + 0.25, z + 0.5);  // unreachable
+                case NORTH -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.75);
+                case SOUTH -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.25);
+                case WEST -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.5);
+                case EAST -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.5);
+                default -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
             };
         }
 
         if (shape == StairShape.OUTER_RIGHT || shape == StairShape.INNER_RIGHT) {
             return switch (direction) {
-                case NORTH -> new Vec3d(x + 0.25, y + 0.25, z + 0.75);
-                case SOUTH -> new Vec3d(x + 0.75, y + 0.25, z + 0.25);
-                case WEST -> new Vec3d(x + 0.75, y + 0.25, z + 0.75);
-                case EAST -> new Vec3d(x + 0.25, y + 0.25, z + 0.25);
-                default -> new Vec3d(x + 0.5, y + 0.25, z + 0.5);  // unreachable
+                case NORTH -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.75);
+                case SOUTH -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.25);
+                case WEST -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.75);
+                case EAST -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.25);
+                default -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
             };
         }
 
         // shape is OUTER_LEFT or INNER_LEFT
         return switch (direction) {
-            case NORTH -> new Vec3d(x + 0.75, y + 0.25, z + 0.75);
-            case SOUTH -> new Vec3d(x + 0.25, y + 0.25, z + 0.25);
-            case WEST -> new Vec3d(x + 0.75, y + 0.25, z + 0.25);
-            case EAST -> new Vec3d(x + 0.25, y + 0.25, z + 0.75);
-            default -> new Vec3d(x + 0.5, y + 0.25, z + 0.5);  // unreachable
+            case NORTH -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.75);
+            case SOUTH -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.25);
+            case WEST -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.25);
+            case EAST -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.75);
+            default -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
         };
     }
 
