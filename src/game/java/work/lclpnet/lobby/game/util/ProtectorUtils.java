@@ -38,6 +38,8 @@ public class ProtectorUtils {
         config.allow(MODIFY_INVENTORY, ClickEventScope.CREATIVE_OP);
 
         config.allow(PROJECTILE_BREAK_DECORATED_POT, ProjectileHitScope.CREATIVE_OP);
+
+        config.allow(CRAFT_ITEM, PlayerItemStackScope.CREATIVE_OP);
     }
 
     private ProtectorUtils() {}

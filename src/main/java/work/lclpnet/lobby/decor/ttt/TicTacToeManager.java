@@ -12,6 +12,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.GameMode;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.TranslationService;
@@ -78,6 +79,7 @@ public class TicTacToeManager {
             playing.put(player.getUuid(), table);
         }
 
+        player.changeGameMode(GameMode.SURVIVAL);  // needed to left-click blocks
         update(table, i);
     }
 
@@ -101,6 +103,7 @@ public class TicTacToeManager {
         }
 
         display.reset(table);
+        player.changeGameMode(GameMode.ADVENTURE);
 
         if (instance != null && instance.hasBegun() && opponent != null) {
             win(opponent);

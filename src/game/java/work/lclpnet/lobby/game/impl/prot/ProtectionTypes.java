@@ -71,6 +71,7 @@ public class ProtectionTypes {
     public static final ProtectionType<ProjectileHitScope> PROJECTILE_BREAK_DECORATED_POT;
     public static final ProtectionType<ItemScatterScope> ITEM_SCATTER;
     public static final ProtectionType<EntityItemEntityScope> ENTITY_ITEM_DROP;
+    public static final ProtectionType<PlayerItemStackScope> CRAFT_ITEM;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -123,6 +124,7 @@ public class ProtectionTypes {
                 .add(PROJECTILE_BREAK_DECORATED_POT = new ProjectileHitProtectionType())
                 .add(ITEM_SCATTER = new ItemScatterProtectionType())
                 .add(ENTITY_ITEM_DROP = new EntityItemEntityProtectionType())
+                .add(CRAFT_ITEM = new PlayerItemStackProtectionType())
                 .build();
     }
 

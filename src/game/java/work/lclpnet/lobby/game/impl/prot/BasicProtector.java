@@ -3,6 +3,7 @@ package work.lclpnet.lobby.game.impl.prot;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -12,8 +13,10 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.entity.*;
+import work.lclpnet.kibu.hook.player.CraftingRecipeCallback;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
+import work.lclpnet.kibu.hook.util.PendingRecipe;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
 import work.lclpnet.kibu.hook.world.ItemScatterCallback;
@@ -222,6 +225,16 @@ public class BasicProtector implements Protector, Unloadable {
         protect(ENTITY_ITEM_DROP, EntityDropItemCallback.HOOK, scope
                 -> (world, entity, itemEntity)
                 -> scope.isWithinScope(entity, itemEntity));
+
+        protect(CRAFT_ITEM, CraftingRecipeCallback.HOOK, scope
+                -> (player, recipeManager, type, inventory, world)
+                -> recipeManager.getFirstMatch(type, inventory, world)
+                .map(RecipeEntry::value)
+                .map(recipe -> recipe.getResult(world.getRegistryManager()))
+                // disallowed results will be mapped to empty, others will pass
+                .filter(result -> scope.isWithinScope(player, result))
+                .map(result -> PendingRecipe.empty())
+                .orElse(PendingRecipe.pass()));
     }
 
     @Override

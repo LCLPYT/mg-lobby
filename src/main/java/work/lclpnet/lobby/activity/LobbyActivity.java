@@ -28,6 +28,8 @@ import work.lclpnet.lobby.game.GameOwner;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameInstance;
 import work.lclpnet.lobby.game.api.GameStarter;
+import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
+import work.lclpnet.lobby.game.impl.prot.ProtectionTypes;
 import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.game.start.LobbyGameConfigurator;
 import work.lclpnet.lobby.game.util.ProtectorComponent;
@@ -84,12 +86,6 @@ public class LobbyActivity extends ComponentActivity {
 
         configurator.setActivity(this);
 
-        component(ProtectorComponent.KEY).configure(config -> {
-            config.disallowAll();
-
-            ProtectorUtils.allowCreativeOperatorBypass(config);
-        });
-
         HookRegistrar hooks = component(HOOKS).hooks();
         Scheduler scheduler = component(SCHEDULER).scheduler();
         CommandRegistrar commands = component(COMMANDS).commands();
@@ -141,6 +137,9 @@ public class LobbyActivity extends ComponentActivity {
         // tic tac toe
         ticTacToeManager = component.ticTacToeManager();
         hooks.registerHooks(component.ticTacToeListener());
+
+        // protector
+        component(ProtectorComponent.KEY).configure(this::configureProtection);
 
         // game stuff
         final GameManager gameManager = lobbyManager.getGameManager();
@@ -247,5 +246,15 @@ public class LobbyActivity extends ComponentActivity {
 
         GameManager gameManager = lobbyManager.getGameManager();
         gameManager.removeStateChangeListener(this::onGameRestored);
+    }
+
+    private void configureProtection(MutableProtectionConfig cfg) {
+        cfg.disallowAll();
+
+        cfg.allow(ProtectionTypes.USE_BLOCK, (entity, pos) ->
+                entity instanceof ServerPlayerEntity player && ticTacToeManager.isTableCenter(pos)
+                && ticTacToeManager.isPlaying(player));
+
+        ProtectorUtils.allowCreativeOperatorBypass(cfg);
     }
 }

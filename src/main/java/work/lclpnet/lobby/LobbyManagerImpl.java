@@ -92,7 +92,7 @@ public class LobbyManagerImpl implements LobbyManager {
     }
 
     private void resetPlayer(ServerPlayerEntity player) {
-        player.changeGameMode(GameMode.SURVIVAL);
+        player.changeGameMode(GameMode.ADVENTURE);
         player.clearStatusEffects();
         player.getInventory().clear();
         PlayerUtils.setCursorStack(player, ItemStack.EMPTY);
