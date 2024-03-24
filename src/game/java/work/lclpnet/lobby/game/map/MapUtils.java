@@ -49,6 +49,25 @@ public class MapUtils {
     }
 
     @Nonnull
+    public static List<PositionRotation> getSpawnPositionsAndRotation(GameMap gameMap) {
+        if (!(gameMap.getProperty("spawns") instanceof JSONArray array)) {
+            throw missingProperty("spawns");
+        }
+
+        List<PositionRotation> spawns = new ArrayList<>();
+
+        for (Object element : array) {
+            PositionRotation posRot = getPositionRotation(element);
+
+            if (posRot == null) continue;
+
+            spawns.add(posRot);
+        }
+
+        return spawns;
+    }
+
+    @Nonnull
     public static Map<String, Vec3d> getNamedSpawnPositions(GameMap gameMap) {
         if (!(gameMap.getProperty("spawns") instanceof JSONObject object)) {
             throw missingProperty("spawns");
@@ -86,27 +105,33 @@ public class MapUtils {
         for (String key : object.keySet()) {
             Object value = object.get(key);
 
-            if (value instanceof JSONObject elemObj) {
-                if (!elemObj.has("spawn")) continue;
+            PositionRotation posRot = getPositionRotation(value);
 
-                JSONArray array = elemObj.getJSONArray("spawn");
-                Vec3d spawn = getSpawnVec3d(array);
+            if (posRot == null) continue;
 
-                float yaw = 0, pitch = 0;
-
-                if (elemObj.has("yaw")) {
-                    yaw = getAngle(elemObj.getNumber("yaw"));
-                }
-
-                if (elemObj.has("pitch")) {
-                    pitch = getAngle(elemObj.getNumber("pitch"));
-                }
-
-                spawns.put(key, new PositionRotation(spawn.x, spawn.y, spawn.z, yaw, pitch));
-            }
+            spawns.put(key, posRot);
         }
 
         return spawns;
+    }
+
+    private static PositionRotation getPositionRotation(Object value) {
+        if (!(value instanceof JSONObject elemObj) || !elemObj.has("spawn")) return null;
+
+        JSONArray array = elemObj.getJSONArray("spawn");
+        Vec3d spawn = getSpawnVec3d(array);
+
+        float yaw = 0, pitch = 0;
+
+        if (elemObj.has("yaw")) {
+            yaw = getAngle(elemObj.getNumber("yaw"));
+        }
+
+        if (elemObj.has("pitch")) {
+            pitch = getAngle(elemObj.getNumber("pitch"));
+        }
+
+        return new PositionRotation(spawn.x, spawn.y, spawn.z, yaw, pitch);
     }
 
     @Nonnull
