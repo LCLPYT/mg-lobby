@@ -33,7 +33,7 @@ public class ResetWorldModifier implements WorldModifier {
     }
 
     @Override
-    public void setBlockState(BlockPos pos, BlockState state) {
+    public void setBlockState(BlockPos pos, BlockState state, int flags) {
         synchronized (this) {
             if (!states.containsKey(pos)) {
                 BlockState prevState = world.getBlockState(pos);
@@ -44,7 +44,7 @@ public class ResetWorldModifier implements WorldModifier {
             }
         }
 
-        world.setBlockState(pos, state);
+        world.setBlockState(pos, state, flags);
     }
 
     public void spawnEntity(Entity entity) {
