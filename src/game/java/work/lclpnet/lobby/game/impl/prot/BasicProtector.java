@@ -287,6 +287,8 @@ public class BasicProtector implements Protector, Unloadable {
         blocks.add(Blocks.CAULDRON);
         blocks.add(Blocks.SWEET_BERRY_BUSH);
         blocks.add(Blocks.SPAWNER);
+        blocks.add(Blocks.CAVE_VINES_PLANT);
+        blocks.add(Blocks.CAVE_VINES);
 
         return Collections.unmodifiableSet(blocks);
     }
