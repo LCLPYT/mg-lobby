@@ -28,9 +28,14 @@ public class ProtectorUtils {
         // MobEntity
         config.allow(PlayerEntityScope.creativeOp(), LEASH_MOB, UNLEASH_MOB, LEASH_MOB_TO_BLOCK);
 
+        // LeashKnotEntity
         config.allow(PlayerEntityScope.creativeOp(), DETACH_LEASH);
 
+        // ProjectileEntity
         config.allow(PlayerEntityScope.creativeOp(), PICKUP_PROJECTILE);
+
+        // Entity
+        config.allow(PlayerEntityScope.creativeOp(), MOUNT);
 
         config.allow(ALLOW_DAMAGE, (entity, source) -> source.getAttacker() instanceof ServerPlayerEntity player
                                                        && player.isCreativeLevelTwoOp());
@@ -39,7 +44,7 @@ public class ProtectorUtils {
 
         config.allow(PROJECTILE_BREAK_DECORATED_POT, ProjectileHitScope.CREATIVE_OP);
 
-        config.allow(CRAFT_ITEM, PlayerItemStackScope.CREATIVE_OP);
+        config.allow(PlayerItemStackScope.CREATIVE_OP, CRAFT_ITEM, CONSUME_FOOD);
     }
 
     private ProtectorUtils() {}

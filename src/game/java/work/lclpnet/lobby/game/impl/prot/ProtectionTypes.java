@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game.impl.prot;
 
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
@@ -72,6 +73,8 @@ public class ProtectionTypes {
     public static final ProtectionType<ItemScatterScope> ITEM_SCATTER;
     public static final ProtectionType<EntityItemEntityScope> ENTITY_ITEM_DROP;
     public static final ProtectionType<PlayerItemStackScope> CRAFT_ITEM;
+    public static final ProtectionType<PlayerEntityScope<Entity>> MOUNT;
+    public static final ProtectionType<PlayerItemStackScope> CONSUME_FOOD;
 
     private static final Set<ProtectionType<?>> types;
 
@@ -125,6 +128,8 @@ public class ProtectionTypes {
                 .add(ITEM_SCATTER = new ItemScatterProtectionType())
                 .add(ENTITY_ITEM_DROP = new EntityItemEntityProtectionType())
                 .add(CRAFT_ITEM = new PlayerItemStackProtectionType())
+                .add(MOUNT = new PlayerEntityProtectionType<>())
+                .add(CONSUME_FOOD = new PlayerItemStackProtectionType())
                 .build();
     }
 

@@ -3,6 +3,7 @@ package work.lclpnet.lobby.game.impl.prot;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
@@ -10,6 +11,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.entity.*;
@@ -235,6 +237,21 @@ public class BasicProtector implements Protector, Unloadable {
                 .filter(result -> scope.isWithinScope(player, result))
                 .map(result -> PendingRecipe.empty())
                 .orElse(PendingRecipe.pass()));
+
+        protect(MOUNT, EntityMountCallback.HOOK, scope
+                -> (entity, vehicle, force)
+                -> !force && entity instanceof ServerPlayerEntity player &&
+                   scope.isWithinScope(player, vehicle));
+
+        protect(CONSUME_FOOD, PlayerInteractionHooks.USE_ITEM, scope -> (player, world, hand) -> {
+            ItemStack stack = player.getStackInHand(hand);
+
+            if (!stack.isFood() || !scope.isWithinScope(player, stack)) {
+                return TypedActionResult.pass(ItemStack.EMPTY);
+            }
+
+            return TypedActionResult.fail(ItemStack.EMPTY);
+        });
     }
 
     @Override
