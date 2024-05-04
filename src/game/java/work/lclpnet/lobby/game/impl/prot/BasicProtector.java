@@ -3,6 +3,7 @@ package work.lclpnet.lobby.game.impl.prot;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.Registries;
@@ -11,6 +12,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
@@ -67,7 +69,7 @@ public class BasicProtector implements Protector, Unloadable {
 
         protect(USE_ITEM_ON_BLOCK, BlockModificationHooks.USE_ITEM_ON_BLOCK, scope
                 -> (ctx)
-                -> scope.isWithinScope(ctx.getPlayer(), ctx.getBlockPos()) ? ActionResult.FAIL : null);
+                -> scope.isWithinScope(ctx.getPlayer(), ctx.getBlockPos()) ? ItemActionResult.FAIL : null);
 
         protect(TRAMPLE_FARMLAND, BlockModificationHooks.TRAMPLE_FARMLAND, BasicProtector::onModify);
 
@@ -246,7 +248,7 @@ public class BasicProtector implements Protector, Unloadable {
         protect(CONSUME_FOOD, PlayerInteractionHooks.USE_ITEM, scope -> (player, world, hand) -> {
             ItemStack stack = player.getStackInHand(hand);
 
-            if (!stack.isFood() || !scope.isWithinScope(player, stack)) {
+            if (!stack.contains(DataComponentTypes.FOOD) || !scope.isWithinScope(player, stack)) {
                 return TypedActionResult.pass(ItemStack.EMPTY);
             }
 

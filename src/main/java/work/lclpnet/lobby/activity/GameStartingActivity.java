@@ -141,7 +141,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
             if (remaining <= 5) {
                 for (ServerPlayerEntity player : PlayerLookup.all(getServer())) {
-                    player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.BLOCKS, 2f, 1f);
+                    player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.BLOCKS, 2f, 1f);
                 }
             }
         }

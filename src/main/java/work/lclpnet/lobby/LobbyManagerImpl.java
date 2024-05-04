@@ -152,7 +152,7 @@ public class LobbyManagerImpl implements LobbyManager {
 
     public void onWorldReady() {
         ServerWorld world = getLobbyWorld();
-        var serializer = new ExtendedConfigSerializer<>(LobbyWorldConfig.FACTORY, logger);
+        var serializer = new ExtendedConfigSerializer<>(LobbyWorldConfig.factory(world.getRegistryManager()), logger);
         Path path = Path.of("config", "lobby.json");
 
         worldConfigHandler = new WorldConfigHandler<>(world, path, serializer, logger);

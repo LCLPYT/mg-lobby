@@ -166,7 +166,7 @@ public class BossBarTimer implements SchedulerAction {
         if (remaining > 5) return;
 
         for (ServerPlayerEntity player : bossBar.getPlayers()) {
-            player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.BLOCKS, 2f, 1f);
+            player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.BLOCKS, 2f, 1f);
         }
     }
 

@@ -119,7 +119,7 @@ public class KingOfLadder {
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
-        player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.NEUTRAL, 2f, 0.0f);
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.NEUTRAL, 2f, 0.0f);
     }
 
     private void notifyFormerKing(ServerPlayerEntity player) {
@@ -128,7 +128,7 @@ public class KingOfLadder {
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
-        player.playSound(SoundEvents.ENTITY_BLAZE_DEATH, SoundCategory.NEUTRAL, 2f, 0.75f);
+        player.playSoundToPlayer(SoundEvents.ENTITY_BLAZE_DEATH, SoundCategory.NEUTRAL, 2f, 0.75f);
     }
 
     private void updateDisplays() {

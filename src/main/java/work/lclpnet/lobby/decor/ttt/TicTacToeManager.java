@@ -138,7 +138,7 @@ public class TicTacToeManager {
 
             Title.get(player).title(title, subtitle, 10, 20, 20);
 
-            player.playSound(SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 0.6f, 0f);
+            player.playSoundToPlayer(SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 0.6f, 0f);
         }
 
         display.indicateTurn(table, 1 - causePlayerId);
@@ -156,21 +156,21 @@ public class TicTacToeManager {
         var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_won").formatted(Formatting.GOLD);
 
         Title.get(player).title(Text.empty(), subtitle, 10, 70, 20);
-        player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 0.6f, 1f);
+        player.playSoundToPlayer(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 0.6f, 1f);
     }
 
     private void loose(ServerPlayerEntity player) {
         var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_lost").formatted(Formatting.RED);
 
         Title.get(player).title(Text.empty(), subtitle, 10, 70, 20);
-        player.playSound(SoundEvents.ENTITY_BLAZE_DEATH, SoundCategory.PLAYERS, 0.6f, 1f);
+        player.playSoundToPlayer(SoundEvents.ENTITY_BLAZE_DEATH, SoundCategory.PLAYERS, 0.6f, 1f);
     }
 
     private void draw(ServerPlayerEntity player) {
         var subtitle = translations.translateText(player, "lobby.tic_tac_toe.draw").formatted(Formatting.AQUA);
 
         Title.get(player).title(Text.empty(), subtitle, 10, 70, 20);
-        player.playSound(SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.PLAYERS, 0.3f, 0.57f);
+        player.playSoundToPlayer(SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.PLAYERS, 0.3f, 0.57f);
     }
 
     public boolean isPlaying(ServerPlayerEntity player) {

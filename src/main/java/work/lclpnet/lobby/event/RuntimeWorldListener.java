@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.event;
 
+import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.map.MapState;
 import net.minecraft.server.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
@@ -16,9 +17,9 @@ public class RuntimeWorldListener implements HookListenerModule {
     }
 
     @Nullable
-    private MapState getRuntimeMapState(ServerWorld world, String id) {
+    private MapState getRuntimeMapState(ServerWorld world, MapIdComponent id) {
         if (!(world instanceof RuntimeWorld runtimeWorld)) return null;
 
-        return runtimeWorld.getPersistentStateManager().get(MapState.getPersistentStateType(), id);
+        return runtimeWorld.getPersistentStateManager().get(MapState.getPersistentStateType(), id.asString());
     }
 }

@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.config;
 
 import it.unimi.dsi.fastutil.Pair;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.json.JSONArray;
@@ -16,6 +17,7 @@ import java.util.List;
 
 public class LobbyWorldConfig implements JsonConfig {
 
+    private final RegistryWrapper.WrapperLookup registries;
     public List<MazeConfig> mazeConfigs = new ArrayList<>(List.of(new MazeConfig()));  // one maze by default; mutable
     public BlockPos kingOfLadderGoal = null;
     public List<Vec3d> kingOfLadderDisplays = new ArrayList<>();
@@ -25,9 +27,13 @@ public class LobbyWorldConfig implements JsonConfig {
     public LavaLevitation lavaLevitation = null;
     public GreetingConfig greetingConfig = null;
 
-    public LobbyWorldConfig() {}
+    public LobbyWorldConfig(RegistryWrapper.WrapperLookup registries) {
+        this.registries = registries;
+    }
 
-    public LobbyWorldConfig(JSONObject obj) {
+    public LobbyWorldConfig(JSONObject obj, RegistryWrapper.WrapperLookup registries) {
+        this(registries);
+
         if (obj.has("mazes")) {
             JSONArray mazes = obj.getJSONArray("mazes");
             List<MazeConfig> mazeConfigs = new ArrayList<>();
@@ -120,7 +126,7 @@ public class LobbyWorldConfig implements JsonConfig {
         }
 
         if (obj.has("welcome_hologram") && !obj.isNull("welcome_hologram")) {
-            greetingConfig = GreetingConfig.parse(obj.getJSONObject("welcome_hologram"));
+            greetingConfig = GreetingConfig.parse(obj.getJSONObject("welcome_hologram"), registries);
         }
     }
 
@@ -195,20 +201,22 @@ public class LobbyWorldConfig implements JsonConfig {
 
         json.put("lava_levitation", lavaLevitation != null ? lavaLevitation.asJson() : JSONObject.NULL);
 
-        json.put("welcome_hologram", greetingConfig != null ? greetingConfig.asJson() : JSONObject.NULL);
+        json.put("welcome_hologram", greetingConfig != null ? greetingConfig.asJson(registries) : JSONObject.NULL);
 
         return json;
     }
 
-    public static final JsonConfigFactory<LobbyWorldConfig> FACTORY = new JsonConfigFactory<>() {
-        @Override
-        public LobbyWorldConfig createDefaultConfig() {
-            return new LobbyWorldConfig();
-        }
+    public static JsonConfigFactory<LobbyWorldConfig> factory(RegistryWrapper.WrapperLookup registries) {
+        return new JsonConfigFactory<>() {
+            @Override
+            public LobbyWorldConfig createDefaultConfig() {
+                return new LobbyWorldConfig(registries);
+            }
 
-        @Override
-        public LobbyWorldConfig createConfig(JSONObject json) {
-            return new LobbyWorldConfig(json);
-        }
-    };
+            @Override
+            public LobbyWorldConfig createConfig(JSONObject json) {
+                return new LobbyWorldConfig(json, registries);
+            }
+        };
+    }
 }

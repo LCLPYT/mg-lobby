@@ -154,7 +154,7 @@ public class JumpAndRun {
                 .sendTo(players);
 
         for (ServerPlayerEntity p : players) {
-            p.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.RECORDS, 100f, 1f);
+            p.playSoundToPlayer(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.RECORDS, 100f, 1f);
         }
     }
 
@@ -231,7 +231,7 @@ public class JumpAndRun {
             List<ServerPlayerEntity> nearbyPlayers = world.getEntitiesByClass(ServerPlayerEntity.class, box, p -> !p.isSpectator());
 
             if (!nearbyPlayers.isEmpty()) {
-                next(nearbyPlayers.get(0));
+                next(nearbyPlayers.getFirst());
                 return;
             }
 

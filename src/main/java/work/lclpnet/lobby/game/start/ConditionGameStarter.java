@@ -118,12 +118,12 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
             Text text = conditionMessage.apply(player);
             player.sendMessage(text);
 
-            player.playSound(SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.NEUTRAL, 0.4f, 1f);
+            player.playSoundToPlayer(SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.NEUTRAL, 0.4f, 1f);
         }
     }
 
     private void updateGameStatus() {
-        environment.getServer().submit(() -> {
+        environment.getServer().execute(() -> {
             if (condition.getAsBoolean()) {
                 initGameStart();
             } else {
