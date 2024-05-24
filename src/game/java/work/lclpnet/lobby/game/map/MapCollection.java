@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface MapCollection extends Iterable<GameMap> {
 
@@ -23,5 +24,21 @@ public interface MapCollection extends Iterable<GameMap> {
     @Override
     default Iterator<GameMap> iterator() {
         return getMaps().iterator();
+    }
+
+    default Stream<Identifier> mapsWithPrefix(Identifier prefix) {
+        String str = prefix.toString();
+
+        if (!str.endsWith("/") && str.charAt(str.length() - 1) != ':') {
+            str = str + "/";
+        }
+
+        String prefixStr = str;
+
+        return getMaps().stream()
+                .map(GameMap::getDescriptor)
+                .map(MapDescriptor::getIdentifier)
+                .filter(id -> id.toString().startsWith(prefixStr))
+                .distinct();
     }
 }

@@ -5,13 +5,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -21,27 +19,22 @@ public class GameMap {
     public static final Item DEFAULT_ICON = Items.GRASS_BLOCK;
 
     private final MapDescriptor descriptor;
-    private final Item icon;
     private final Map<String, Object> properties;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock readLock = lock.readLock(), writeLock = lock.writeLock();
+    private volatile Item icon = null;
 
-    public GameMap(MapDescriptor descriptor, Item icon) {
-        this(descriptor, icon, Map.of());
+    public GameMap(MapDescriptor descriptor) {
+        this(descriptor, Map.of());
     }
 
-    public GameMap(MapDescriptor descriptor, Item icon, Map<String, Object> properties) {
+    public GameMap(MapDescriptor descriptor, Map<String, Object> properties) {
         this.descriptor = descriptor;
-        this.icon = icon;
         this.properties = new Object2ObjectOpenHashMap<>(properties);
     }
 
     public MapDescriptor getDescriptor() {
         return descriptor;
-    }
-
-    public Item getIcon() {
-        return icon;
     }
 
     /**
@@ -108,6 +101,78 @@ public class GameMap {
         return Collections.unmodifiableMap(properties);
     }
 
+    public Item getIcon() {
+        if (icon != null) {
+            return icon;
+        }
+
+        synchronized (this) {
+            if (icon != null) return icon;
+
+            Object iconObj = properties.get("icon");
+
+            if (iconObj instanceof String iconStr) {
+                Identifier iconId = new Identifier(iconStr);
+                icon = Registries.ITEM.get(iconId);
+            }
+
+            if (icon == null || icon == Items.AIR) {
+                icon = DEFAULT_ICON;
+            }
+
+            putProperty("icon", icon);
+        }
+
+        return icon;
+    }
+
+    public String getName() {
+        return getName("en_us");
+    }
+
+    public String getName(String locale) {
+        Object nameProp = getProperty("name");
+
+        if (!(nameProp instanceof String name)) {
+            return descriptor.getIdentifier().getPath();
+        }
+
+        Object translatedProp = getProperty("name-translated");
+
+        if (!(translatedProp instanceof JSONObject mapping) || !mapping.has(locale)) return name;
+
+        String translatedName = mapping.getString(locale);
+
+        if (translatedName == null) return name;
+
+        return translatedName;
+    }
+
+    public List<String> getAuthors() {
+        Object authorProp = getProperty("author");
+        Object authorsProp = getProperty("authors");
+
+        String author = authorProp instanceof String ? (String) authorProp : null;
+
+        if (!(authorsProp instanceof Iterable<?> iterable)) {
+            return author != null ? List.of(author) : List.of();
+        }
+
+        List<String> list = new ArrayList<>();
+
+        if (author != null) {
+            list.add(author);
+        }
+
+        for (Object entry : iterable) {
+            if (entry instanceof String str) {
+                list.add(str);
+            }
+        }
+
+        return Collections.unmodifiableList(list);
+    }
+
     public static GameMap parse(Map<String, Object> properties, MapDescriptor parentDescriptor) {
         Object pathObj = properties.get("path");
 
@@ -117,28 +182,13 @@ public class GameMap {
 
         MapDescriptor descriptor = parentDescriptor.resolve(path);
 
-        Item icon = null;
-
-        Object iconObj = properties.get("icon");
-
-        if (iconObj instanceof String iconStr) {
-            Identifier iconId = new Identifier(iconStr);
-            icon = Registries.ITEM.get(iconId);
-        }
-
-        if (icon == null || icon == Items.AIR) {
-            icon = DEFAULT_ICON;
-        }
-
         var props = new HashMap<String, Object>(properties.size());
 
         props.putAll(properties);
 
-        props.put("icon", icon);
-
         props.remove("path");
         props.remove("target");
 
-        return new GameMap(descriptor, icon, props);
+        return new GameMap(descriptor, props);
     }
 }

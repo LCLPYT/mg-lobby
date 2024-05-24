@@ -2,7 +2,6 @@ package work.lclpnet.lobby.game.map;
 
 import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,7 +57,7 @@ public class RepositoryMapLookupTest {
         var repo = getMapRepository();
         var lookup = new RepositoryMapLookup(repo);
 
-        GameMap map = new GameMap(new MapDescriptor("test", "hello", "1.20"), Items.DIAMOND);
+        GameMap map = new GameMap(new MapDescriptor("test", "hello", "1.20"));
 
         var source = lookup.getSource(map).orElseThrow();
 

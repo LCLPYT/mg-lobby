@@ -8,6 +8,10 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GameMapTest {
@@ -19,7 +23,7 @@ public class GameMapTest {
     }
 
     @Test
-    void testParseNoPathThrows() {
+    void parseNoPathThrows() {
         JSONObject json = new JSONObject("""
                 {
                   "icon": "minecraft:cobblestone",
@@ -27,11 +31,11 @@ public class GameMapTest {
                 }
                 """);
 
-        assertThrows(IllegalArgumentException.class, () -> GameMap.parse(json.toMap(), new MapDescriptor("test", "", "")));
+        assertThrows(IllegalArgumentException.class, () -> GameMap.parse(entries(json), new MapDescriptor("test", "", "")));
     }
 
     @Test
-    void testParse() {
+    void parse() {
         JSONObject json = new JSONObject("""
                 {
                   "path": "my_map",
@@ -40,32 +44,30 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(json.toMap(), new MapDescriptor("test", "", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "", "1.20"));
 
         assertEquals(new Identifier("test:my_map"), gameMap.getDescriptor().getIdentifier());
-        assertEquals(Items.COBBLESTONE, gameMap.getIcon());
-        assertEquals(Items.COBBLESTONE, gameMap.getProperty("icon"));
+        assertEquals("minecraft:cobblestone", gameMap.getProperty("icon"));
         assertEquals("LCLP", gameMap.getProperty("author"));
     }
 
     @Test
-    void testMinimal() {
+    void parseMinimal() {
         JSONObject json = new JSONObject("""
                 {
                   "path": "my_map"
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(json.toMap(), new MapDescriptor("test", "", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "", "1.20"));
 
         assertEquals(new Identifier("test:my_map"), gameMap.getDescriptor().getIdentifier());
         assertEquals("test/my_map/1.20", gameMap.getDescriptor().getMapPath());
-        assertEquals(GameMap.DEFAULT_ICON, gameMap.getIcon());
-        assertEquals(GameMap.DEFAULT_ICON, gameMap.getProperty("icon"));
+        assertNull(gameMap.getProperty("icon"));
     }
 
     @Test
-    void testPropertiesRemoved() {
+    void parsePropertiesRemoved() {
         JSONObject json = new JSONObject("""
                 {
                   "path": "my_map",
@@ -73,49 +75,172 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(json.toMap(), new MapDescriptor("test", "", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "", "1.20"));
 
         assertFalse(gameMap.getProperties().containsKey("path"));
         assertFalse(gameMap.getProperties().containsKey("target"));
     }
 
     @Test
-    void testNested() {
+    void parseNested() {
         JSONObject json = new JSONObject("""
                 {
                   "path": "my_map"
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(json.toMap(), new MapDescriptor("test", "nested", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested", "1.20"));
 
         assertEquals(new Identifier("test:nested/my_map"), gameMap.getDescriptor().getIdentifier());
     }
 
     @Test
-    void testNestedAbsoluteNamespaceOnly() {
+    void parseNestedAbsoluteNamespaceOnly() {
         JSONObject json = new JSONObject("""
                 {
                   "path": "/test"
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(json.toMap(), new MapDescriptor("test", "nested", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested", "1.20"));
 
         assertEquals(new Identifier("test:"), gameMap.getDescriptor().getIdentifier());
     }
 
     @Test
-    void testNestedAbsolute() {
+    void parseNestedAbsolute() {
         JSONObject json = new JSONObject("""
                 {
                   "path": "/test/map_two"
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(json.toMap(), new MapDescriptor("test", "nested", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested", "1.20"));
 
         assertEquals(new Identifier("test:map_two"), gameMap.getDescriptor().getIdentifier());
         assertEquals("test/map_two/1.20", gameMap.getDescriptor().getMapPath());
+    }
+
+    @Test
+    void getAuthorsArray() {
+        JSONObject json = new JSONObject("""
+                {
+                    "authors": [
+                      "foo",
+                      "bar"
+                    ]
+                }
+                """);
+
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+
+        assertEquals(List.of("foo", "bar"), gameMap.getAuthors());
+    }
+
+    @Test
+    void getAuthorsUndefined() {
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""));
+
+        assertEquals(List.of(), gameMap.getAuthors());
+    }
+
+    @Test
+    void getAuthorsAuthor() {
+        JSONObject json = new JSONObject("""
+                {
+                    "author": "foo"
+                }
+                """);
+
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+
+        assertEquals(List.of("foo"), gameMap.getAuthors());
+    }
+
+    @Test
+    void getAuthorsAuthorMergedWithAuthors() {
+        JSONObject json = new JSONObject("""
+                {
+                    "author": "baz",
+                    "authors": [
+                      "foo",
+                      "bar"
+                    ]
+                }
+                """);
+
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+
+        assertEquals(List.of("baz", "foo", "bar"), gameMap.getAuthors());
+    }
+
+    @Test
+    void getNameUndefined() {
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""));
+
+        assertEquals("nested", gameMap.getName());
+    }
+
+    @Test
+    void getNameLocalized() {
+        JSONObject json = new JSONObject("""
+                {
+                    "name": "Custom Name",
+                    "name-translated": {
+                      "de_de": "Spezieller Name"
+                    }
+                }
+                """);
+
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+
+        assertEquals("Custom Name", gameMap.getName());
+        assertEquals("Custom Name", gameMap.getName("en_us"));
+        assertEquals("Spezieller Name", gameMap.getName("de_de"));
+        assertEquals("Custom Name", gameMap.getName("smth_else"));
+    }
+
+    @Test
+    void getIcon() {
+        JSONObject json = new JSONObject("""
+                {
+                    "icon": "minecraft:diamond"
+                }
+                """);
+
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+
+        assertEquals(Items.DIAMOND, gameMap.getIcon());
+        assertEquals(Items.DIAMOND, gameMap.getProperty("icon"));
+    }
+
+    @Test
+    void getIconUndefined() {
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""));
+
+        assertEquals(GameMap.DEFAULT_ICON, gameMap.getIcon());
+    }
+
+    @Test
+    void getIconUnknown() {
+        JSONObject json = new JSONObject("""
+                {
+                    "icon": "_zzzzzzzzzzzzzzz:zzzzzzzzzzzzz"
+                }
+                """);
+
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+
+        assertEquals(GameMap.DEFAULT_ICON, gameMap.getIcon());
+    }
+
+    private static Map<String, Object> entries(JSONObject json) {
+        Map<String, Object> entries = new HashMap<>();
+
+        for (String key : json.keySet()) {
+            entries.put(key, json.get(key));
+        }
+
+        return entries;
     }
 }
