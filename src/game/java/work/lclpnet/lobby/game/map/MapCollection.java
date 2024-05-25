@@ -3,9 +3,7 @@ package work.lclpnet.lobby.game.map;
 import net.minecraft.util.Identifier;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public interface MapCollection extends Iterable<GameMap> {
@@ -26,7 +24,7 @@ public interface MapCollection extends Iterable<GameMap> {
         return getMaps().iterator();
     }
 
-    default Stream<Identifier> mapsWithPrefix(Identifier prefix) {
+    default Stream<GameMap> mapsWithPrefix(Identifier prefix) {
         String str = prefix.toString();
 
         if (!str.endsWith("/") && str.charAt(str.length() - 1) != ':') {
@@ -35,10 +33,17 @@ public interface MapCollection extends Iterable<GameMap> {
 
         String prefixStr = str;
 
-        return getMaps().stream()
+        Set<Identifier> seen = new HashSet<>();
+
+        return getMaps().stream().filter(map -> {
+            Identifier id = map.getDescriptor().getIdentifier();
+            return id.toString().startsWith(prefixStr) && seen.add(id);
+        });
+    }
+
+    default Stream<Identifier> mapIdsWithPrefix(Identifier prefix) {
+        return mapsWithPrefix(prefix)
                 .map(GameMap::getDescriptor)
-                .map(MapDescriptor::getIdentifier)
-                .filter(id -> id.toString().startsWith(prefixStr))
-                .distinct();
+                .map(MapDescriptor::getIdentifier);
     }
 }
