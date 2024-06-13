@@ -54,6 +54,8 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
             component.lobbyWorldDownloader().renewWorld();
         }
 
+        component.dataPackService().downloadRequired();
+
         logger.info("Lobby loaded.");
     }
 

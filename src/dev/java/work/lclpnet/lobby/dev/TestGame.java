@@ -6,6 +6,7 @@ import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameInstance;
+import work.lclpnet.lobby.game.api.data.GameDataPacks;
 import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.conf.MinecraftGameConfig;
 import work.lclpnet.mplugins.ext.PluginUnloader;
@@ -26,5 +27,11 @@ public class TestGame implements Game {
     @Override
     public GameInstance createInstance(GameEnvironment environment) {
         return new TestGameInstance(environment);
+    }
+
+    // optional, use this if the game requires data packs that must be loaded at bootstrap (e.g. world generators, biomes, other static registry data)
+    @Override
+    public GameDataPacks getBootstrapDataPacks() {
+        return new TestGameDataPacks();
     }
 }

@@ -19,10 +19,14 @@ import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.game.AsyncGameStateIo;
 import work.lclpnet.lobby.game.GameStateIo;
+import work.lclpnet.lobby.game.api.data.DataPackSink;
+import work.lclpnet.lobby.game.impl.data.PathDataPackSink;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @Module(includes = LobbyModule.Bindings.class)
 public class LobbyModule {
@@ -99,5 +103,20 @@ public class LobbyModule {
     @Provides @Named("lobbyWorld")
     ServerWorld provideServerWorld(LobbyManager lobbyManager) {
         return lobbyManager.getLobbyWorld();
+    }
+
+    @Provides @Named("dataPacks")
+    Path provideDataPacksPath(ConfigAccess configAccess) {
+        return Path.of(configAccess.getConfig().getSafeLobbyLevelName()).resolve("datapacks");
+    }
+
+    @Provides @Singleton
+    Executor provideIoExecutor() {
+        return Executors.newVirtualThreadPerTaskExecutor();
+    }
+
+    @Provides
+    DataPackSink provideDataPackSink(@Named("dataPacks") Path path) {
+        return new PathDataPackSink(path);
     }
 }

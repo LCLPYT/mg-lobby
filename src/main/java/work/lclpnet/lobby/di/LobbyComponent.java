@@ -5,6 +5,7 @@ import work.lclpnet.lobby.LobbyManagerImpl;
 import work.lclpnet.lobby.activity.LobbyActivity;
 import work.lclpnet.lobby.io.LobbyWorldDownloader;
 import work.lclpnet.lobby.io.ServerPropertiesAdjuster;
+import work.lclpnet.lobby.service.DataPackService;
 
 import javax.inject.Singleton;
 
@@ -19,6 +20,8 @@ public interface LobbyComponent {
     LobbyWorldDownloader lobbyWorldDownloader();
 
     LobbyActivity lobbyActivity();
+
+    DataPackService dataPackService();
 
     // subcomponents
     ActivityComponent.Builder activityComponent();
