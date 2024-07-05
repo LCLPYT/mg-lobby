@@ -60,7 +60,7 @@ public class SqliteCacheIndex implements CacheIndex {
 
         logger.info("Successfully established SQLite connection");
 
-        CacheMigration migration = new CacheMigration(connection, logger);
+        SqliteCacheMigration migration = new SqliteCacheMigration(connection, logger);
         migration.migrate();
 
         return connection;

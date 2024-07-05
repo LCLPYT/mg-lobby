@@ -1,16 +1,17 @@
 package work.lclpnet.lobby.game.map.cache;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 
 import java.sql.*;
 
-public class CacheMigration {
+public class SqliteCacheMigration {
 
     public static final int VERSION = 0;
     private final Connection connection;
     private final Logger logger;
 
-    public CacheMigration(Connection connection, Logger logger) {
+    public SqliteCacheMigration(Connection connection, Logger logger) {
         this.connection = connection;
         this.logger = logger;
     }
@@ -30,27 +31,35 @@ public class CacheMigration {
         }
     }
 
-    private static boolean isUpToDate(Statement statement) {
+    @VisibleForTesting
+    static boolean isUpToDate(Statement statement) {
         try (ResultSet result = statement.executeQuery("SELECT version FROM info LIMIT 1")) {
             if (!result.next()) return false;
 
-            int version = result.getInt(0);
+            int version = result.getInt(1);
 
             return version >= VERSION;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
-    private static void createInfoTable(Statement statement) throws SQLException {
+    @VisibleForTesting
+    static void createInfoTable(Statement statement) throws SQLException {
         statement.execute("CREATE TABLE IF NOT EXISTS info (version int unsigned NOT NULL)");
     }
 
-    private void updateVersion() throws SQLException {
+    @VisibleForTesting
+    void updateVersion() throws SQLException {
+        updateVersion(VERSION);
+    }
+
+    @VisibleForTesting
+    void updateVersion(int version) throws SQLException {
         PreparedStatement statement = connection.prepareStatement("REPLACE INTO info (version) VALUES (?)");
 
         try (statement) {
-            statement.setInt(1, VERSION);
+            statement.setInt(1, version);
             statement.execute();
         }
     }
