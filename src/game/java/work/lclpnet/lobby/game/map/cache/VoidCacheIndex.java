@@ -2,11 +2,22 @@ package work.lclpnet.lobby.game.map.cache;
 
 public class VoidCacheIndex implements CacheIndex {
 
+    private VoidCacheIndex() {}
+
     @Override
     public void close() {}
 
     @Override
-    public boolean hasValidEntry(String path, int ttlSeconds) {
-        return false;
+    public boolean isEntryInvalid(String path, int ttlSeconds) {
+        return true;
+    }
+
+    public static VoidCacheIndex getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    // lazy singleton
+    private static class Holder {
+        private static final VoidCacheIndex INSTANCE = new VoidCacheIndex();
     }
 }

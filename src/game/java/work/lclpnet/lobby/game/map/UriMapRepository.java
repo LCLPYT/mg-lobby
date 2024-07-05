@@ -92,7 +92,7 @@ public class UriMapRepository implements MapRepository {
             info = getMapInfo(base, target, maxLinkDepth - 1);
             info.merge(props);
         } else {
-            info = new MapInfo(mapUri, props);
+            info = new MapInfo(mapUri, path, props);
         }
 
         return info;

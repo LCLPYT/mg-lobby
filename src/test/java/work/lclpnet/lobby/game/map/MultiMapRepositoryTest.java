@@ -49,8 +49,8 @@ class MultiMapRepositoryTest {
         MapRepository repoA = mock();
         MapRepository repoB = mock();
 
-        MapInfo mapA = new MapInfo(URI.create("foo/bar/1.20"), Map.of("source", "sourceA"));
-        MapInfo mapB = new MapInfo(URI.create("foo/bar/1.20"), Map.of("source", "sourceB"));
+        MapInfo mapA = new MapInfo(URI.create("foo/bar/1.20"), "foo/bar/1.20", Map.of("source", "sourceA"));
+        MapInfo mapB = new MapInfo(URI.create("foo/bar/1.20"), "foo/bar/1.20", Map.of("source", "sourceB"));
 
         when(repoA.getMapInfo("foo/bar/1.20"))
                 .thenReturn(mapA);

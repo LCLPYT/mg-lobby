@@ -29,19 +29,19 @@ public class SqliteCacheIndex implements CacheIndex {
     }
 
     @Override
-    public boolean hasValidEntry(String path, int ttlSeconds) {
+    public boolean isEntryInvalid(String path, int ttlSeconds) {
         try (var statement = connection.prepareStatement("SELECT timestamp FROM entries WHERE path = ?")) {
 
             try (ResultSet result = statement.executeQuery()) {
-                if (!result.next()) return false;
+                if (!result.next()) return true;
 
                 long timestamp = result.getLong(0);
 
-                return System.currentTimeMillis() - timestamp < ttlSeconds * 1000L;
+                return System.currentTimeMillis() - timestamp >= ttlSeconds * 1000L;
             }
         } catch (SQLException e) {
             logger.error("Failed to fetch cache entry timestamp", e);
-            return false;
+            return true;
         }
     }
 

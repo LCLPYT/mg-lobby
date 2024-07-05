@@ -49,7 +49,6 @@ public class CacheMapFetcher implements MapFetcher {
     }
 
     private void pullRemoteMap(Path target, URI source, GameMap map) throws IOException {
-        String mapPath = map.getDescriptor().getMapPath();
         URL sourceUrl;
 
         try {
@@ -60,7 +59,7 @@ public class CacheMapFetcher implements MapFetcher {
             return;
         }
 
-        Path cachedSource = cache.cacheMapSource(mapPath, sourceUrl);
+        Path cachedSource = cache.cacheMapSource(map, sourceUrl);
 
         if (cachedSource == null) {
             // copy to target directly

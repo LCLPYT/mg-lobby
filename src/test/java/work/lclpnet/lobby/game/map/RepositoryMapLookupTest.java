@@ -88,7 +88,7 @@ public class RepositoryMapLookupTest {
             @Override
             public MapInfo getMapInfo(String path) throws IOException {
                 if ("test/hello/1.20".equals(path)) {
-                    return new MapInfo(URI.create("test/hello/1.20/map.json"), Map.of("source", "here"));
+                    return new MapInfo(URI.create("test/hello/1.20/map.json"), "test/hello/1.20", Map.of("source", "here"));
                 }
 
                 throw new IOException();

@@ -7,7 +7,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-public record MapInfo(URI uri, Map<String, Object> properties) {
+public record MapInfo(URI uri, String target, Map<String, Object> properties) {
 
     @Nullable
     public String getSource() {
@@ -37,6 +37,6 @@ public record MapInfo(URI uri, Map<String, Object> properties) {
 
         copy.put("source", source);
 
-        return new MapInfo(uri, copy);
+        return new MapInfo(uri, target, copy);
     }
 }

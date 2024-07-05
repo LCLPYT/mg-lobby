@@ -32,6 +32,8 @@ public class RepositoryMapLookup implements MapLookup {
 
         source.ifPresent(uri -> map.putProperty("source", uri));
 
+        map.putProperty("target", info.target());
+
         return source;
     }
 }

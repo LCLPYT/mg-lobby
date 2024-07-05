@@ -3,6 +3,7 @@ package work.lclpnet.lobby.game.map.cache;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import work.lclpnet.lobby.game.map.GameMap;
 import work.lclpnet.lobby.game.map.MapInfo;
 import work.lclpnet.lobby.game.map.MapRef;
 import work.lclpnet.lobby.game.map.UriMapRepository;
@@ -40,7 +41,7 @@ public class MapCache implements Closeable {
     public Collection<MapRef> getCachedMapList(String path) {
         String entry = Path.of(path).resolve("index.json").toString();
 
-        if (!index.hasValidEntry(entry, ttlSeconds)) {
+        if (index.isEntryInvalid(entry, ttlSeconds)) {
             return null;
         }
 
@@ -56,7 +57,7 @@ public class MapCache implements Closeable {
     public MapInfo getCachedMapInfo(String path) {
         String entry = Path.of(path).resolve("map.json").toString();
 
-        if (!index.hasValidEntry(entry, ttlSeconds)) {
+        if (index.isEntryInvalid(entry, ttlSeconds)) {
             return null;
         }
 
@@ -80,30 +81,11 @@ public class MapCache implements Closeable {
 
     @Nullable
     private MapInfo withCachedSourceIfAvailable(String path, MapInfo mapInfo) {
-        String source = mapInfo.getSource();
+        Path cachePath = getCachedMapSource(path, mapInfo);
 
-        if (source == null) return null;
+        if (cachePath == null) return null;
 
-        var uri = FileUtil.getUri(mapInfo.uri(), source);
-
-        if (uri.isEmpty()) return null;
-
-        String sourcePath = uri.get().getPath();
-
-        if (sourcePath == null) return null;
-
-        String cacheFileName;
-
-        try {
-            cacheFileName = Path.of(sourcePath).getFileName().toString();
-        } catch (InvalidPathException e) {
-            logger.error("Failed to determine map source path file name", e);
-            return null;
-        }
-
-        Path cachePath = getCachePath(path + "/" + cacheFileName);
-
-        if (cachePath == null || !Files.exists(cachePath)) return null;
+        String cacheFileName = cachePath.getFileName().toString();
 
         return mapInfo.withSource(cacheFileName);
     }
@@ -175,7 +157,92 @@ public class MapCache implements Closeable {
     }
 
     @Nullable
-    public Path cacheMapSource(String path, URL source) {
+    public Path getCachedMapSource(GameMap map) {
+        if (!map.hasProperty("target", String.class)) {
+            return null;
+        }
+
+        String path = map.getProperty("target");
+
+        // try to infer source directly from the map instance
+        Object source = map.getProperty("source");
+
+        if (source instanceof URI sourceUri) {
+            Path cachedSource = getCachedMapSource(path, sourceUri);
+
+            if (cachedSource != null) {
+                return cachedSource;
+            }
+        }
+
+        // try to find cached map info
+        MapInfo mapInfo = getCachedMapInfo(path);
+
+        if (mapInfo == null) return null;
+
+        // try to find cached map source
+        return getCachedMapSource(path, mapInfo);
+    }
+
+    @Nullable
+    private Path getCachedMapSource(String path, URI source) {
+        String sourcePath = source.getPath();
+
+        if (sourcePath == null) return null;
+
+        String fileName;
+
+        try {
+            fileName = Path.of(sourcePath).getFileName().toString();
+        } catch (InvalidPathException ignored) {
+            return null;
+        }
+
+        return getCachedMapSource(path, fileName);
+    }
+
+    @Nullable
+    private Path getCachedMapSource(String path, MapInfo mapInfo) {
+        String source = mapInfo.getSource();
+
+        if (source == null) return null;
+
+        var uri = FileUtil.getUri(mapInfo.uri(), source);
+
+        if (uri.isEmpty()) return null;
+
+        String sourcePath = uri.get().getPath();
+
+        if (sourcePath == null) return null;
+
+        String cacheFileName;
+
+        try {
+            cacheFileName = Path.of(sourcePath).getFileName().toString();
+        } catch (InvalidPathException e) {
+            logger.error("Failed to determine map source path file name", e);
+            return null;
+        }
+
+        return getCachedMapSource(path, cacheFileName);
+    }
+
+    @Nullable
+    private Path getCachedMapSource(String path, String cacheFileName) {
+        Path cachePath = getCachePath(path + "/" + cacheFileName);
+
+        if (cachePath == null || !Files.exists(cachePath)) return null;
+
+        return cachePath;
+    }
+
+    @Nullable
+    public Path cacheMapSource(GameMap map, URL source) {
+        if (!map.hasProperty("target", String.class)) {
+            return null;
+        }
+
+        String path = map.getProperty("target");
         String sourcePath = source.getPath();
 
         if (sourcePath == null) {
@@ -237,7 +304,7 @@ public class MapCache implements Closeable {
             index = SqliteCacheIndex.createSqliteIndex(indexPath, logger);
         } catch (SQLException e) {
             logger.error("Failed to create SQLite cache index, cache will not be used", e);
-            index = new VoidCacheIndex();
+            index = VoidCacheIndex.getInstance();
         }
 
         URI rootUri = root.toUri();
