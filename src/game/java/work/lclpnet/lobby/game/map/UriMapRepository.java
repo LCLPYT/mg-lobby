@@ -98,6 +98,10 @@ public class UriMapRepository implements MapRepository {
         return info;
     }
 
+    public URI getRoot() {
+        return root;
+    }
+
     private JSONObject fetchJsonObject(URI uri) throws IOException {
         String content;
 

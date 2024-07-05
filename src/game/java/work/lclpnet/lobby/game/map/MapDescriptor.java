@@ -90,4 +90,15 @@ public class MapDescriptor {
     public int hashCode() {
         return Objects.hash(namespace, path, version);
     }
+
+    @Override
+    public String toString() {
+        String base = namespace + ":" + path;
+
+        if (version.isEmpty()) {
+            return base;
+        }
+
+        return base + ":" + version;
+    }
 }

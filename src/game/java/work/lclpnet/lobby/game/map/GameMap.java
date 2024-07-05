@@ -173,6 +173,11 @@ public class GameMap {
         return Collections.unmodifiableList(list);
     }
 
+    @Override
+    public String toString() {
+        return "GameMap{descriptor=%s}".formatted(descriptor);
+    }
+
     public static GameMap parse(Map<String, Object> properties, MapDescriptor parentDescriptor) {
         Object pathObj = properties.get("path");
 

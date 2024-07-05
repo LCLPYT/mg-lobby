@@ -1,23 +1,26 @@
 package work.lclpnet.lobby.game.map;
 
-import work.lclpnet.lobby.io.copy.WorldCopier;
-
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 
 public class MapManager {
 
     private final MapCollection collection;
     private final MapLookup lookup;
+    private final MapFetcher fetcher;
 
     public MapManager(MapLookup lookup) {
-        this(new SimpleMapCollection(), lookup);
+        this(lookup, new DirectMapFetcher(lookup));
     }
 
-    public MapManager(MapCollection maps, MapLookup lookup) {
+    public MapManager(MapLookup lookup, MapFetcher fetcher) {
+        this(new SimpleMapCollection(), lookup, fetcher);
+    }
+
+    public MapManager(MapCollection maps, MapLookup lookup, MapFetcher fetcher) {
         this.collection = maps;
         this.lookup = lookup;
+        this.fetcher = fetcher;
     }
 
     public MapCollection getCollection() {
@@ -31,9 +34,7 @@ public class MapManager {
      * @throws IOException If there was an IO error
      */
     public void pull(GameMap map, Path target) throws IOException {
-        URI source = lookup.getSource(map).orElseThrow();
-
-        WorldCopier.get(source).copyTo(target);
+        fetcher.pull(map, target);
     }
 
     /**

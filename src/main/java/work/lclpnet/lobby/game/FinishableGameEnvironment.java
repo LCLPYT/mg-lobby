@@ -163,7 +163,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
             owner.detach();
         }
 
-        server.submit(() -> {
+        server.execute(() -> {
             synchronized (this) {
                 destroyed = true;
 
