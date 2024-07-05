@@ -124,7 +124,10 @@ public class MapCache implements Closeable {
             Files.writeString(cachePath, json.toString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             logger.warn("Failed to cache map info", e);
+            return;
         }
+
+        index.updateEntry(path);
     }
 
     public void cacheMapList(String path, Collection<MapRef> mapList) {

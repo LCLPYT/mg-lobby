@@ -12,6 +12,9 @@ public class VoidCacheIndex implements CacheIndex {
         return true;
     }
 
+    @Override
+    public void updateEntry(String path) {}
+
     public static VoidCacheIndex getInstance() {
         return Holder.INSTANCE;
     }

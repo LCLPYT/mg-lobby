@@ -30,18 +30,37 @@ public class SqliteCacheIndex implements CacheIndex {
 
     @Override
     public boolean isEntryInvalid(String path, int ttlSeconds) {
+        long timestamp = getTimestamp(path);
+
+        if (timestamp == -1) return true;
+
+        return System.currentTimeMillis() / 1000 - timestamp >= ttlSeconds;
+    }
+
+    public long getTimestamp(String path) {
         try (var statement = connection.prepareStatement("SELECT timestamp FROM entries WHERE path = ?")) {
+            statement.setString(1, path);
 
             try (ResultSet result = statement.executeQuery()) {
-                if (!result.next()) return true;
+                if (!result.next()) return -1;
 
-                long timestamp = result.getLong(0);
-
-                return System.currentTimeMillis() - timestamp >= ttlSeconds * 1000L;
+                return result.getLong(1);
             }
         } catch (SQLException e) {
             logger.error("Failed to fetch cache entry timestamp", e);
-            return true;
+            return -1;
+        }
+    }
+
+    @Override
+    public void updateEntry(String path) {
+        try (var statement = connection.prepareStatement("REPLACE INTO entries (path, timestamp) VALUES (?, ?)")) {
+            statement.setString(1, path);
+            statement.setLong(2, System.currentTimeMillis() / 1000);
+
+            statement.execute();
+        } catch (SQLException e) {
+            logger.error("Failed to update cache entry timestamp", e);
         }
     }
 

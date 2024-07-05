@@ -5,4 +5,6 @@ import java.io.Closeable;
 public interface CacheIndex extends Closeable {
 
     boolean isEntryInvalid(String path, int ttlSeconds);
+
+    void updateEntry(String path);
 }

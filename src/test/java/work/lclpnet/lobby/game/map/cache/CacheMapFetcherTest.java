@@ -212,6 +212,9 @@ class CacheMapFetcherTest {
         }
 
         @Override
+        public void updateEntry(String path) {}
+
+        @Override
         public void close() {}
     };
 }

@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.map.cache;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,7 @@ class SqliteCacheMigrationTest {
 
     @BeforeEach
     void setUp() throws IOException, SQLException {
-        Path path = Files.createTempFile("mgl_cm", "index.sqlite");
+        Path path = Files.createTempFile("mgl_scm", "index.sqlite");
         String absPath = path.toAbsolutePath().toString();
 
         connection = DriverManager.getConnection("jdbc:sqlite:".concat(absPath));
@@ -46,16 +47,7 @@ class SqliteCacheMigrationTest {
     void migrate() throws SQLException {
         cacheMigration.migrate();
 
-        Set<String> tableNames = new HashSet<>();
-
-        try (Statement statement = connection.createStatement()) {
-            ResultSet result = statement.executeQuery("SELECT name FROM sqlite_master WHERE type='table'");
-
-            while (result.next()) {
-                String name = result.getString(1);
-                tableNames.add(name);
-            }
-        }
+        Set<String> tableNames = getTableNames(connection);
 
         assertEquals(Set.of("info", "entries"), tableNames);
     }
@@ -110,16 +102,7 @@ class SqliteCacheMigrationTest {
         // now try to migrate the database, this should not be executed
         cacheMigration.migrate();
 
-        Set<String> tableNames = new HashSet<>();
-
-        try (Statement statement = connection.createStatement()) {
-            ResultSet result = statement.executeQuery("SELECT name FROM sqlite_master WHERE type='table'");
-
-            while (result.next()) {
-                String name = result.getString(1);
-                tableNames.add(name);
-            }
-        }
+        Set<String> tableNames = getTableNames(connection);
 
         assertEquals(Set.of("info"), tableNames);
     }
@@ -132,6 +115,13 @@ class SqliteCacheMigrationTest {
 
         cacheMigration.migrate();
 
+        Set<String> tableNames = getTableNames(connection);
+
+        assertEquals(Set.of("info", "entries"), tableNames);
+    }
+
+    @NotNull
+    public static Set<String> getTableNames(Connection connection) throws SQLException {
         Set<String> tableNames = new HashSet<>();
 
         try (Statement statement = connection.createStatement()) {
@@ -142,7 +132,6 @@ class SqliteCacheMigrationTest {
                 tableNames.add(name);
             }
         }
-
-        assertEquals(Set.of("info", "entries"), tableNames);
+        return tableNames;
     }
 }
