@@ -31,7 +31,7 @@ public class GameMapTest {
                 }
                 """);
 
-        assertThrows(IllegalArgumentException.class, () -> GameMap.parse(entries(json), new MapDescriptor("test", "", "")));
+        assertThrows(IllegalArgumentException.class, () -> GameMap.parse(entries(json), new MapDescriptor("test", "")));
     }
 
     @Test
@@ -44,7 +44,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", ""));
 
         assertEquals(new Identifier("test:my_map"), gameMap.getDescriptor().getIdentifier());
         assertEquals("minecraft:cobblestone", gameMap.getProperty("icon"));
@@ -59,10 +59,10 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", ""));
 
         assertEquals(new Identifier("test:my_map"), gameMap.getDescriptor().getIdentifier());
-        assertEquals("test/my_map/1.20", gameMap.getDescriptor().getMapPath());
+        assertEquals("test/my_map", gameMap.getDescriptor().getMapPath());
         assertNull(gameMap.getProperty("icon"));
     }
 
@@ -75,7 +75,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", ""));
 
         assertFalse(gameMap.getProperties().containsKey("path"));
         assertFalse(gameMap.getProperties().containsKey("target"));
@@ -89,7 +89,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested"));
 
         assertEquals(new Identifier("test:nested/my_map"), gameMap.getDescriptor().getIdentifier());
     }
@@ -102,7 +102,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested"));
 
         assertEquals(new Identifier("test:"), gameMap.getDescriptor().getIdentifier());
     }
@@ -115,10 +115,10 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested", "1.20"));
+        GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested"));
 
         assertEquals(new Identifier("test:map_two"), gameMap.getDescriptor().getIdentifier());
-        assertEquals("test/map_two/1.20", gameMap.getDescriptor().getMapPath());
+        assertEquals("test/map_two", gameMap.getDescriptor().getMapPath());
     }
 
     @Test
@@ -132,14 +132,14 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"), entries(json));
 
         assertEquals(List.of("foo", "bar"), gameMap.getAuthors());
     }
 
     @Test
     void getAuthorsUndefined() {
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"));
 
         assertEquals(List.of(), gameMap.getAuthors());
     }
@@ -152,7 +152,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"), entries(json));
 
         assertEquals(List.of("foo"), gameMap.getAuthors());
     }
@@ -169,14 +169,14 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"), entries(json));
 
         assertEquals(List.of("baz", "foo", "bar"), gameMap.getAuthors());
     }
 
     @Test
     void getNameUndefined() {
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"));
 
         assertEquals("nested", gameMap.getName());
     }
@@ -192,7 +192,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"), entries(json));
 
         assertEquals("Custom Name", gameMap.getName());
         assertEquals("Custom Name", gameMap.getName("en_us"));
@@ -208,7 +208,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"), entries(json));
 
         assertEquals(Items.DIAMOND, gameMap.getIcon());
         assertEquals(Items.DIAMOND, gameMap.getProperty("icon"));
@@ -216,7 +216,7 @@ public class GameMapTest {
 
     @Test
     void getIconUndefined() {
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"));
 
         assertEquals(GameMap.DEFAULT_ICON, gameMap.getIcon());
     }
@@ -229,7 +229,7 @@ public class GameMapTest {
                 }
                 """);
 
-        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested", ""), entries(json));
+        GameMap gameMap = new GameMap(new MapDescriptor("test", "nested"), entries(json));
 
         assertEquals(GameMap.DEFAULT_ICON, gameMap.getIcon());
     }

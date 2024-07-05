@@ -56,7 +56,7 @@ class CacheMapFetcherTest {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
             for (String name : List.of("map_one", "map_two", "map_three")) {
-                GameMap map = new GameMap(new MapDescriptor("test", name, ""));
+                GameMap map = new GameMap(new MapDescriptor("test", name));
 
                 Path path = dir.resolve("test").resolve(name);
 
@@ -72,7 +72,7 @@ class CacheMapFetcherTest {
         void pull_plain_propertiesMerged() throws IOException {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
-            GameMap map = new GameMap(new MapDescriptor("test", "map_one", ""));
+            GameMap map = new GameMap(new MapDescriptor("test", "map_one"));
 
             assertNull(map.getProperty("extraProp"));
 
@@ -85,7 +85,7 @@ class CacheMapFetcherTest {
         void pull_linked_copiedWithoutCache() throws IOException {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
-            GameMap map = new GameMap(new MapDescriptor("linked", "test", ""));
+            GameMap map = new GameMap(new MapDescriptor("linked", "test"));
 
             Path path = dir.resolve("test").resolve("map_three");
 
@@ -100,7 +100,7 @@ class CacheMapFetcherTest {
         void pull_escaped_throws() throws IOException {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
-            GameMap map = new GameMap(new MapDescriptor("broken", "escape/../../../test", ""));
+            GameMap map = new GameMap(new MapDescriptor("broken", "escape/../../../test"));
 
             Path path = dir.resolve("broken").resolve("map_three");
 
@@ -146,7 +146,7 @@ class CacheMapFetcherTest {
         void pull_plain_copiedAndCached() throws IOException {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
-            GameMap map = new GameMap(new MapDescriptor("test", "map_three", ""));
+            GameMap map = new GameMap(new MapDescriptor("test", "map_three"));
 
             Path path = dir.resolve("test").resolve("map_three");
 
@@ -161,7 +161,7 @@ class CacheMapFetcherTest {
         void pull_plain_propertiesMerged() throws IOException {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
-            GameMap map = new GameMap(new MapDescriptor("test", "map_two", ""));
+            GameMap map = new GameMap(new MapDescriptor("test", "map_two"));
 
             assertNull(map.getProperty("extraProp"));
 
@@ -175,7 +175,7 @@ class CacheMapFetcherTest {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
             // linked:test targets test:map_three, so test:map_three should be cached
-            GameMap map = new GameMap(new MapDescriptor("linked", "test", ""));
+            GameMap map = new GameMap(new MapDescriptor("linked", "test"));
 
             Path path = dir.resolve("test").resolve("map_three");
 
@@ -190,7 +190,7 @@ class CacheMapFetcherTest {
         void pull_escaped_throws() throws IOException {
             Path dir = Files.createTempDirectory("mgl_mmt");
 
-            GameMap map = new GameMap(new MapDescriptor("broken", "escape/../../../test", ""));
+            GameMap map = new GameMap(new MapDescriptor("broken", "escape/../../../test"));
 
             Path path = dir.resolve("broken").resolve("map_three");
 

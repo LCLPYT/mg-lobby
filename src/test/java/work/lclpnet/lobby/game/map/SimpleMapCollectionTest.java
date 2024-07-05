@@ -22,9 +22,9 @@ class SimpleMapCollectionTest {
     @Test
     void mapsWithPrefix() {
         var maps = new SimpleMapCollection();
-        GameMap myFoo = new GameMap(new MapDescriptor("my_minigame", "my_map/foo", "1.20"));
-        GameMap myBar = new GameMap(new MapDescriptor("my_minigame", "my_map/bar", "1.20"));
-        GameMap otherFoo = new GameMap(new MapDescriptor("my_minigame", "other_map/foo", "1.20"));
+        GameMap myFoo = new GameMap(new MapDescriptor("my_minigame", "my_map/foo"));
+        GameMap myBar = new GameMap(new MapDescriptor("my_minigame", "my_map/bar"));
+        GameMap otherFoo = new GameMap(new MapDescriptor("my_minigame", "other_map/foo"));
 
         maps.add(myFoo);
         maps.add(myBar);
@@ -43,9 +43,9 @@ class SimpleMapCollectionTest {
     @Test
     void mapIdsWithPrefix() {
         var maps = new SimpleMapCollection();
-        maps.add(new GameMap(new MapDescriptor("my_minigame", "my_map/foo", "1.20")));
-        maps.add(new GameMap(new MapDescriptor("my_minigame", "my_map/bar", "1.20")));
-        maps.add(new GameMap(new MapDescriptor("my_minigame", "other_map/foo", "1.20")));
+        maps.add(new GameMap(new MapDescriptor("my_minigame", "my_map/foo")));
+        maps.add(new GameMap(new MapDescriptor("my_minigame", "my_map/bar")));
+        maps.add(new GameMap(new MapDescriptor("my_minigame", "other_map/foo")));
 
         assertEquals(Set.of(
                 new Identifier("my_minigame", "my_map/foo"),

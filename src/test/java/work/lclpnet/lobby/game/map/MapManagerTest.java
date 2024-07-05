@@ -42,7 +42,7 @@ class MapManagerTest {
 
         assertTrue(maps.getMaps().isEmpty());
 
-        manager.loadAll(new MapDescriptor(namespace, path, ""));
+        manager.loadAll(new MapDescriptor(namespace, path));
 
         var actual = maps.getMaps().stream()
                 .map(GameMap::getDescriptor)
@@ -54,20 +54,20 @@ class MapManagerTest {
     private static Stream<Arguments> maps() {
         return Stream.of(
                 Arguments.of("test", "", Set.of(
-                        new MapDescriptor("test", "map_one", ""),
-                        new MapDescriptor("test", "map_two", ""),
-                        new MapDescriptor("test", "map_three", "")
+                        new MapDescriptor("test", "map_one"),
+                        new MapDescriptor("test", "map_two"),
+                        new MapDescriptor("test", "map_three")
                 )),
                 Arguments.of("my_collection", "", Set.of(
-                        new MapDescriptor("test", "map_two", "")
+                        new MapDescriptor("test", "map_two")
                 )),
                 Arguments.of("linked", "", Set.of(
                         // target field not evaluated in list maps operation, only when trying to access the map
-                        new MapDescriptor("linked", "test", "")
+                        new MapDescriptor("linked", "test")
                 )),
                 Arguments.of("broken", "escape", Set.of(
                         // path is not validated in list maps operation, only when trying to access the map
-                        new MapDescriptor("broken", "escape/../../../test", "")
+                        new MapDescriptor("broken", "escape/../../../test")
                 ))
         );
     }
