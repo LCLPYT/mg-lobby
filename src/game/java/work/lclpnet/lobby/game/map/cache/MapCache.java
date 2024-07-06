@@ -26,27 +26,27 @@ import java.util.Objects;
 public class MapCache implements Closeable {
 
     private final CacheIndex index;
-    private final UriMapRepository repository;
+    private final UriMapRepository cacheRepository;
     private final int ttlSeconds;
     private final Logger logger;
 
-    public MapCache(CacheIndex index, UriMapRepository repository, int ttlSeconds, Logger logger) {
+    public MapCache(CacheIndex index, UriMapRepository cacheRepository, int ttlSeconds, Logger logger) {
         this.ttlSeconds = ttlSeconds;
         this.logger = logger;
         this.index = index;
-        this.repository = repository;
+        this.cacheRepository = cacheRepository;
     }
 
     @Nullable
     public Collection<MapRef> getCachedMapList(String path) {
-        String entry = Path.of(path).resolve("index.json").toString();
+        String entry = path + "/index.json";
 
-        if (index.isEntryInvalid(entry, ttlSeconds)) {
+        if (index.isEntryInvalid(entry)) {
             return null;
         }
 
         try {
-            return repository.getMapList(path);
+            return cacheRepository.getMapList(path);
         } catch (IOException e) {
             logger.error("Failed to get cached map list for {}", path, e);
             return null;
@@ -55,16 +55,16 @@ public class MapCache implements Closeable {
 
     @Nullable
     public MapInfo getCachedMapInfo(String path) {
-        String entry = Path.of(path).resolve("map.json").toString();
+        String entry = path + "/map.json";
 
-        if (index.isEntryInvalid(entry, ttlSeconds)) {
+        if (index.isEntryInvalid(entry)) {
             return null;
         }
 
         MapInfo mapInfo;
 
         try {
-            mapInfo = repository.getMapInfo(path);
+            mapInfo = cacheRepository.getMapInfo(path);
         } catch (IOException e) {
             logger.error("Failed to get cached map info for {}", path, e);
             return null;
@@ -97,7 +97,7 @@ public class MapCache implements Closeable {
 
     @Nullable
     public Path getCachePath(String path) {
-        Path root = Path.of(repository.getRoot());
+        Path root = Path.of(cacheRepository.getRoot());
         Path cachePath = root.resolve(path);
 
         if (cachePath.startsWith(root)) {
@@ -108,7 +108,8 @@ public class MapCache implements Closeable {
     }
 
     public void cacheMapInfo(String path, MapInfo info) {
-        Path cachePath = getCachePath(path + "/map.json");
+        String entry = path + "/map.json";
+        Path cachePath = getCachePath(entry);
 
         if (cachePath == null) {
             logger.warn("Failed to cache map info: path {} escapes the cache directory", path);
@@ -127,11 +128,12 @@ public class MapCache implements Closeable {
             return;
         }
 
-        index.updateEntry(path);
+        index.updateEntry(entry, ttlSeconds);
     }
 
     public void cacheMapList(String path, Collection<MapRef> mapList) {
-        Path cachePath = getCachePath(path + "/index.json");
+        String entry = path + "/index.json";
+        Path cachePath = getCachePath(entry);
 
         if (cachePath == null) {
             logger.warn("Failed to cache map list: path {} escapes the cache directory", path);
@@ -156,7 +158,10 @@ public class MapCache implements Closeable {
             Files.writeString(cachePath, json.toString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             logger.warn("Failed to cache map list", e);
+            return;
         }
+
+        index.updateEntry(entry, ttlSeconds);
     }
 
     @Nullable
@@ -295,6 +300,10 @@ public class MapCache implements Closeable {
         Path userHome = Path.of(prop);
         Path root = userHome.resolve(".maps");
 
+        return createCache(root, logger);
+    }
+
+    public static MapCache createCache(Path root, Logger logger) throws IOException {
         if (!Files.exists(root)) {
             Files.createDirectories(root);
         }

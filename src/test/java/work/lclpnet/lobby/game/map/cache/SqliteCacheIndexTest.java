@@ -21,31 +21,20 @@ class SqliteCacheIndexTest {
     }
 
     @Test
-    void getTimestamp_exists() throws SQLException, IOException {
+    void getExpiryTimestamp_exists() throws SQLException, IOException {
         Path path = Path.of("src", "test", "resources", "cache", "index_simple_entry.sqlite");
 
         try (var index = SqliteCacheIndex.createSqliteIndex(path, logger)) {
-            assertEquals(1720210276, index.getTimestamp("test/hello"));
+            assertEquals(1720210276, index.getExpiryTimestamp("test/hello"));
         }
     }
 
     @Test
-    void isEntryInvalid_withinTtl_false() throws SQLException, IOException {
-        Path path = Path.of("src", "test", "resources", "cache", "index_simple_entry.sqlite");
-
-        long ttl = System.currentTimeMillis() / 1000 - 1720210276 + 10;
-
-        try (var index = SqliteCacheIndex.createSqliteIndex(path, logger)) {
-            assertFalse(index.isEntryInvalid("test/hello", (int) ttl));
-        }
-    }
-
-    @Test
-    void isEntryInvalid_tooOld_true() throws SQLException, IOException {
+    void isEntryInvalid_expired_true() throws SQLException, IOException {
         Path path = Path.of("src", "test", "resources", "cache", "index_simple_entry.sqlite");
 
         try (var index = SqliteCacheIndex.createSqliteIndex(path, logger)) {
-            assertTrue(index.isEntryInvalid("test/hello", 60));
+            assertTrue(index.isEntryInvalid("test/hello"));
         }
     }
 
@@ -68,7 +57,7 @@ class SqliteCacheIndexTest {
 
         @Test
         void getTimestamp() {
-            assertEquals(-1, index.getTimestamp("test/hello"));
+            assertEquals(-1, index.getExpiryTimestamp("test/hello"));
         }
 
         @Test
@@ -77,16 +66,25 @@ class SqliteCacheIndexTest {
 
             long now = System.currentTimeMillis() / 1000;
 
-            index.updateEntry(path);
+            index.updateEntry(path, 3600);
 
-            long time = index.getTimestamp(path);
+            long expiryTime = index.getExpiryTimestamp(path);
 
-            assertTrue(time >= now);
+            assertTrue(expiryTime >= now + 3600);
         }
 
         @Test
         void isEntryInvalid_doesNotExist_true() {
-            assertTrue(index.isEntryInvalid("test/hello", 60));
+            assertTrue(index.isEntryInvalid("test/hello"));
+        }
+
+        @Test
+        void isEntryInvalid_beforeExpiry_false() {
+            String path = "test/hello";
+
+            index.updateEntry(path, 1800);
+
+            assertFalse(index.isEntryInvalid(path));
         }
     }
 }

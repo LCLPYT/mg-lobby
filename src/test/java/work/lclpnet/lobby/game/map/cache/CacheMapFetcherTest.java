@@ -47,7 +47,7 @@ class CacheMapFetcherTest {
             URI cacheUri = Files.createTempDirectory("mgl_cmf").toUri();
             UriMapRepository cacheRepo = new UriMapRepository(cacheUri, logger);
 
-            cache = new MapCache(ALWAYS_CACHED, cacheRepo, 600, logger);
+            cache = new MapCache(AlwaysCachedIndex.INSTANCE, cacheRepo, 600, logger);
             fetcher = new CacheMapFetcher(lookup, cache);
         }
 
@@ -138,7 +138,7 @@ class CacheMapFetcherTest {
             URI cacheUri = Files.createTempDirectory("mgl_cmf").toUri();
             UriMapRepository cacheRepo = new UriMapRepository(cacheUri, logger);
 
-            cache = new MapCache(ALWAYS_CACHED, cacheRepo, 600, logger);
+            cache = new MapCache(AlwaysCachedIndex.INSTANCE, cacheRepo, 600, logger);
             fetcher = new CacheMapFetcher(lookup, cache);
         }
 
@@ -204,17 +204,4 @@ class CacheMapFetcherTest {
         Path path = dir.resolve(name).resolve("content.txt");
         assertTrue(Files.isRegularFile(path));
     }
-
-    private static final CacheIndex ALWAYS_CACHED = new CacheIndex() {
-        @Override
-        public boolean isEntryInvalid(String path, int ttlSeconds) {
-            return false;
-        }
-
-        @Override
-        public void updateEntry(String path) {}
-
-        @Override
-        public void close() {}
-    };
 }

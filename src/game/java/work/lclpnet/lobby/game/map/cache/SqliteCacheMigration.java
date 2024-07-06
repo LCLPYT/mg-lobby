@@ -68,7 +68,7 @@ public class SqliteCacheMigration {
         statement.execute("""
                 CREATE TABLE IF NOT EXISTS entries (\
                 path string NOT NULL PRIMARY KEY, \
-                timestamp bigint unsigned NOT NULL
+                expiry bigint unsigned NOT NULL
                 )""");
     }
 }

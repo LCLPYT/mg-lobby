@@ -29,16 +29,21 @@ public class SqliteCacheIndex implements CacheIndex {
     }
 
     @Override
-    public boolean isEntryInvalid(String path, int ttlSeconds) {
-        long timestamp = getTimestamp(path);
+    public boolean isEntryInvalid(String path) {
+        long expiryTimestamp = getExpiryTimestamp(path);
 
-        if (timestamp == -1) return true;
+        if (expiryTimestamp == -1) return true;
 
-        return System.currentTimeMillis() / 1000 - timestamp >= ttlSeconds;
+        return System.currentTimeMillis() / 1000 >= expiryTimestamp;
     }
 
-    public long getTimestamp(String path) {
-        try (var statement = connection.prepareStatement("SELECT timestamp FROM entries WHERE path = ?")) {
+    /**
+     * Gets the expiry timestamp in seconds (unix timestamp) for a path.
+     * @param path The path.
+     * @return The expiry timestamp, or -1 if not set.
+     */
+    public long getExpiryTimestamp(String path) {
+        try (var statement = connection.prepareStatement("SELECT expiry FROM entries WHERE path = ?")) {
             statement.setString(1, path);
 
             try (ResultSet result = statement.executeQuery()) {
@@ -53,10 +58,10 @@ public class SqliteCacheIndex implements CacheIndex {
     }
 
     @Override
-    public void updateEntry(String path) {
-        try (var statement = connection.prepareStatement("REPLACE INTO entries (path, timestamp) VALUES (?, ?)")) {
+    public void updateEntry(String path, int ttlSeconds) {
+        try (var statement = connection.prepareStatement("REPLACE INTO entries (path, expiry) VALUES (?, ?)")) {
             statement.setString(1, path);
-            statement.setLong(2, System.currentTimeMillis() / 1000);
+            statement.setLong(2, System.currentTimeMillis() / 1000 + ttlSeconds);
 
             statement.execute();
         } catch (SQLException e) {

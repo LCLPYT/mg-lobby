@@ -8,12 +8,12 @@ public class VoidCacheIndex implements CacheIndex {
     public void close() {}
 
     @Override
-    public boolean isEntryInvalid(String path, int ttlSeconds) {
+    public boolean isEntryInvalid(String path) {
         return true;
     }
 
     @Override
-    public void updateEntry(String path) {}
+    public void updateEntry(String path, int ttlSeconds) {}
 
     public static VoidCacheIndex getInstance() {
         return Holder.INSTANCE;
