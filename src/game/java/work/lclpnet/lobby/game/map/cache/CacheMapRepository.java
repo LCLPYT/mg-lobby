@@ -5,7 +5,10 @@ import work.lclpnet.lobby.game.map.MapRef;
 import work.lclpnet.lobby.game.map.MapRepository;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * A map repository using cached maps first.
@@ -18,6 +21,7 @@ public class CacheMapRepository implements MapRepository {
     public CacheMapRepository(MapRepository upstream, MapCache cache) {
         this.upstream = upstream;
         this.cache = cache;
+        this.upstream.addRedirectAction(this.cache::cacheMapInfo);
     }
 
     @Override
@@ -45,8 +49,27 @@ public class CacheMapRepository implements MapRepository {
 
         MapInfo mapInfo = upstream.getMapInfo(path);
 
-        cache.cacheMapInfo(path, mapInfo);
+        cache.cacheMapInfo(mapInfo.target(), mapInfo);
 
         return mapInfo;
+    }
+
+    @Override
+    public Optional<URI> getResource(String path, String resource) throws IOException {
+        var cached = cache.getCachedResource(path, resource);
+
+        if (cached != null) {
+            return Optional.of(cached.toUri());
+        }
+
+        return upstream.getResource(path, resource).map(uri -> {
+            Path cachedResource = cache.cacheResource(path, resource, uri);
+
+            if (cachedResource == null) {
+                return uri;
+            }
+
+            return cachedResource.toUri();
+        });
     }
 }

@@ -3,21 +3,19 @@ package work.lclpnet.lobby.game.map.cache;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import work.lclpnet.lobby.game.map.GameMap;
 import work.lclpnet.lobby.game.map.MapInfo;
 import work.lclpnet.lobby.game.map.MapRef;
 import work.lclpnet.lobby.game.map.UriMapRepository;
-import work.lclpnet.lobby.game.util.FileUtil;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -70,24 +68,38 @@ public class MapCache implements Closeable {
             return null;
         }
 
-        MapInfo modified = withCachedSourceIfAvailable(path, mapInfo);
-
-        if (modified != null) {
-            return modified;
-        }
-
         return mapInfo;
     }
 
     @Nullable
-    private MapInfo withCachedSourceIfAvailable(String path, MapInfo mapInfo) {
-        Path cachePath = getCachedMapSource(path, mapInfo);
+    public Path getCachedResource(String path, String resource) {
+        String entry = URI.create(path + "/").resolve(resource).toString();
 
-        if (cachePath == null) return null;
+        if (index.isEntryInvalid(entry)) {
+            return null;
+        }
 
-        String cacheFileName = cachePath.getFileName().toString();
+        var res = cacheRepository.getResource(path, resource);
 
-        return mapInfo.withSource(cacheFileName);
+        if (res.isEmpty()) {
+            return null;
+        }
+
+        URI uri = res.get();
+        Path resourcePath;
+
+        try {
+            resourcePath = Path.of(uri);
+        } catch (RuntimeException e) {
+            logger.error("Failed to resolve path from cache uri {}", uri);
+            return null;
+        }
+
+        if (Files.isRegularFile(resourcePath)) {
+            return resourcePath;
+        }
+
+        return null;
     }
 
     @Override
@@ -165,129 +177,48 @@ public class MapCache implements Closeable {
     }
 
     @Nullable
-    public Path getCachedMapSource(GameMap map) {
-        if (!map.hasProperty("target", String.class)) {
+    public Path cacheResource(String path, String resource, URI uri) {
+        // only cache remote files
+        if (uri.getHost() == null) {
             return null;
         }
 
-        String path = map.getProperty("target");
-
-        // try to infer source directly from the map instance
-        Object source = map.getProperty("source");
-
-        if (source instanceof URI sourceUri) {
-            Path cachedSource = getCachedMapSource(path, sourceUri);
-
-            if (cachedSource != null) {
-                return cachedSource;
-            }
-        }
-
-        // try to find cached map info
-        MapInfo mapInfo = getCachedMapInfo(path);
-
-        if (mapInfo == null) return null;
-
-        // try to find cached map source
-        return getCachedMapSource(path, mapInfo);
-    }
-
-    @Nullable
-    private Path getCachedMapSource(String path, URI source) {
-        String sourcePath = source.getPath();
-
-        if (sourcePath == null) return null;
-
-        String fileName;
+        URL url;
 
         try {
-            fileName = Path.of(sourcePath).getFileName().toString();
-        } catch (InvalidPathException ignored) {
+            url = uri.toURL();
+        } catch (MalformedURLException e) {
+            logger.error("Failed to cache resource: {} cannot be converted to a URL", uri, e);
             return null;
         }
 
-        return getCachedMapSource(path, fileName);
-    }
-
-    @Nullable
-    private Path getCachedMapSource(String path, MapInfo mapInfo) {
-        String source = mapInfo.getSource();
-
-        if (source == null) return null;
-
-        var uri = FileUtil.getUri(mapInfo.uri(), source);
-
-        if (uri.isEmpty()) return null;
-
-        String sourcePath = uri.get().getPath();
-
-        if (sourcePath == null) return null;
-
-        String cacheFileName;
-
-        try {
-            cacheFileName = Path.of(sourcePath).getFileName().toString();
-        } catch (InvalidPathException e) {
-            logger.error("Failed to determine map source path file name", e);
+        // only cache remote files
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
             return null;
         }
 
-        return getCachedMapSource(path, cacheFileName);
-    }
-
-    @Nullable
-    private Path getCachedMapSource(String path, String cacheFileName) {
-        Path cachePath = getCachePath(path + "/" + cacheFileName);
-
-        if (cachePath == null || !Files.exists(cachePath)) return null;
-
-        return cachePath;
-    }
-
-    @Nullable
-    public Path cacheMapSource(GameMap map, URL source) {
-        if (!map.hasProperty("target", String.class)) {
-            return null;
-        }
-
-        String path = map.getProperty("target");
-        String sourcePath = source.getPath();
-
-        if (sourcePath == null) {
-            logger.warn("Failed to cache map source: Path of {} is undefined", source);
-            return null;
-        }
-
-        String fileName;
-
-        try {
-            fileName = Path.of(sourcePath).getFileName().toString();
-        } catch (InvalidPathException e) {
-            logger.warn("Could not determine map source file name of {}", source, e);
-            return null;
-        }
-
-        // try to copy the map to the cache first
-        Path cachePath = getCachePath(path + "/" + fileName);
+        String entry = URI.create(path + "/").resolve(resource).toString();
+        Path cachePath = getCachePath(entry);
 
         if (cachePath == null) {
-            logger.warn("Could not determine cache path for {}", path + "/" + fileName);
+            logger.warn("Failed to cache resource: path {} escapes the cache directory", entry);
             return null;
         }
 
-        // copy to cache
         try {
             Files.createDirectories(cachePath.getParent());
 
-            URLConnection connection = source.openConnection();
+            URLConnection connection = url.openConnection();
 
             try (var in = connection.getInputStream()) {
                 Files.copy(in, cachePath);
             }
         } catch (IOException e) {
-            logger.error("Failed to cache map source for {}", cachePath, e);
+            logger.error("Failed to cache resource {}", cachePath, e);
             return null;
         }
+
+        index.updateEntry(entry, ttlSeconds);
 
         return cachePath;
     }

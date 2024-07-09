@@ -1,7 +1,5 @@
 package work.lclpnet.lobby.game.map;
 
-import work.lclpnet.lobby.game.util.FileUtil;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
@@ -13,13 +11,9 @@ public interface MapRepository {
 
     MapInfo getMapInfo(String path) throws IOException;
 
-    default Optional<URI> getMapSource(MapInfo info) {
-        String source = info.getSource();
+    Optional<URI> getResource(String path, String resource) throws IOException;
 
-        if (source == null) {
-            return Optional.empty();
-        }
-
-        return FileUtil.getUri(info.uri(), source);
+    default void addRedirectAction(MapRedirectAction action) {
+        throw new UnsupportedOperationException("MapRepository does not support redirect actions");
     }
 }

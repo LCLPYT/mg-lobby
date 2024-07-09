@@ -1,8 +1,9 @@
 package work.lclpnet.lobby.game.map.cache;
 
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.SimpleFileServer;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.lobby.game.map.MapInfo;
@@ -10,6 +11,7 @@ import work.lclpnet.lobby.game.map.MapRef;
 import work.lclpnet.lobby.game.map.UriMapRepository;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,8 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MapCacheTest {
 
@@ -77,5 +78,43 @@ class MapCacheTest {
         var cached = cache.getCachedMapInfo("test/map_one");
 
         assertEquals(info, cached);
+    }
+
+    @Test
+    void getCachedResource_uncached_null() {
+        var res = cache.getCachedResource("test/foo", "my-resource.txt");
+
+        assertNull(res);
+    }
+
+    @Nested
+    class Remote {
+        static HttpServer server;
+
+        @BeforeAll
+        static void setUpAll() {
+            InetSocketAddress address = new InetSocketAddress("localhost", 8000);
+            Path rootPath = Path.of("src", "test", "resources").toAbsolutePath();
+
+            server = SimpleFileServer.createFileServer(address, rootPath, SimpleFileServer.OutputLevel.INFO);
+            server.start();
+        }
+
+        @AfterAll
+        static void tearDownAll() {
+            server.stop(1);
+        }
+
+        @Test
+        void cacheResource_uncached_isCached() {
+            URI uri = URI.create("http://localhost:8000/directory/foo.txt");
+
+            cache.cacheResource("test/foo", "my-resource.txt", uri);
+
+            Path cached = cache.getCachedResource("test/foo", "my-resource.txt");
+
+            assertNotNull(cached);
+            assertNotEquals(uri, cached.toUri());
+        }
     }
 }

@@ -6,13 +6,11 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import work.lclpnet.lobby.game.util.FileUtil;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -92,6 +90,11 @@ public class RepositoryMapLookupTest {
                 }
 
                 throw new IOException();
+            }
+
+            @Override
+            public Optional<URI> getResource(String path, String resource) {
+                return FileUtil.getUri(URI.create(path), resource);
             }
         };
     }
