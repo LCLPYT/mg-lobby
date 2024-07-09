@@ -11,7 +11,7 @@ public interface MapRepository {
 
     MapInfo getMapInfo(String path) throws IOException;
 
-    Optional<URI> getResource(String path, String resource) throws IOException;
+    Optional<URI> getResource(String path, String resource);
 
     default void addRedirectAction(MapRedirectAction action) {
         throw new UnsupportedOperationException("MapRepository does not support redirect actions");

@@ -44,10 +44,6 @@ public class RepositoryMapLookup implements MapLookup {
             return Optional.empty();
         }
 
-        try {
-            return mapRepository.getResource(info.target() + "/", source);
-        } catch (IOException e) {
-            return Optional.empty();
-        }
+        return mapRepository.getResource(info.target() + "/", source);
     }
 }

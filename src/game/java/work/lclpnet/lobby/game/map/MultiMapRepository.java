@@ -40,7 +40,7 @@ public class MultiMapRepository implements MapRepository {
     }
 
     @Override
-    public Optional<URI> getResource(String path, String resource) throws IOException {
+    public Optional<URI> getResource(String path, String resource) {
         for (MapRepository child : children) {
             var uri = child.getResource(path, resource);
 

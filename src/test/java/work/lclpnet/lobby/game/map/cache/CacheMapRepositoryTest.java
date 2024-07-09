@@ -2,7 +2,6 @@ package work.lclpnet.lobby.game.map.cache;
 
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.SimpleFileServer;
-import org.apache.commons.io.function.IOBiFunction;
 import org.apache.commons.io.function.IOFunction;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
@@ -26,6 +25,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -210,7 +210,7 @@ class CacheMapRepositoryTest {
         final MapRepository parent;
         IOFunction<String, Collection<MapRef>> mapListFunction = null;
         IOFunction<String, MapInfo> mapInfoFunction = null;
-        IOBiFunction<String, String, Optional<URI>> resourceFunction = null;
+        BiFunction<String, String, Optional<URI>> resourceFunction = null;
 
         private WrappedMapRepository(MapRepository parent) {
             this.parent = Objects.requireNonNull(parent);
@@ -235,7 +235,7 @@ class CacheMapRepositoryTest {
         }
 
         @Override
-        public Optional<URI> getResource(String path, String resource) throws IOException {
+        public Optional<URI> getResource(String path, String resource) {
             if (resourceFunction != null) {
                 return resourceFunction.apply(path, resource);
             }

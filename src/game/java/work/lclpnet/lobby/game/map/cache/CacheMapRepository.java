@@ -55,7 +55,7 @@ public class CacheMapRepository implements MapRepository {
     }
 
     @Override
-    public Optional<URI> getResource(String path, String resource) throws IOException {
+    public Optional<URI> getResource(String path, String resource) {
         var cached = cache.getCachedResource(path, resource);
 
         if (cached != null) {
