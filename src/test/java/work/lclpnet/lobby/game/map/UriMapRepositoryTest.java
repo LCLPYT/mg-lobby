@@ -3,6 +3,7 @@ package work.lclpnet.lobby.game.map;
 import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,19 +19,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UriMapRepositoryTest {
 
-    private static final Logger logger = LoggerFactory.getLogger("test");
+    static final Logger logger = LoggerFactory.getLogger("test");
+    URI uri;
+    UriMapRepository repo;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         SharedConstants.createGameVersion();
         Bootstrap.initialize();
     }
 
+    @BeforeEach
+    void setupEach() {
+        uri = Path.of("src", "test", "resources", "maps").toUri();
+        repo = new UriMapRepository(uri, logger);
+    }
+
     @Test
     void testSimplePath() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
         var maps = repo.getMapList("test");
 
         assertEquals(Set.of("map_one", "map_two", "map_three"), maps.stream()
@@ -39,9 +46,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testNestedPath() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
         var maps = repo.getMapList("foo");
 
         assertEquals(Set.of("bar/baz", "bar/hi"), maps.stream()
@@ -51,9 +55,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testAbsolutePath() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
         var maps = repo.getMapList("my_collection");
 
         assertEquals(Set.of("/test/map_two"), maps.stream()
@@ -63,10 +64,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoSimple() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         var info = repo.getMapInfo("test/map_three");
 
         assertEquals(uri.resolve("test/map_three/map.json"), info.uri());
@@ -74,10 +71,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoPropertiesMerged() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         var info = repo.getMapInfo("test/map_one");
 
         assertEquals(true, info.properties().get("extraProp"));
@@ -85,10 +78,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoLink() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         var info = repo.getMapInfo("linked/test");
 
         assertEquals(uri.resolve("test/map_three/map.json"), info.uri());
@@ -96,10 +85,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoLinkDataInherited() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         var info = repo.getMapInfo("linked/with_data");
 
         assertEquals(10, info.properties().get("inheritedProp"));
@@ -108,10 +93,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoLinkRelative() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         var info = repo.getMapInfo("linked/relative");
 
         assertEquals(uri.resolve("linked/relative/map/map.json"), info.uri());
@@ -119,10 +100,6 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoLinkRelativeUp() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         var info = repo.getMapInfo("linked/relative/up");
 
         assertEquals(uri.resolve("linked/relative/map/map.json"), info.uri());
@@ -130,19 +107,11 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoLinkMaxDepthExceededThrows() {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         assertThrows(IOException.class, () -> repo.getMapInfo("cycle/map_a"));
     }
 
     @Test
     void testInfoLinkTargetPropertyRemoved() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         var info = repo.getMapInfo("linked/test");
 
         assertNull(info.properties().get("target"));
@@ -150,19 +119,53 @@ public class UriMapRepositoryTest {
 
     @Test
     void testInfoLinkOutsideOfRepoThrows() {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         assertThrows(IOException.class, () -> repo.getMapInfo("broken/escape"));
     }
 
     @Test
     void testGetMapsPathOutsideOfRepoThrows() {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-
         assertThrows(IOException.class, () -> repo.getMapList("../escaped"));
+    }
+
+    @Test
+    void testGetResourceBasic() {
+        URI res = repo.getResource("test/map_two", "world.zip").orElseThrow();
+
+        assertEquals(uri.resolve("test/map_two/world.zip"), res);
+    }
+
+    @Test
+    void testGetResourceRelative() {
+        URI res = repo.getResource("test/map_two", "../map_three/world.tar.xz").orElseThrow();
+
+        assertEquals(uri.resolve("test/map_three/world.tar.xz"), res);
+    }
+
+    @Test
+    void testGetResourceAbsolute() {
+        URI res = repo.getResource("test/map_two", "/test/map_three/world.tar.xz").orElseThrow();
+
+        assertEquals(uri.resolve("test/map_three/world.tar.xz"), res);
+    }
+
+    @Test
+    void testGetResourcePathOutsideEmpty() {
+        var res = repo.getResource("../test/map_two", "world.tar");
+
+        assertEquals(Optional.empty(), res);
+    }
+
+    @Test
+    void testGetResourceResourceOutsideEmpty() {
+        var res = repo.getResource("test/map_two", "../../../world.tar");
+
+        assertEquals(Optional.empty(), res);
+    }
+
+    @Test
+    void testGetResourceAbsoluteResourceOutsideEmpty() {
+        var res = repo.getResource("test/map_two", "/../world.tar");
+
+        assertEquals(Optional.empty(), res);
     }
 }

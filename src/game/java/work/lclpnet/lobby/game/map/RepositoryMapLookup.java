@@ -28,10 +28,22 @@ public class RepositoryMapLookup implements MapLookup {
 
         map.putProperties(info.properties());
 
-        var source = mapRepository.getMapSource(info);
+        var source = getSource(info);
 
         source.ifPresent(uri -> map.putProperty("source", uri));
 
+        map.putProperty("target", info.target());
+
         return source;
+    }
+
+    private Optional<URI> getSource(MapInfo info) {
+        String source = info.getSource();
+
+        if (source == null) {
+            return Optional.empty();
+        }
+
+        return mapRepository.getResource(info.target() + "/", source);
     }
 }

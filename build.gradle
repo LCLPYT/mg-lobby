@@ -30,6 +30,18 @@ repositories {
         url 'https://repo.lclpnet.work/repository/snapshots'
     }
 
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+
     maven {
         url = 'https://maven.nucleoid.xyz/'
     }
@@ -68,6 +80,7 @@ dependencies {
     modImplementation "work.lclpnet.mods.kibu:kibu-world-api:${project.kibu_world_api_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
     modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
+    modImplementation "maven.modrinth:sqlite-jdbc:3.41.2.1+20230506"
     pluginImplementation("work.lclpnet.mcserver-api:mcserver-api-kibu:${project.mcserver_api_version}")
     pluginCompileOnly(pluginLocalRuntime("work.lclpnet.plugins:pal:${project.pal_version}"))
 
@@ -93,6 +106,7 @@ dependencies {
 
     // test dependencies
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.1'
     testImplementation "org.mockito:mockito-core:5.6.0"
 }
 

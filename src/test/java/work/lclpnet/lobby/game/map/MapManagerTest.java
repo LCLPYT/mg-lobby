@@ -2,19 +2,22 @@ package work.lclpnet.lobby.game.map;
 
 import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
-import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MapManagerTest {
 
@@ -26,116 +29,46 @@ class MapManagerTest {
         Bootstrap.initialize();
     }
 
-    @Test
-    void pull_copied() throws IOException {
+    @ParameterizedTest
+    @MethodSource("maps")
+    void loadAll_loadedIntoCollection(String namespace, String path, Set<MapDescriptor> expected) throws IOException {
         URI uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        var repo = new UriMapRepository(uri, logger);
-        var manager = new MapManager(new RepositoryMapLookup(repo));
+        var lookup = new RepositoryMapLookup(new UriMapRepository(uri, logger));
+        var fetcher = new DirectMapFetcher(lookup);
+        var maps = new SimpleMapCollection();
 
-        manager.loadAll(new MapDescriptor("test", "", ""));
+        var manager = new MapManager(maps, lookup, fetcher);
 
-        var maps = manager.getCollection();
+        assertTrue(maps.getMaps().isEmpty());
 
-        Path dir = Files.createTempDirectory("mgl_mmt");
+        manager.loadAll(new MapDescriptor(namespace, path));
 
-        for (String name : List.of("map_one", "map_two", "map_three")) {
-            GameMap map = maps.getMap(new Identifier("test", name)).orElseThrow();
+        var actual = maps.getMaps().stream()
+                .map(GameMap::getDescriptor)
+                .collect(Collectors.toSet());
 
-            Path path = dir.resolve("test").resolve(name);
-            manager.pull(map, path);
-
-            assertCopied(dir, path);
-        }
+        assertEquals(expected, actual);
     }
 
-    @Test
-    void pull_propertiesMerged() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-        var manager = new MapManager(new RepositoryMapLookup(repo));
-
-        manager.loadAll(new MapDescriptor("test", "", ""));
-
-        var maps = manager.getCollection();
-
-        Path dir = Files.createTempDirectory("mgl_mmt");
-
-        GameMap map = maps.getMap(new Identifier("test", "map_one")).orElseThrow();
-
-        assertNull(map.getProperty("extraProp"));
-
-        manager.pull(map, dir.resolve("test").resolve("map_one"));
-
-        assertEquals(Boolean.TRUE, map.getProperty("extraProp"));
-    }
-
-    @Test
-    void pull_fromCollection_copied() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-        var manager = new MapManager(new RepositoryMapLookup(repo));
-
-        manager.loadAll(new MapDescriptor("my_collection", "", ""));
-
-        var maps = manager.getCollection();
-
-        Path dir = Files.createTempDirectory("mgl_mmt");
-
-        GameMap map = maps.getMap(new Identifier("test", "map_two")).orElseThrow();
-
-        Path path = dir.resolve("test").resolve("map_two");
-        manager.pull(map, path);
-
-        assertCopied(dir, path);
-    }
-
-    @Test
-    void pull_linked_copied() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-        var manager = new MapManager(new RepositoryMapLookup(repo));
-
-        manager.loadAll(new MapDescriptor("linked", "", ""));
-
-        var maps = manager.getCollection();
-
-        Path dir = Files.createTempDirectory("mgl_mmt");
-
-        GameMap map = maps.getMap(new Identifier("linked", "test")).orElseThrow();
-
-        Path path = dir.resolve("test").resolve("map_three");
-        manager.pull(map, path);
-
-        assertCopied(dir, path);
-    }
-
-    @Test
-    void pull_escaped_throws() throws IOException {
-        URI uri = Path.of("src", "test", "resources", "maps").toUri();
-
-        var repo = new UriMapRepository(uri, logger);
-        var manager = new MapManager(new RepositoryMapLookup(repo));
-
-        manager.loadAll(new MapDescriptor("broken", "escape", ""));
-
-        var maps = manager.getCollection();
-
-        Path dir = Files.createTempDirectory("mgl_mmt");
-
-        GameMap map = maps.getMap(new Identifier("broken", "escape/../../../test")).orElseThrow();
-
-        Path path = dir.resolve("broken").resolve("map_three");
-        assertThrows(IOException.class, () -> manager.pull(map, path));
-    }
-
-    private void assertCopied(Path dir, Path name) {
-        assertEquals(Path.of("..", "..").toString(), name.relativize(dir).toString());
-
-        Path path = dir.resolve(name).resolve("content.txt");
-        assertTrue(Files.isRegularFile(path));
+    private static Stream<Arguments> maps() {
+        return Stream.of(
+                Arguments.of("test", "", Set.of(
+                        new MapDescriptor("test", "map_one"),
+                        new MapDescriptor("test", "map_two"),
+                        new MapDescriptor("test", "map_three")
+                )),
+                Arguments.of("my_collection", "", Set.of(
+                        new MapDescriptor("test", "map_two")
+                )),
+                Arguments.of("linked", "", Set.of(
+                        // target field not evaluated in list maps operation, only when trying to access the map
+                        new MapDescriptor("linked", "test")
+                )),
+                Arguments.of("broken", "escape", Set.of(
+                        // path is not validated in list maps operation, only when trying to access the map
+                        new MapDescriptor("broken", "escape/../../../test")
+                ))
+        );
     }
 }

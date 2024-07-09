@@ -6,13 +6,11 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import work.lclpnet.lobby.game.util.FileUtil;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,7 +27,7 @@ public class RepositoryMapLookupTest {
         var repo = getMapRepository();
         var lookup = new RepositoryMapLookup(repo);
 
-        var maps = lookup.getMaps(new MapDescriptor("test", "", ""));
+        var maps = lookup.getMaps(new MapDescriptor("test", ""));
 
         assertEquals(List.of("test:map_one", "test:nested/map_two"), maps.stream()
                 .map(map -> map.getDescriptor().getIdentifier())
@@ -43,7 +41,7 @@ public class RepositoryMapLookupTest {
         var repo = getMapRepository();
         var lookup = new RepositoryMapLookup(repo);
 
-        var maps = lookup.getMaps(new MapDescriptor("test", "nested", ""));
+        var maps = lookup.getMaps(new MapDescriptor("test", "nested"));
 
         assertEquals(List.of("test:nested/map_two"), maps.stream()
                 .map(map -> map.getDescriptor().getIdentifier())
@@ -57,11 +55,11 @@ public class RepositoryMapLookupTest {
         var repo = getMapRepository();
         var lookup = new RepositoryMapLookup(repo);
 
-        GameMap map = new GameMap(new MapDescriptor("test", "hello", "1.20"));
+        GameMap map = new GameMap(new MapDescriptor("test", "hello"));
 
         var source = lookup.getSource(map).orElseThrow();
 
-        assertEquals(URI.create("test/hello/1.20/here"), source);
+        assertEquals(URI.create("test/hello/here"), source);
     }
 
     @NotNull
@@ -87,11 +85,16 @@ public class RepositoryMapLookupTest {
 
             @Override
             public MapInfo getMapInfo(String path) throws IOException {
-                if ("test/hello/1.20".equals(path)) {
-                    return new MapInfo(URI.create("test/hello/1.20/map.json"), Map.of("source", "here"));
+                if ("test/hello".equals(path)) {
+                    return new MapInfo(URI.create("test/hello/map.json"), "test/hello", Map.of("source", "here"));
                 }
 
                 throw new IOException();
+            }
+
+            @Override
+            public Optional<URI> getResource(String path, String resource) {
+                return FileUtil.getUri(URI.create(path), resource);
             }
         };
     }

@@ -1,8 +1,10 @@
 package work.lclpnet.lobby.game.map;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class MultiMapRepository implements MapRepository {
@@ -35,5 +37,18 @@ public class MultiMapRepository implements MapRepository {
         }
 
         throw new IOException("Map information wasn't found");
+    }
+
+    @Override
+    public Optional<URI> getResource(String path, String resource) {
+        for (MapRepository child : children) {
+            var uri = child.getResource(path, resource);
+
+            if (uri.isPresent()) {
+                return uri;
+            }
+        }
+
+        return Optional.empty();
     }
 }

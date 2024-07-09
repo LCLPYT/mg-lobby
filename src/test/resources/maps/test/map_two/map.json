@@ -1,3 +1,4 @@
 {
-  "source": "world.zip"
+  "source": "world.zip",
+  "extraProp": 10
 }
