@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -197,6 +198,19 @@ class CacheMapRepositoryTest {
         URI actual = repository.getResource(path, resource).orElseThrow();
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void getMapInfo_infoUncachedSourceCached_sourceInvalidated() throws IOException {
+        URI uri = repository.getResource("test/map_three", "world.tar.xz").orElseThrow();
+        Path cached = cache.getCachedResource("test/map_three", "world.tar.xz");
+
+        assertNotNull(cached);
+        assertEquals(uri, cached.toUri());
+
+        repository.getMapInfo("test/map_three");
+
+        assertNull(cache.getCachedResource("test/map_three", "world.tar.xz"));
     }
 
     private static @NotNull Set<String> paths(Collection<MapRef> maps) {

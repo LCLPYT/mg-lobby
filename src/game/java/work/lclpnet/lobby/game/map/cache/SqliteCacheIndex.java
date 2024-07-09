@@ -69,6 +69,17 @@ public class SqliteCacheIndex implements CacheIndex {
         }
     }
 
+    @Override
+    public void invalidate(String path) {
+        try (var statement = connection.prepareStatement("DELETE FROM entries WHERE path = ?")) {
+            statement.setString(1, path);
+
+            statement.execute();
+        } catch (SQLException e) {
+            logger.error("Failed to invalidate cache entry", e);
+        }
+    }
+
     public static SqliteCacheIndex createSqliteIndex(Path path, Logger logger) throws SQLException {
         Connection connection = createSqliteConnection(path, logger);
 

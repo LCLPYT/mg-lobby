@@ -15,6 +15,9 @@ public class VoidCacheIndex implements CacheIndex {
     @Override
     public void updateEntry(String path, int ttlSeconds) {}
 
+    @Override
+    public void invalidate(String path) {}
+
     public static VoidCacheIndex getInstance() {
         return Holder.INSTANCE;
     }

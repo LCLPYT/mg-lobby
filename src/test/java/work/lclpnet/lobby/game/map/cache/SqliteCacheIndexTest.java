@@ -86,5 +86,17 @@ class SqliteCacheIndexTest {
 
             assertFalse(index.isEntryInvalid(path));
         }
+
+        @Test
+        void invalidate_cached_isInvalidated() {
+            String path = "test/hello";
+            index.updateEntry(path, 10000);
+
+            assertFalse(index.isEntryInvalid(path));
+
+            index.invalidate(path);
+
+            assertTrue(index.isEntryInvalid(path));
+        }
     }
 }

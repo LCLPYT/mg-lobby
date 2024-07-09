@@ -73,7 +73,7 @@ public class MapCache implements Closeable {
 
     @Nullable
     public Path getCachedResource(String path, String resource) {
-        String entry = URI.create(path + "/").resolve(resource).toString();
+        String entry = getResourceEntry(path, resource);
 
         if (index.isEntryInvalid(entry)) {
             return null;
@@ -109,11 +109,11 @@ public class MapCache implements Closeable {
 
     @Nullable
     public Path getCachePath(String path) {
-        Path root = Path.of(cacheRepository.getRoot());
-        Path cachePath = root.resolve(path);
+        URI root = cacheRepository.getRoot();
+        URI cacheUri = root.resolve(path);
 
-        if (cachePath.startsWith(root)) {
-            return cachePath;
+        if (cacheUri.getPath().startsWith(root.getPath())) {
+            return Path.of(cacheUri);
         }
 
         return null;
@@ -197,7 +197,7 @@ public class MapCache implements Closeable {
             return null;
         }
 
-        String entry = URI.create(path + "/").resolve(resource).toString();
+        String entry = getResourceEntry(path, resource);
         Path cachePath = getCachePath(entry);
 
         if (cachePath == null) {
@@ -221,6 +221,29 @@ public class MapCache implements Closeable {
         index.updateEntry(entry, ttlSeconds);
 
         return cachePath;
+    }
+
+    private String getResourceEntry(String path, String resource) {
+        return URI.create(path + "/").resolve(resource).toString();
+    }
+
+    public void invalidateSource(MapInfo info) {
+        String source = info.getSource();
+
+        if (source == null) return;
+
+        String entry = getResourceEntry(info.target() + "/", source);
+
+        invalidate(entry);
+    }
+
+    public void invalidate(String entry) {
+        if (getCachePath(entry) == null) {
+            logger.error("Cannot invalidate path outside the cache directory: {}", entry);
+            return;
+        }
+
+        index.invalidate(entry);
     }
 
     public static MapCache createUserCache(Logger logger) throws IOException {

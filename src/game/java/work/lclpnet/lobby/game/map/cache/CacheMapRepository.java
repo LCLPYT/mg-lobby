@@ -51,6 +51,9 @@ public class CacheMapRepository implements MapRepository {
 
         cache.cacheMapInfo(mapInfo.target(), mapInfo);
 
+        // invalidate the map source to keep it in sync with the info
+        cache.invalidateSource(mapInfo);
+
         return mapInfo;
     }
 

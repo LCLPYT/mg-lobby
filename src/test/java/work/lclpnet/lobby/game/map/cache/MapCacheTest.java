@@ -20,10 +20,12 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class MapCacheTest {
 
     static final Logger logger = LoggerFactory.getLogger(MapCacheTest.class);
+    private CacheIndex index;
     private MapCache cache;
     private Path cacheRoot;
 
@@ -33,7 +35,8 @@ class MapCacheTest {
 
         UriMapRepository cacheRepo = new UriMapRepository(cacheRoot.toUri(), logger);
 
-        cache = new MapCache(AlwaysCachedIndex.INSTANCE, cacheRepo, 3600, logger);
+        index = mock();
+        cache = new MapCache(index, cacheRepo, 3600, logger);
     }
 
     @Test
@@ -85,6 +88,20 @@ class MapCacheTest {
         var res = cache.getCachedResource("test/foo", "my-resource.txt");
 
         assertNull(res);
+    }
+
+    @Test
+    void invalidate_validPath_invalidated() {
+        cache.invalidate("test");
+
+        verify(index, times(1)).invalidate("test");
+    }
+
+    @Test
+    void invalidate_invalidPath_notInvalidated() {
+        cache.invalidate("../test");
+
+        verify(index, never()).invalidate(anyString());
     }
 
     @Nested
