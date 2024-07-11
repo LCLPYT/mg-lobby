@@ -2,9 +2,9 @@ package work.lclpnet.lobby.game;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.game.api.Game;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class GameManagerState {

@@ -1,6 +1,7 @@
 package work.lclpnet.lobby;
 
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -15,11 +16,10 @@ import work.lclpnet.lobby.di.LobbyModule;
 import work.lclpnet.lobby.event.ConnectionListener;
 import work.lclpnet.lobby.event.RuntimeWorldListener;
 import work.lclpnet.lobby.game.GameOwnerCache;
+import work.lclpnet.mplugins.event.PluginBootstrapEvents;
 import work.lclpnet.mplugins.ext.WorldStateListener;
 import work.lclpnet.translations.loader.translation.SPITranslationLoader;
 import work.lclpnet.translations.loader.translation.TranslationLoader;
-
-import javax.annotation.Nonnull;
 
 public class LobbyPlugin extends KibuPlugin implements WorldStateListener, LobbyAPI, TranslatedPlugin {
 
@@ -54,7 +54,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
             component.lobbyWorldDownloader().renewWorld();
         }
 
-        component.dataPackService().downloadRequired();
+        PluginBootstrapEvents.COMPLETE.register(frame -> component.dataPackService().downloadRequired());
 
         logger.info("Lobby loaded.");
     }
@@ -105,7 +105,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
         return new SPITranslationLoader(getClass().getClassLoader());
     }
 
-    @Nonnull
+    @NotNull
     public GameOwnerCache getGameOwnerCache() {
         return gameOwnerCache;
     }

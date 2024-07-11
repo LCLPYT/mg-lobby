@@ -5,10 +5,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -20,6 +20,8 @@ public class GameMap {
 
     private final MapDescriptor descriptor;
     private final Map<String, Object> properties;
+    @Nullable
+    private final MapDescriptor referrer;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock readLock = lock.readLock(), writeLock = lock.writeLock();
     private volatile Item icon = null;
@@ -29,8 +31,13 @@ public class GameMap {
     }
 
     public GameMap(MapDescriptor descriptor, Map<String, Object> properties) {
+        this(descriptor, properties, null);
+    }
+
+    public GameMap(MapDescriptor descriptor, Map<String, Object> properties, @Nullable MapDescriptor referrer) {
         this.descriptor = descriptor;
         this.properties = new Object2ObjectOpenHashMap<>(properties);
+        this.referrer = referrer;
     }
 
     public MapDescriptor getDescriptor() {
@@ -61,7 +68,7 @@ public class GameMap {
         return (T) o;
     }
 
-    @Nonnull
+    @NotNull
     public <T> T requireProperty(String name) {
         T prop = getProperty(name);
         return Objects.requireNonNull(prop, "Property \"%s\" is undefined".formatted(name));
@@ -194,6 +201,22 @@ public class GameMap {
         props.remove("path");
         props.remove("target");
 
-        return new GameMap(descriptor, props);
+        return new GameMap(descriptor, props, parentDescriptor);
+    }
+
+    public boolean isFrom(String idPrefix) {
+        String id = descriptor.getIdentifier().toString();
+
+        if (id.startsWith(idPrefix)) {
+            return true;
+        }
+
+        if (referrer == null) {
+            return false;
+        }
+
+        id = referrer.getIdentifier().toString();
+
+        return id.startsWith(idPrefix);
     }
 }

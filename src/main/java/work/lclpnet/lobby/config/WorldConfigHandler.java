@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.config;
 
 import net.minecraft.server.world.ServerWorld;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
 import work.lclpnet.config.json.ConfigSerializer;
 import work.lclpnet.config.json.JsonConfig;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
 
 public class WorldConfigHandler<T extends JsonConfig> extends ConfigHandler<T> {
@@ -15,7 +15,7 @@ public class WorldConfigHandler<T extends JsonConfig> extends ConfigHandler<T> {
         super(getSavePath(world).resolve(relativePath), serializer, logger);
     }
 
-    @Nonnull
+    @NotNull
     private static Path getSavePath(ServerWorld world) {
         String levelName = world.getChunkManager().threadedAnvilChunkStorage.getSaveDir();
         return world.getServer().getRunDirectory().toPath().resolve(levelName);

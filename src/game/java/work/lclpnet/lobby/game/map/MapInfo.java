@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.game.map;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;

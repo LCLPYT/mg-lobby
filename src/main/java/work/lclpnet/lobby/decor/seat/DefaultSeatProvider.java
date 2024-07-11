@@ -14,9 +14,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.access.entity.ArmorStandAccess;
-
-import javax.annotation.Nullable;
 
 public class DefaultSeatProvider implements SeatProvider {
 

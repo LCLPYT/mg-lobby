@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -37,7 +38,6 @@ import work.lclpnet.lobby.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.Random;
 import java.util.function.Supplier;

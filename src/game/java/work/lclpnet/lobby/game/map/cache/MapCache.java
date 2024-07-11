@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.map.cache;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -7,7 +8,6 @@ import work.lclpnet.lobby.game.map.MapInfo;
 import work.lclpnet.lobby.game.map.MapRef;
 import work.lclpnet.lobby.game.map.UriMapRepository;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.MalformedURLException;

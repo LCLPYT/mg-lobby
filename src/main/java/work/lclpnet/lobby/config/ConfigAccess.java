@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.config;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public interface ConfigAccess {
 
-    @Nonnull
+    @NotNull
     LobbyConfig getConfig();
 
-    @Nonnull
+    @NotNull
     LobbyWorldConfig getWorldConfig();
 }

@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.game.start;
 
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.activity.LobbyActivity;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public class LobbyGameConfigurator {

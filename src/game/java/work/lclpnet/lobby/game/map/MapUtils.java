@@ -3,11 +3,11 @@ package work.lclpnet.lobby.game.map;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.kibu.hook.util.PositionRotation;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class MapUtils {
 
     private MapUtils() {}
 
-    @Nonnull
+    @NotNull
     public static Vec3d getSpawnPosition(GameMap gameMap) {
         if (gameMap.getProperty("spawn") instanceof JSONArray array) {
             return getSpawnVec3d(array);
@@ -31,7 +31,7 @@ public class MapUtils {
         return getAngle(number);
     }
 
-    @Nonnull
+    @NotNull
     public static List<Vec3d> getSpawnPositions(GameMap gameMap) {
         if (!(gameMap.getProperty("spawns") instanceof JSONArray array)) {
             throw missingProperty("spawns");
@@ -48,7 +48,7 @@ public class MapUtils {
         return spawns;
     }
 
-    @Nonnull
+    @NotNull
     public static List<PositionRotation> getSpawnPositionsAndRotation(GameMap gameMap) {
         if (!(gameMap.getProperty("spawns") instanceof JSONArray array)) {
             throw missingProperty("spawns");
@@ -67,7 +67,7 @@ public class MapUtils {
         return spawns;
     }
 
-    @Nonnull
+    @NotNull
     public static Map<String, Vec3d> getNamedSpawnPositions(GameMap gameMap) {
         if (!(gameMap.getProperty("spawns") instanceof JSONObject object)) {
             throw missingProperty("spawns");
@@ -94,7 +94,7 @@ public class MapUtils {
         return spawns;
     }
 
-    @Nonnull
+    @NotNull
     public static Map<String, PositionRotation> getNamedSpawnPositionsAndRotation(GameMap gameMap) {
         if (!(gameMap.getProperty("spawns") instanceof JSONObject object)) {
             throw missingProperty("spawns");
@@ -134,7 +134,7 @@ public class MapUtils {
         return new PositionRotation(spawn.x, spawn.y, spawn.z, yaw, pitch);
     }
 
-    @Nonnull
+    @NotNull
     private static Vec3d getSpawnVec3d(JSONArray json) {
         if (json.length() < 3) {
             throw new IllegalArgumentException("JSONArray must have at least 3 elements");

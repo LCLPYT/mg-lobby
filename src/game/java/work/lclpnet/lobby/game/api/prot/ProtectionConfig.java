@@ -1,8 +1,7 @@
 package work.lclpnet.lobby.game.api.prot;
 
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.game.impl.prot.ProtectionTypes;
-
-import javax.annotation.Nullable;
 
 public interface ProtectionConfig {
 

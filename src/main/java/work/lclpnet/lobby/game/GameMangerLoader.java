@@ -1,8 +1,7 @@
 package work.lclpnet.lobby.game;
 
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.game.api.Game;
-
-import javax.annotation.Nullable;
 
 public interface GameMangerLoader {
 

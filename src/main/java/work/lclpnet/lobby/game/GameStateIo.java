@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.CompletableFuture;
 
 public interface GameStateIo {
@@ -9,6 +10,6 @@ public interface GameStateIo {
 
     CompletableFuture<Void> restore(GameMangerLoader loader);
 
-    @Nonnull
+    @NotNull
     GameManagerState getState();
 }

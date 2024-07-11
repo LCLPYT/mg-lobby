@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.game.map;
 
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -18,7 +18,7 @@ public interface MapCollection extends Iterable<GameMap> {
         maps.forEach(this::add);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     default Iterator<GameMap> iterator() {
         return getMaps().iterator();
@@ -35,10 +35,8 @@ public interface MapCollection extends Iterable<GameMap> {
 
         Set<Identifier> seen = new HashSet<>();
 
-        return getMaps().stream().filter(map -> {
-            Identifier id = map.getDescriptor().getIdentifier();
-            return id.toString().startsWith(prefixStr) && seen.add(id);
-        });
+        return getMaps().stream()
+                .filter(map -> map.isFrom(prefixStr) && seen.add(map.getDescriptor().getIdentifier()));
     }
 
     default Stream<Identifier> mapIdsWithPrefix(Identifier prefix) {

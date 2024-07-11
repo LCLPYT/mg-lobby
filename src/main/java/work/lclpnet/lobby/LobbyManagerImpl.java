@@ -20,7 +20,6 @@ import work.lclpnet.lobby.service.PalService;
 import work.lclpnet.lobby.util.PlayerReset;
 import work.lclpnet.mplugins.MPluginsAPI;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
@@ -50,7 +49,7 @@ public class LobbyManagerImpl implements LobbyManager {
         return logger;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public LobbyConfig getConfig() {
         LobbyConfig config = configHandler.getConfig();

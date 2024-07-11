@@ -9,9 +9,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.RaycastContext;
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.util.RayCaster;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -30,7 +30,7 @@ public class DefaultPosGenerator implements PosGenerator {
     public DefaultPosGenerator(ServerWorld world, Stack<BlockPos> history, Config config) {
         initPossibleMoves();
 
-        if (history.size() == 0) {
+        if (history.isEmpty()) {
             throw new IllegalArgumentException("History must have a start element");
         }
 
@@ -374,7 +374,7 @@ public class DefaultPosGenerator implements PosGenerator {
     @Override
     public void reset() {
         this.lastMoveUp = false;
-        this.from = history.get(0);
+        this.from = history.getFirst();
     }
 
     /**
