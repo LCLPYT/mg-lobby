@@ -6,7 +6,7 @@ plugins {
     id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
-    id 'kibu-plugin-dev' version '0.14.0'
+    id 'kibu-plugin-dev' version '0.15.0'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
