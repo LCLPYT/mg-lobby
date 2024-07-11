@@ -181,8 +181,12 @@ extraMcSourceSets.each { name ->
         }
 
         // include extra sourceSet in main jar tasks
-        [jar, sourcesJar, shadowJar].each {
+        [jar, shadowJar].each {
             it.from set.output
+        }
+
+        sourcesJar {
+            from set.allSource
         }
     }
 }
