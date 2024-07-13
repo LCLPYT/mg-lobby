@@ -17,6 +17,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Objects;
@@ -211,7 +212,7 @@ public class MapCache implements Closeable {
             URLConnection connection = url.openConnection();
 
             try (var in = connection.getInputStream()) {
-                Files.copy(in, cachePath);
+                Files.copy(in, cachePath, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
             logger.error("Failed to cache resource {}", cachePath, e);

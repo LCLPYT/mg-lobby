@@ -132,6 +132,9 @@ class MapCacheTest {
 
             assertNotNull(cached);
             assertNotEquals(uri, cached.toUri());
+
+            verify(index, times(1))
+                    .updateEntry(eq("test/foo/my-resource.txt"), anyInt());
         }
     }
 }
