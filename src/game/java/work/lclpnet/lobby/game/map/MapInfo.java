@@ -6,8 +6,13 @@ import org.json.JSONObject;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-public record MapInfo(URI uri, String target, Map<String, Object> properties) {
+public record MapInfo(URI uri, String target, Map<String, Object> properties, @Nullable MapRepository origin) {
+
+    public MapInfo(URI uri, String target, Map<String, Object> properties) {
+        this(uri, target, properties, null);
+    }
 
     @Nullable
     public String getSource() {
@@ -37,6 +42,23 @@ public record MapInfo(URI uri, String target, Map<String, Object> properties) {
 
         copy.put("source", source);
 
-        return new MapInfo(uri, target, copy);
+        return new MapInfo(uri, target, copy, origin);
+    }
+
+    public MapInfo withOrigin(MapRepository repo) {
+        return new MapInfo(uri, target, properties, repo);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapInfo mapInfo = (MapInfo) o;
+        return Objects.equals(uri, mapInfo.uri) && Objects.equals(target, mapInfo.target) && Objects.equals(properties, mapInfo.properties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri, target, properties);
     }
 }

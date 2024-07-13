@@ -44,7 +44,7 @@ public class CacheMapRepository implements MapRepository {
         var cached = cache.getCachedMapInfo(path);
 
         if (cached != null) {
-            return cached;
+            return cached.withOrigin(this);
         }
 
         MapInfo mapInfo = upstream.getMapInfo(path);
@@ -54,7 +54,7 @@ public class CacheMapRepository implements MapRepository {
         // invalidate the map source to keep it in sync with the info
         cache.invalidateSource(mapInfo);
 
-        return mapInfo;
+        return mapInfo.withOrigin(this);
     }
 
     @Override

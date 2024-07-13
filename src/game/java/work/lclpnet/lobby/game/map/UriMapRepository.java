@@ -117,7 +117,7 @@ public class UriMapRepository implements MapRepository {
         URI rootRelative = this.root.relativize(root.resolve(path));
         String rootPath = Objects.requireNonNull(rootRelative.getPath());
 
-        MapInfo currentInfo = new MapInfo(mapUri, rootPath, props);
+        MapInfo currentInfo = new MapInfo(mapUri, rootPath, props, this);
         Object targetObj = props.get("target");
 
         if (!(targetObj instanceof String target)) {

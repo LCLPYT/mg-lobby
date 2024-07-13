@@ -10,6 +10,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,18 +65,35 @@ class MultiMapRepositoryTest {
 
         MapInfo mapInfo = multi.getMapInfo("foo/bar/1.20");
 
-        assertSame(mapA, mapInfo);
+        assertEquals(mapA, mapInfo);
     }
 
     @Test
-    void getResource() throws IOException {
+    void getMapInfo_originUpdated() throws IOException {
+        MapRepository repo = mock();
+
+        MapInfo mapA = new MapInfo(URI.create("foo/bar/1.20"), "foo/bar/1.20", Map.of("source", "sourceA"));
+
+        when(repo.getMapInfo("foo/bar/1.20"))
+                .thenReturn(mapA);
+
+        var multi = new MultiMapRepository(new MapRepository[] { repo });
+
+        MapInfo mapInfo = multi.getMapInfo("foo/bar/1.20");
+
+        assertNull(mapA.origin());
+        assertSame(repo, mapInfo.origin());
+    }
+
+    @Test
+    void getResource() {
         MapRepository repoA = mock();
         MapRepository repoB = mock();
 
-        when(repoA.getResource(any(), any()))
+        when(repoA.getResource(anyString(), any()))
                 .thenReturn(Optional.empty());
 
-        when(repoB.getResource(any(), any()))
+        when(repoB.getResource(anyString(), any()))
                 .thenReturn(Optional.empty());
 
         URI resOne = URI.create("foo/one/res1.txt");
@@ -102,5 +120,31 @@ class MultiMapRepositoryTest {
         assertSame(resOne, multi.getResource("foo/one", "res1.txt").orElseThrow());
         assertSame(resTwo, multi.getResource("foo/two", "bar/res2.txt").orElseThrow());
         assertSame(resThreeA, multi.getResource("foo/three", "../res.txt").orElseThrow());
+    }
+
+    @Test
+    void getResource_withInfo_originPreferred() {
+        MapRepository repoA = mock();
+        MapRepository repoB = mock();
+
+        // repo A should not be invoked in this test case
+        when(repoA.getResource(anyString(), any()))
+                .thenThrow(AssertionError.class);
+
+        when(repoB.getResource(anyString(), any()))
+                .thenReturn(Optional.empty());
+
+        URI resB = URI.create("foo/res.txt");
+
+        when(repoB.getResource("foo/", "res.txt"))
+                .thenReturn(Optional.of(resB));
+
+        var multi = new MultiMapRepository(new MapRepository[] { repoA, repoB });
+
+        // simulate info from repoB
+        var info = new MapInfo(URI.create("some/uri"), "foo", Map.of(), repoB);
+
+        // resource should be taken from repoB first, as the info originates from repoB
+        assertSame(resB, multi.getResource(info, "res.txt").orElseThrow());
     }
 }
