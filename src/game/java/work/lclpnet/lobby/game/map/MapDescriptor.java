@@ -29,7 +29,7 @@ public class MapDescriptor {
     }
 
     public Identifier getIdentifier() {
-        return new Identifier(namespace, path);
+        return Identifier.of(namespace, path);
     }
 
     public String getMapPath() {

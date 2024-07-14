@@ -3,7 +3,7 @@ package work.lclpnet.lobby.game.api.prot.scope;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
-public interface PlayerEntityScope<E extends Entity> {
+public interface PlayerEntityScope<E extends Entity> extends PlayerGenericScope<E> {
 
     PlayerEntityScope<?> CREATIVE_OP = (player, entity) -> player.isCreativeLevelTwoOp();
 

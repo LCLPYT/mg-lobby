@@ -120,8 +120,8 @@ public class BasicProtector implements Protector, Unloadable {
                 -> (world, pos, newState)
                 -> scope.isWithinScope(world, pos));
 
-        protect(FROST_WALKER_FREEZE, WorldPhysicsHooks.FROST_WALKER_FREEZE, scope
-                -> (world, pos, entity)
+        protect(REPLACE_DISK_ENCHANTMENT, WorldPhysicsHooks.REPLACE_DISK_ENCHANTMENT, scope
+                -> (world, pos, entity, state)
                 -> scope.isWithinScope(entity, pos));
 
         protect(DROP_ITEM, PlayerInventoryHooks.DROP_ITEM, scope
@@ -231,10 +231,10 @@ public class BasicProtector implements Protector, Unloadable {
                 -> scope.isWithinScope(entity, itemEntity));
 
         protect(CRAFT_ITEM, CraftingRecipeCallback.HOOK, scope
-                -> (player, recipeManager, type, inventory, world)
-                -> recipeManager.getFirstMatch(type, inventory, world)
+                -> (player, recipeManager, type, input, cached)
+                -> recipeManager.getFirstMatch(type, input, player.getWorld())
                 .map(RecipeEntry::value)
-                .map(recipe -> recipe.getResult(world.getRegistryManager()))
+                .map(recipe -> recipe.getResult(player.getRegistryManager()))
                 // disallowed results will be mapped to empty, others will pass
                 .filter(result -> scope.isWithinScope(player, result))
                 .map(result -> PendingRecipe.empty())

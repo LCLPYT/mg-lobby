@@ -3,7 +3,7 @@ import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
     id 'java'
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
     id 'kibu-plugin-dev' version '0.15.0'

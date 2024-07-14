@@ -31,13 +31,13 @@ class SimpleMapCollectionTest {
         maps.add(otherFoo);
 
         assertEquals(Set.of(myFoo, myBar),
-                maps.mapsWithPrefix(new Identifier("my_minigame", "my_map")).collect(Collectors.toSet()));
+                maps.mapsWithPrefix(Identifier.of("my_minigame", "my_map")).collect(Collectors.toSet()));
 
         assertEquals(Set.of(otherFoo),
-                maps.mapsWithPrefix(new Identifier("my_minigame", "other_map")).collect(Collectors.toSet()));
+                maps.mapsWithPrefix(Identifier.of("my_minigame", "other_map")).collect(Collectors.toSet()));
 
         assertEquals(Set.of(otherFoo, myFoo, myBar),
-                maps.mapsWithPrefix(new Identifier("my_minigame", "")).collect(Collectors.toSet()));
+                maps.mapsWithPrefix(Identifier.of("my_minigame", "")).collect(Collectors.toSet()));
     }
 
     @Test
@@ -48,18 +48,18 @@ class SimpleMapCollectionTest {
         maps.add(new GameMap(new MapDescriptor("my_minigame", "other_map/foo")));
 
         assertEquals(Set.of(
-                new Identifier("my_minigame", "my_map/foo"),
-                new Identifier("my_minigame", "my_map/bar")
-        ), maps.mapIdsWithPrefix(new Identifier("my_minigame", "my_map")).collect(Collectors.toSet()));
+                Identifier.of("my_minigame", "my_map/foo"),
+                Identifier.of("my_minigame", "my_map/bar")
+        ), maps.mapIdsWithPrefix(Identifier.of("my_minigame", "my_map")).collect(Collectors.toSet()));
 
         assertEquals(Set.of(
-                new Identifier("my_minigame", "other_map/foo")
-        ), maps.mapIdsWithPrefix(new Identifier("my_minigame", "other_map")).collect(Collectors.toSet()));
+                Identifier.of("my_minigame", "other_map/foo")
+        ), maps.mapIdsWithPrefix(Identifier.of("my_minigame", "other_map")).collect(Collectors.toSet()));
 
         assertEquals(Set.of(
-                new Identifier("my_minigame", "other_map/foo"),
-                new Identifier("my_minigame", "my_map/foo"),
-                new Identifier("my_minigame", "my_map/bar")
-        ), maps.mapIdsWithPrefix(new Identifier("my_minigame", "")).collect(Collectors.toSet()));
+                Identifier.of("my_minigame", "other_map/foo"),
+                Identifier.of("my_minigame", "my_map/foo"),
+                Identifier.of("my_minigame", "my_map/bar")
+        ), maps.mapIdsWithPrefix(Identifier.of("my_minigame", "")).collect(Collectors.toSet()));
     }
 }

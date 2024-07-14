@@ -21,13 +21,13 @@ public class MapDescriptorTest {
     @Test
     void getIdentifier() {
         var desc = new MapDescriptor("foo", "bar");
-        assertEquals(new Identifier("foo", "bar"), desc.getIdentifier());
+        assertEquals(Identifier.of("foo", "bar"), desc.getIdentifier());
     }
 
     @Test
     void getIdentifierNoPath() {
         var desc = new MapDescriptor("foo", "");
-        assertEquals(new Identifier("foo", ""), desc.getIdentifier());
+        assertEquals(Identifier.of("foo", ""), desc.getIdentifier());
     }
 
     @Test

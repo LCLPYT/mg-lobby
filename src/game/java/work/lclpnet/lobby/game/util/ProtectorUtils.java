@@ -25,8 +25,8 @@ public class ProtectorUtils {
         // LivingEntity
         config.allow(PlayerEntityScope.creativeOp(), USE_ITEM_ON_ENTITY);
 
-        // MobEntity
-        config.allow(PlayerEntityScope.creativeOp(), LEASH_MOB, UNLEASH_MOB, LEASH_MOB_TO_BLOCK);
+        // Leashable
+        config.allow(PlayerGenericScope.creativeOp(), LEASH_MOB, UNLEASH_MOB, LEASH_MOB_TO_BLOCK);
 
         // LeashKnotEntity
         config.allow(PlayerEntityScope.creativeOp(), DETACH_LEASH);

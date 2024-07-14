@@ -17,7 +17,7 @@ public class WorldConfigHandler<T extends JsonConfig> extends ConfigHandler<T> {
 
     @NotNull
     private static Path getSavePath(ServerWorld world) {
-        String levelName = world.getChunkManager().threadedAnvilChunkStorage.getSaveDir();
-        return world.getServer().getRunDirectory().toPath().resolve(levelName);
+        String levelName = world.getChunkManager().chunkLoadingManager.getSaveDir();
+        return world.getServer().getRunDirectory().resolve(levelName);
     }
 }

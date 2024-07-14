@@ -2,11 +2,11 @@ package work.lclpnet.lobby.game.impl.prot;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.Leashable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.decoration.LeashKnotEntity;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
 import work.lclpnet.lobby.game.api.prot.scope.*;
@@ -42,7 +42,7 @@ public class ProtectionTypes {
     public static final ProtectionType<WorldBlockScope> FREEZE;
     public static final ProtectionType<WorldBlockScope> SNOW_FALL;
     public static final ProtectionType<WorldBlockScope> CAULDRON_PRECIPITATION;
-    public static final ProtectionType<EntityBlockScope> FROST_WALKER_FREEZE;
+    public static final ProtectionType<EntityBlockScope> REPLACE_DISK_ENCHANTMENT;
     public static final ProtectionType<PlayerIntBoolScope> DROP_ITEM;
     public static final ProtectionType<EntityDamageSourceScope> ALLOW_DAMAGE;
     public static final ProtectionType<PlayerItemEntityScope> PICKUP_ITEM;
@@ -56,9 +56,9 @@ public class ProtectionTypes {
     public static final ProtectionType<PlayerEntityScope<LivingEntity>> USE_ITEM_ON_ENTITY;
     public static final ProtectionType<EntityBlockScope> ATTACH_LEASH;
     public static final ProtectionType<PlayerEntityScope<LeashKnotEntity>> DETACH_LEASH;
-    public static final ProtectionType<PlayerEntityScope<MobEntity>> LEASH_MOB;
-    public static final ProtectionType<PlayerEntityScope<MobEntity>> UNLEASH_MOB;
-    public static final ProtectionType<PlayerEntityScope<MobEntity>> LEASH_MOB_TO_BLOCK;
+    public static final ProtectionType<PlayerGenericScope<Leashable>> LEASH_MOB;
+    public static final ProtectionType<PlayerGenericScope<Leashable>> UNLEASH_MOB;
+    public static final ProtectionType<PlayerGenericScope<Leashable>> LEASH_MOB_TO_BLOCK;
     public static final ProtectionType<PlayerEntityScope<ProjectileEntity>> PICKUP_PROJECTILE;
     public static final ProtectionType<ClickEventScope> MODIFY_INVENTORY;
     public static final ProtectionType<EntityBlockScope> EDIT_SIGN;
@@ -102,7 +102,7 @@ public class ProtectionTypes {
                 .add(FREEZE = new WorldBlockProtectionType())
                 .add(SNOW_FALL = new WorldBlockProtectionType())
                 .add(CAULDRON_PRECIPITATION = new WorldBlockProtectionType())
-                .add(FROST_WALKER_FREEZE = new EntityBlockProtectionType())
+                .add(REPLACE_DISK_ENCHANTMENT = new EntityBlockProtectionType())
                 .add(DROP_ITEM = new PlayerIntBoolProtectionType())
                 .add(ALLOW_DAMAGE = new EntityDamageSourceProtectionType())
                 .add(PICKUP_ITEM = new PlayerItemEntityProtectionType())
@@ -116,9 +116,9 @@ public class ProtectionTypes {
                 .add(USE_ITEM_ON_ENTITY = new PlayerEntityProtectionType<>())
                 .add(ATTACH_LEASH = new EntityBlockProtectionType())
                 .add(DETACH_LEASH = new PlayerEntityProtectionType<>())
-                .add(LEASH_MOB = new PlayerEntityProtectionType<>())
-                .add(UNLEASH_MOB = new PlayerEntityProtectionType<>())
-                .add(LEASH_MOB_TO_BLOCK = new PlayerEntityProtectionType<>())
+                .add(LEASH_MOB = new PlayerGenericProtectionType<>())
+                .add(UNLEASH_MOB = new PlayerGenericProtectionType<>())
+                .add(LEASH_MOB_TO_BLOCK = new PlayerGenericProtectionType<>())
                 .add(PICKUP_PROJECTILE = new PlayerEntityProtectionType<>())
                 .add(MODIFY_INVENTORY = new ClickEventProtectionType())
                 .add(EDIT_SIGN = new EntityBlockProtectionType())

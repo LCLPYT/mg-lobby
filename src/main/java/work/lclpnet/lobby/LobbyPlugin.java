@@ -92,7 +92,7 @@ public class LobbyPlugin extends KibuPlugin implements WorldStateListener, Lobby
     }
 
     public static Identifier identifier(String path) {
-        return new Identifier(ID, path);
+        return Identifier.of(ID, path);
     }
 
     @Override

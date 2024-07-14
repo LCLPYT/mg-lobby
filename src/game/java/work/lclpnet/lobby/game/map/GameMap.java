@@ -119,7 +119,7 @@ public class GameMap {
             Object iconObj = properties.get("icon");
 
             if (iconObj instanceof String iconStr) {
-                Identifier iconId = new Identifier(iconStr);
+                Identifier iconId = Identifier.of(iconStr);
                 icon = Registries.ITEM.get(iconId);
             }
 

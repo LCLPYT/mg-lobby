@@ -234,7 +234,7 @@ public class BossBarTimer implements SchedulerAction {
 
             if (identifier == null) {
                 String alphabet = "abcdefghijklmnopqrstuvwxyz0123456789/._-";
-                id = new Identifier("mgl_bbt", StringUtil.getRandomString(alphabet, 16, new Random()));
+                id = Identifier.of("mgl_bbt", StringUtil.getRandomString(alphabet, 16, new Random()));
             }
 
             return new BossBarTimer(translationService, id, subject, cycleColor, alertSound, durationTicks, color);

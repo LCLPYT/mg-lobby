@@ -46,7 +46,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", ""));
 
-        assertEquals(new Identifier("test:my_map"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(Identifier.of("test:my_map"), gameMap.getDescriptor().getIdentifier());
         assertEquals("minecraft:cobblestone", gameMap.getProperty("icon"));
         assertEquals("LCLP", gameMap.getProperty("author"));
     }
@@ -61,7 +61,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", ""));
 
-        assertEquals(new Identifier("test:my_map"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(Identifier.of("test:my_map"), gameMap.getDescriptor().getIdentifier());
         assertEquals("test/my_map", gameMap.getDescriptor().getMapPath());
         assertNull(gameMap.getProperty("icon"));
     }
@@ -91,7 +91,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested"));
 
-        assertEquals(new Identifier("test:nested/my_map"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(Identifier.of("test:nested/my_map"), gameMap.getDescriptor().getIdentifier());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested"));
 
-        assertEquals(new Identifier("test:"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(Identifier.of("test:"), gameMap.getDescriptor().getIdentifier());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(entries(json), new MapDescriptor("test", "nested"));
 
-        assertEquals(new Identifier("test:map_two"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(Identifier.of("test:map_two"), gameMap.getDescriptor().getIdentifier());
         assertEquals("test/map_two", gameMap.getDescriptor().getMapPath());
     }
 
