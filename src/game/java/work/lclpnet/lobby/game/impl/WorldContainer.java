@@ -6,7 +6,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import work.lclpnet.kibu.hook.world.ServerWorldHooks;
-import work.lclpnet.mplugins.ext.Unloadable;
 import xyz.nucleoid.fantasy.Fantasy;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.fantasy.RuntimeWorldHandle;
@@ -14,7 +13,7 @@ import xyz.nucleoid.fantasy.RuntimeWorldHandle;
 import java.util.Map;
 import java.util.Optional;
 
-public class WorldContainer implements Unloadable {
+public class WorldContainer {
 
     private final MinecraftServer server;
     private final Map<RegistryKey<World>, RuntimeWorldHandle> worlds = new Object2ObjectOpenHashMap<>();
@@ -61,7 +60,6 @@ public class WorldContainer implements Unloadable {
         stopTracking(world.getRegistryKey());
     }
 
-    @Override
     public synchronized void unload() {
         ServerWorldHooks.UNLOAD.unregister(this::onWorldUnload);
 

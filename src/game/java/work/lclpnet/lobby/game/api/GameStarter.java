@@ -1,7 +1,6 @@
 package work.lclpnet.lobby.game.api;
 
 import work.lclpnet.activity.Activity;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
 
 public interface GameStarter {
 
@@ -22,7 +21,6 @@ public interface GameStarter {
     }
 
     interface Args {
-        PluginContext getPluginContext();
 
         void startChildActivity(Activity activity);
 

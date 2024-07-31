@@ -2,9 +2,10 @@ package work.lclpnet.lobby.game;
 
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
-import work.lclpnet.kibu.plugin.cmd.CommandStack;
-import work.lclpnet.kibu.plugin.hook.HookStack;
-import work.lclpnet.kibu.plugin.scheduler.SchedulerStack;
+import work.lclpnet.kibu.cmd.impl.CommandContainer;
+import work.lclpnet.kibu.cmd.impl.CommandStack;
+import work.lclpnet.kibu.hook.HookStack;
+import work.lclpnet.kibu.scheduler.util.SchedulerStack;
 import work.lclpnet.lobby.LobbyAPI;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameFinisher;
@@ -13,7 +14,6 @@ import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.impl.WorldContainer;
 import work.lclpnet.lobby.game.impl.WorldFacadeImpl;
 import work.lclpnet.lobby.game.map.MapManager;
-import work.lclpnet.mplugins.ext.Unloadable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,24 +26,17 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     private final Logger logger;
     private final GameConfig gameConfig;
     private volatile boolean destroyed = false;
-    private volatile List<Unloadable> closeWhenDone = null;
+    private volatile List<Runnable> whenDone = null;
     private volatile HookStack hookStack;
     private volatile CommandStack commandStack;
     private volatile SchedulerStack schedulerStack;
     private volatile WorldFacadeImpl worldFacade;
     private WorldContainer worldContainer;
-    private GameOwner owner = null;
 
     public FinishableGameEnvironment(MinecraftServer server, Logger logger, GameConfig gameConfig) {
         this.server = server;
         this.logger = logger;
         this.gameConfig = gameConfig;
-    }
-
-    public void bind(GameOwner owner) {
-        synchronized (this) {
-            this.owner = owner;
-        }
     }
 
     @Override
@@ -78,7 +71,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
 
         synchronized (this) {
             if (commandStack == null) {
-                commandStack = new CommandStack();
+                commandStack = new CommandStack(CommandContainer::new);
             }
 
             return commandStack;
@@ -135,17 +128,17 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public void closeWhenDone(Unloadable unloadable) {
-        Objects.requireNonNull(unloadable);
+    public void whenDone(Runnable action) {
+        Objects.requireNonNull(action);
 
         assertNotDestroyed();
 
         synchronized (this) {
-            if (closeWhenDone == null) {
-                closeWhenDone = new ArrayList<>();
+            if (whenDone == null) {
+                whenDone = new ArrayList<>();
             }
 
-            closeWhenDone.add(unloadable);
+            whenDone.add(action);
         }
     }
 
@@ -159,10 +152,6 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
 
     @Override
     public void finishGame(Reason reason) {
-        if (owner != null) {
-            owner.detach();
-        }
-
         server.execute(() -> {
             synchronized (this) {
                 destroyed = true;
@@ -183,15 +172,13 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
                     worldContainer.unload();
                 }
 
-                if (closeWhenDone != null) {
-                    closeWhenDone.forEach(Unloadable::unload);
-                    closeWhenDone.clear();
+                if (whenDone != null) {
+                    whenDone.forEach(Runnable::run);
+                    whenDone.clear();
                 }
             }
 
-            if (reason != Reason.UNLOADED) {
-                LobbyAPI.getInstance().enterLobbyPhase();
-            }
+            LobbyAPI.getInstance().enterLobbyPhase();
         });
     }
 }

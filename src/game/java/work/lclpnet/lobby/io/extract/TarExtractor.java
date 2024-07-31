@@ -20,7 +20,7 @@ public class TarExtractor implements ArchiveExtractor {
     public void extractTo(Path path) throws IOException {
         try (var in = new TarArchiveInputStream(source)) {
             TarArchiveEntry entry;
-            while ((entry = in.getNextTarEntry()) != null) {
+            while ((entry = in.getNextEntry()) != null) {
                 Path dst = path.resolve(entry.getName());
 
                 if (entry.isDirectory()) {

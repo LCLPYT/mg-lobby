@@ -5,15 +5,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
-import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.kibu.cmd.type.CommandRegistrar;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.TranslationService;
-import work.lclpnet.lobby.LobbyPlugin;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.cmd.*;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
@@ -25,7 +24,6 @@ import work.lclpnet.lobby.di.ActivityComponent;
 import work.lclpnet.lobby.di.ActivityModule;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.GameOwner;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameInstance;
 import work.lclpnet.lobby.game.api.GameStarter;
@@ -40,6 +38,7 @@ import work.lclpnet.lobby.util.ResetWorldModifier;
 
 import javax.inject.Inject;
 import java.util.Random;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
@@ -50,7 +49,6 @@ public class LobbyActivity extends ComponentActivity {
     private final ActivityManager childActivity;
     private final ActivityComponent.Builder componentBuilder;
     private final GameStartingActivity.Builder startingBuilder;
-    private final PluginContext context;
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
     private final TranslationService translationService;
     private GameStarter gameStarter;
@@ -59,10 +57,9 @@ public class LobbyActivity extends ComponentActivity {
     private TicTacToeManager ticTacToeManager;
 
     @Inject
-    public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
+    public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
                          GameStartingActivity.Builder startingBuilder, TranslationService translationService) {
-        super(context);
-        this.context = context;
+        super(server, logger);
         this.lobbyManager = lobbyManager;
         this.childActivity = new SyncActivityManager();
         this.componentBuilder = componentBuilder;
@@ -178,7 +175,7 @@ public class LobbyActivity extends ComponentActivity {
 
         final Game nextGame = game;
 
-        getServer().submit(() -> changeGame(nextGame));
+        getServer().execute(() -> changeGame(nextGame));
     }
 
     @Nullable
@@ -206,14 +203,9 @@ public class LobbyActivity extends ComponentActivity {
 
         FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig());
 
-        // create a GameOwner that is responsible for properly unloading the game when the owning plugin is unloaded
-        GameOwner owner = LobbyPlugin.getInstance().getGameOwnerCache().getOwner(game.getOwner());
-        owner.setFinisher(environment.getFinisher());
-        environment.bind(owner);
-
         GameInstance instance = game.createInstance(environment);
 
-        var args = new LobbyArgs(context, childActivity, configurator);
+        var args = new LobbyArgs(childActivity, configurator);
 
         gameStarter = instance.createStarter(args, () -> {
             // register end command

@@ -1,8 +1,8 @@
 package work.lclpnet.activity.component.builtin;
 
 import work.lclpnet.activity.component.Component;
-import work.lclpnet.kibu.plugin.cmd.CommandContainer;
-import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
+import work.lclpnet.kibu.cmd.impl.CommandContainer;
+import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 
 public class CommandComponent implements Component {
 

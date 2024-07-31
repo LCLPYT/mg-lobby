@@ -10,8 +10,8 @@ import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.ComponentView;
 import work.lclpnet.activity.component.DependentComponent;
 import work.lclpnet.activity.util.BossBarHandler;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 import work.lclpnet.kibu.translate.bossbar.CustomBossBar;
 

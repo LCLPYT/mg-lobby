@@ -37,7 +37,7 @@ public class LobbyMazeGeneratorProvider implements MazeGeneratorProvider<Positio
         final Map<BlockPos, PositionedNode> nodes = new HashMap<>();
 
         while (!queue.isEmpty()) {
-            final BlockPos pos = queue.remove(0);
+            final BlockPos pos = queue.removeFirst();
 
             final PositionedNode node = nodes.computeIfAbsent(pos, PositionedNode::new);
 

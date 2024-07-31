@@ -14,7 +14,6 @@ public interface GameFinisher {
 
     enum Reason {
         REGULAR,
-        COMMAND,
-        UNLOADED
+        COMMAND
     }
 }

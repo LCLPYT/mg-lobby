@@ -3,10 +3,11 @@ package work.lclpnet.lobby.dev;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Formatting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.scheduler.Ticks;
-import work.lclpnet.lobby.LobbyPlugin;
+import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameInstance;
 import work.lclpnet.lobby.game.api.GameStarter;
@@ -16,6 +17,7 @@ import java.util.function.BooleanSupplier;
 
 public class TestGameInstance implements GameInstance {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestGameInstance.class);
     private final GameEnvironment environment;
 
     public TestGameInstance(GameEnvironment environment) {
@@ -32,7 +34,7 @@ public class TestGameInstance implements GameInstance {
 
         // optionally, you can configure the starter:
 
-        var translations = LobbyPlugin.getInstance().getTranslationService();
+        var translations = LobbyMod.getInstance().getTranslationService();
 
         // you can set a periodic condition message that gets sent to everyone, if the game cannot start.
         var notEnoughPlayers = translations.translateText("lobby.game.not_enough_players", minPlayers)
@@ -51,10 +53,7 @@ public class TestGameInstance implements GameInstance {
     public void start() {
         System.out.println("The test game was started! (will end in 10 seconds)");
 
-        // normally, you would use static getInstance() of your plugin
-        PluginContext context = LobbyPlugin.getInstance();
-
-        TestGameActivity activity = new TestGameActivity(context);
+        TestGameActivity activity = new TestGameActivity(environment.getServer(), logger);
 
         ActivityManager.getInstance().startActivity(activity);
 

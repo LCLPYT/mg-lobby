@@ -3,8 +3,8 @@ package work.lclpnet.lobby.game.impl;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.ServerTickHooks;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 
 import java.util.ArrayList;
 import java.util.List;

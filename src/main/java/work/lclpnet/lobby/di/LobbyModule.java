@@ -4,14 +4,14 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.BlockView;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lobby.LobbyManagerImpl;
-import work.lclpnet.lobby.LobbyPlugin;
+import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
@@ -27,6 +27,8 @@ import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 @Module(includes = LobbyModule.Bindings.class)
 public class LobbyModule {
@@ -48,12 +50,12 @@ public class LobbyModule {
 
     private final Logger logger;
     private final TranslationService translationService;
-    private final PluginContext pluginContext;
+    private final Future<MinecraftServer> server;
 
-    public LobbyModule(Logger logger, TranslationService translationService, PluginContext pluginContext) {
+    public LobbyModule(Logger logger, TranslationService translationService, Future<MinecraftServer> server) {
         this.logger = logger;
         this.translationService = translationService;
-        this.pluginContext = pluginContext;
+        this.server = server;
     }
 
     @Provides
@@ -67,15 +69,20 @@ public class LobbyModule {
     }
 
     @Provides
-    PluginContext providePluginContext() {
-        return pluginContext;
+    Future<MinecraftServer> provideServerFuture() {
+        return server;
+    }
+
+    @Provides
+    MinecraftServer provideServer() {
+        return server.resultNow();
     }
 
     @Singleton
     @Provides
     ConfigHandler<LobbyConfig> provideConfigHandler() {
         var configSerializer = new ExtendedConfigSerializer<>(LobbyConfig.FACTORY, logger);
-        var configFile = FabricLoader.getInstance().getConfigDir().resolve(LobbyPlugin.ID).resolve("config.json");
+        var configFile = FabricLoader.getInstance().getConfigDir().resolve(LobbyMod.ID).resolve("config.json");
 
         return new ConfigHandler<>(configFile, configSerializer, logger);
     }
@@ -97,7 +104,7 @@ public class LobbyModule {
 
     @Provides @Named("gameManagerStatePath")
     Path provideGameManagerStatePath() {
-        return FabricLoader.getInstance().getConfigDir().resolve(LobbyPlugin.ID).resolve("gameManagerState.dat");
+        return FabricLoader.getInstance().getConfigDir().resolve(LobbyMod.ID).resolve("gameManagerState.dat");
     }
 
     @Provides @Named("lobbyWorld")

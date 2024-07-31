@@ -4,9 +4,9 @@ import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.map.MapState;
 import net.minecraft.server.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
+import work.lclpnet.kibu.hook.HookListenerModule;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.map.hook.MapStateCallback;
-import work.lclpnet.kibu.plugin.hook.HookListenerModule;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import xyz.nucleoid.fantasy.RuntimeWorld;
 
 public class RuntimeWorldListener implements HookListenerModule {

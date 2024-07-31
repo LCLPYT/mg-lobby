@@ -1,11 +1,10 @@
 package work.lclpnet.lobby.game;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.lobby.game.api.Game;
-import work.lclpnet.lobby.game.api.GameProvider;
-import work.lclpnet.plugin.load.PluginClassLoader;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,7 +18,6 @@ public class GameManager implements GameMangerLoader {
 
     public static final String EMPTY_GAME_ID = "none";
     private final Logger logger;
-    private final ServiceLoader<GameProvider> serviceLoader;
     private final GameStateIo stateManager;
     private final Set<Runnable> stateChangeCallbacks = new ObjectOpenHashSet<>(4);
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -31,21 +29,14 @@ public class GameManager implements GameMangerLoader {
     public GameManager(Logger logger, GameStateIo stateManager) {
         this.logger = logger;
         this.stateManager = stateManager;
-        this.serviceLoader = ServiceLoader.load(GameProvider.class, getClass().getClassLoader());
     }
 
-    public void reload() {
-        if (!(getClass().getClassLoader() instanceof PluginClassLoader)) {
-            logger.warn("Class loader of {} should be an instance of {} but is {}. Some features may not work as expected",
-                    GameManager.class.getName(), PluginClassLoader.class.getName(), getClass().getClassLoader().getClass().getName());
-        }
-
-        serviceLoader.reload();
+    public void discoverGames() {
+        var entryPoints = FabricLoader.getInstance().getEntrypoints("game-entry", Game.class);
 
         Map<String, Game> games = new HashMap<>();
 
-        for (GameProvider provider : serviceLoader) {
-            Game game = provider.provideGame();
+        for (Game game : entryPoints) {
             String id = game.getConfig().identifier();
 
             if (isReservedGameId(id)) {
