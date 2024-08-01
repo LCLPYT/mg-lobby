@@ -208,6 +208,7 @@ artifactExtraSourceSets.each { name ->
         description "Remaps the built ${name} jar to intermediary mappings."
         group 'fabric'
         archiveClassifier.set(name)
+        addNestedDependencies = false  // cannot add nested jars to non-mod jars produced by RemapJarTask
 
         inputFile.convention(defaultJar.archiveFile)
     }.get()
