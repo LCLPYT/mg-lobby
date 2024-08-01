@@ -16,7 +16,7 @@ import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
@@ -33,18 +33,18 @@ import java.util.stream.Collectors;
 public class TicTacToeManager {
 
     private final Map<TicTacToeTable, TicTacToeInstance> tables;
-    private final TranslationService translations;
+    private final Translations translations;
     private final Scheduler scheduler;
     private final Map<UUID, TicTacToeTable> playing = new HashMap<>();
     private final TicTacToeDisplay display;
 
     @Inject
-    public TicTacToeManager(LobbyWorldConfig config, TranslationService translations, Scheduler scheduler,
+    public TicTacToeManager(LobbyWorldConfig config, Translations translations, Scheduler scheduler,
                             @Named("lobbyWorld") ServerWorld world, WorldModifier worldModifier) {
         this(getTables(config), translations, scheduler, world, worldModifier);
     }
 
-    public TicTacToeManager(Set<TicTacToeTable> tables, TranslationService translations, Scheduler scheduler, ServerWorld world, WorldModifier worldModifier) {
+    public TicTacToeManager(Set<TicTacToeTable> tables, Translations translations, Scheduler scheduler, ServerWorld world, WorldModifier worldModifier) {
         this.tables = new HashMap<>();
 
         for (TicTacToeTable table : tables) {

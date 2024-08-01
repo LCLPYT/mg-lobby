@@ -6,6 +6,7 @@ import work.lclpnet.kibu.cmd.impl.CommandContainer;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.scheduler.util.SchedulerStack;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.LobbyAPI;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameFinisher;
@@ -25,6 +26,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     private final MinecraftServer server;
     private final Logger logger;
     private final GameConfig gameConfig;
+    private final Translations translations;
     private volatile boolean destroyed = false;
     private volatile List<Runnable> whenDone = null;
     private volatile HookStack hookStack;
@@ -33,10 +35,11 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     private volatile WorldFacadeImpl worldFacade;
     private WorldContainer worldContainer;
 
-    public FinishableGameEnvironment(MinecraftServer server, Logger logger, GameConfig gameConfig) {
+    public FinishableGameEnvironment(MinecraftServer server, Logger logger, GameConfig gameConfig, Translations translations) {
         this.server = server;
         this.logger = logger;
         this.gameConfig = gameConfig;
+        this.translations = translations;
     }
 
     @Override
@@ -140,6 +143,11 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
 
             whenDone.add(action);
         }
+    }
+
+    @Override
+    public Translations getTranslations() {
+        return translations;
     }
 
     private void assertNotDestroyed() {

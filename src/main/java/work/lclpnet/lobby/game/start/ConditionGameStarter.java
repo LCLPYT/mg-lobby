@@ -13,7 +13,7 @@ import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
 import work.lclpnet.kibu.scheduler.Ticks;
 import work.lclpnet.kibu.scheduler.util.SchedulerStack;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.kibu.translate.util.Partial;
@@ -190,7 +190,7 @@ public class ConditionGameStarter implements GameStarter {
     }
 
     public void setConditionBossBarValue(Object value) {
-        TranslationService translations = LobbyMod.getInstance().getTranslationService();
+        Translations translations = environment.getTranslations();
         Identifier barId = LobbyMod.identifier("waiting_condition");
 
         configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",

@@ -10,7 +10,7 @@ import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.cmd.arg.GameSuggestionProvider;
 import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.api.Game;
@@ -22,10 +22,10 @@ public class SetGameCommand implements KibuCommand {
     private final GameManager gameManager;
     private final Consumer<Game> consumer;
     private final Logger logger;
-    private final TranslationService translations;
+    private final Translations translations;
 
     public SetGameCommand(GameManager gameManager, Consumer<Game> consumer, Logger logger,
-                          TranslationService translations) {
+                          Translations translations) {
         this.gameManager = gameManager;
         this.consumer = consumer;
         this.logger = logger;

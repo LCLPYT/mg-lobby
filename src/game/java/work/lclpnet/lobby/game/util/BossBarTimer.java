@@ -11,7 +11,7 @@ import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.kibu.scheduler.api.TaskHandle;
 import work.lclpnet.kibu.scheduler.api.TaskScheduler;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 
@@ -23,7 +23,7 @@ import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class BossBarTimer implements SchedulerAction {
 
-    private final TranslationService translationService;
+    private final Translations translations;
     private final Identifier id;
     private final Object subject;
     private final boolean cycleColor;
@@ -38,9 +38,9 @@ public class BossBarTimer implements SchedulerAction {
     private int colorIndex;
     private int timer;
 
-    private BossBarTimer(TranslationService translationService, Identifier id, Object subject, boolean cycleColor,
+    private BossBarTimer(Translations translations, Identifier id, Object subject, boolean cycleColor,
                          boolean alertSound, int durationTicks, BossBar.Color color) {
-        this.translationService = translationService;
+        this.translations = translations;
         this.id = id;
         this.subject = subject;
         this.cycleColor = cycleColor;
@@ -78,7 +78,7 @@ public class BossBarTimer implements SchedulerAction {
 
             var translation = titleTranslation();
 
-            bossBar = translationService.translateBossBar(id, translation.left(), translation.right())
+            bossBar = translations.translateBossBar(id, translation.left(), translation.right())
                     .with(bossBarProvider).formatted(Formatting.YELLOW);
 
             bossBar.setColor(BossBar.Color.values()[colorIndex]);
@@ -187,20 +187,20 @@ public class BossBarTimer implements SchedulerAction {
         }
     }
 
-    public static Builder builder(TranslationService translationService, Object subject) {
-        return new Builder(translationService, subject);
+    public static Builder builder(Translations translations, Object subject) {
+        return new Builder(translations, subject);
     }
 
     public static class Builder {
-        private final TranslationService translationService;
+        private final Translations translations;
         private final Object subject;
         private Identifier identifier;
         private boolean cycleColor = false, alertSound = false;
         private int durationTicks = 600;
         private BossBar.Color color = BossBar.Color.GREEN;
 
-        private Builder(TranslationService translationService, Object subject) {
-            this.translationService = translationService;
+        private Builder(Translations translations, Object subject) {
+            this.translations = translations;
             this.subject = subject;
         }
 
@@ -237,7 +237,7 @@ public class BossBarTimer implements SchedulerAction {
                 id = Identifier.of("mgl_bbt", StringUtil.getRandomString(alphabet, 16, new Random()));
             }
 
-            return new BossBarTimer(translationService, id, subject, cycleColor, alertSound, durationTicks, color);
+            return new BossBarTimer(translations, id, subject, cycleColor, alertSound, durationTicks, color);
         }
     }
 }

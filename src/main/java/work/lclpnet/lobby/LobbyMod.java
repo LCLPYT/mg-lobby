@@ -9,7 +9,8 @@ import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.world.ServerWorldReadyCallback;
 import work.lclpnet.kibu.hook.world.ServerWorldUnreadyCallback;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
+import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.di.DaggerLobbyComponent;
 import work.lclpnet.lobby.di.LobbyComponent;
@@ -24,7 +25,6 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
     public static final String ID = "mg-lobby";
     public static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyMod instance = null;
-    private TranslationService translationService = null;
     private LobbyManagerImpl manager = null;
     private LobbyComponent component = null;
 
@@ -32,14 +32,14 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
     public void onInitializeServer() {
         instance = this;
 
-        var loadingTranslations = LobbyTranslations.load(logger);
+        var loadingTranslations = ModTranslations.fromAssets(ID, logger);
 
-        translationService = loadingTranslations.translations();
+        Translations translations = loadingTranslations.translations();
 
         var serverFuture = new CompletableFuture<MinecraftServer>();
 
         component = DaggerLobbyComponent.builder()
-                .lobbyModule(new LobbyModule(logger, translationService, serverFuture))
+                .lobbyModule(new LobbyModule(logger, translations, serverFuture))
                 .build();
 
         manager = component.lobbyManager();
@@ -94,9 +94,5 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
 
     public static Identifier identifier(String path) {
         return Identifier.of(ID, path);
-    }
-
-    public TranslationService getTranslationService() {
-        return translationService;
     }
 }

@@ -4,6 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.scheduler.util.SchedulerStack;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.map.MapManager;
 
@@ -26,4 +27,6 @@ public interface GameEnvironment {
     GameFinisher getFinisher();
 
     void whenDone(Runnable action);
+
+    Translations getTranslations();
 }

@@ -20,7 +20,7 @@ import work.lclpnet.activity.component.builtin.BuiltinComponents;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.game.api.GameStarter;
@@ -30,14 +30,14 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
     private final GameConfig gameConfig;
     private final GameStarter starter;
-    private final TranslationService translations;
+    private final Translations translations;
     private TranslatedBossBar bossBar;
     private int timer;
     private int colorIndex;
     private boolean wasPaused = false;
 
     @AssistedInject
-    public GameStartingActivity(MinecraftServer server, Logger logger, TranslationService translations,
+    public GameStartingActivity(MinecraftServer server, Logger logger, Translations translations,
                                 @Assisted GameConfig gameConfig, @Assisted GameStarter starter) {
         super(server, logger);
         this.gameConfig = gameConfig;

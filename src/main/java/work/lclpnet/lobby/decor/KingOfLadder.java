@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.title.Title;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
 
@@ -32,17 +32,17 @@ public class KingOfLadder {
     private final ServerWorld world;
     private final BlockPos goal;
     private final List<Vec3d> displays;
-    private final TranslationService translations;
+    private final Translations translations;
     private final Collection<UUID> contesting = new HashSet<>();
     private UUID king = null;
     private String kingName = null;
 
     @Inject
-    public KingOfLadder(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config, TranslationService translations) {
+    public KingOfLadder(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config, Translations translations) {
         this(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, translations);
     }
 
-    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays, TranslationService translations) {
+    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays, Translations translations) {
         this.world = world;
         this.goal = goal;
         this.displays = displays;

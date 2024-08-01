@@ -9,7 +9,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
@@ -23,23 +23,22 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 @Singleton
 public class LobbyManagerImpl implements LobbyManager {
 
     private final ConfigHandler<LobbyConfig> configHandler;
     private final Logger logger;
-    private final TranslationService translationService;
+    private final Translations translations;
     private final GameManager gameManager;
     private final Future<MinecraftServer> server;
     private volatile WorldConfigHandler<LobbyWorldConfig> worldConfigHandler = null;
 
     @Inject
-    public LobbyManagerImpl(TranslationService translationService, Logger logger,
+    public LobbyManagerImpl(Translations translations, Logger logger,
                             GameManager gameManager, ConfigHandler<LobbyConfig> configHandler, Future<MinecraftServer> server) {
         this.logger = logger;
-        this.translationService = translationService;
+        this.translations = translations;
         this.gameManager = gameManager;
         this.configHandler = configHandler;
         this.server = server;
@@ -87,8 +86,8 @@ public class LobbyManagerImpl implements LobbyManager {
     }
 
     @Override
-    public TranslationService getTranslationService() {
-        return translationService;
+    public Translations getTranslations() {
+        return translations;
     }
 
     @Override

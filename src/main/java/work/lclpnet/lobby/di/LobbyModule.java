@@ -9,7 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.BlockView;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.LobbyManagerImpl;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.api.LobbyManager;
@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 @Module(includes = LobbyModule.Bindings.class)
 public class LobbyModule {
@@ -49,12 +48,12 @@ public class LobbyModule {
     }
 
     private final Logger logger;
-    private final TranslationService translationService;
+    private final Translations translations;
     private final Future<MinecraftServer> server;
 
-    public LobbyModule(Logger logger, TranslationService translationService, Future<MinecraftServer> server) {
+    public LobbyModule(Logger logger, Translations translations, Future<MinecraftServer> server) {
         this.logger = logger;
-        this.translationService = translationService;
+        this.translations = translations;
         this.server = server;
     }
 
@@ -64,8 +63,8 @@ public class LobbyModule {
     }
 
     @Provides
-    TranslationService provideTranslationService() {
-        return translationService;
+    Translations provideTranslations() {
+        return translations;
     }
 
     @Provides

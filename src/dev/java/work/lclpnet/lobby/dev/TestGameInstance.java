@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.scheduler.Ticks;
-import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameInstance;
 import work.lclpnet.lobby.game.api.GameStarter;
@@ -34,7 +33,7 @@ public class TestGameInstance implements GameInstance {
 
         // optionally, you can configure the starter:
 
-        var translations = LobbyMod.getInstance().getTranslationService();
+        var translations = environment.getTranslations();
 
         // you can set a periodic condition message that gets sent to everyone, if the game cannot start.
         var notEnoughPlayers = translations.translateText("lobby.game.not_enough_players", minPlayers)
