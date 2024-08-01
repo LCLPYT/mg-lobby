@@ -29,6 +29,7 @@
     "kibu-world-api": "*"
   },
   "suggests": {
-    "pal": "*"
+    "pal": "*",
+    "mcserver-api": "*"
   }
 }
