@@ -6,22 +6,23 @@ import dagger.assisted.AssistedInject;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.entity.boss.BossBar;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BossBarComponent;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
-import work.lclpnet.lobby.LobbyPlugin;
+import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.game.api.GameStarter;
 import work.lclpnet.lobby.game.conf.GameConfig;
 
@@ -29,16 +30,16 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
     private final GameConfig gameConfig;
     private final GameStarter starter;
-    private final TranslationService translations;
+    private final Translations translations;
     private TranslatedBossBar bossBar;
     private int timer;
     private int colorIndex;
     private boolean wasPaused = false;
 
     @AssistedInject
-    public GameStartingActivity(PluginContext context, TranslationService translations,
+    public GameStartingActivity(MinecraftServer server, Logger logger, Translations translations,
                                 @Assisted GameConfig gameConfig, @Assisted GameStarter starter) {
-        super(context);
+        super(server, logger);
         this.gameConfig = gameConfig;
         this.starter = starter;
         this.translations = translations;
@@ -58,7 +59,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         final BossBarComponent bossBars = component(BuiltinComponents.BOSS_BAR);
 
-        final Identifier bossBarId = LobbyPlugin.identifier("starting");
+        final Identifier bossBarId = LobbyMod.identifier("starting");
         final var titleTranslation = titleTranslation();
 
         bossBar = translations.translateBossBar(bossBarId, titleTranslation.left(), titleTranslation.right())

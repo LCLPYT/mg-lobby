@@ -2,7 +2,6 @@ package work.lclpnet.lobby.game.api;
 
 import work.lclpnet.lobby.game.api.data.GameDataPacks;
 import work.lclpnet.lobby.game.conf.GameConfig;
-import work.lclpnet.mplugins.ext.PluginUnloader;
 
 /**
  * A game type that can be chosen by the game runtime.
@@ -15,8 +14,6 @@ import work.lclpnet.mplugins.ext.PluginUnloader;
 public interface Game {
 
     GameConfig getConfig();
-
-    PluginUnloader getOwner();
 
     GameInstance createInstance(GameEnvironment environment);
 

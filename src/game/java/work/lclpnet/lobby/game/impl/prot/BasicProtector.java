@@ -16,6 +16,7 @@ import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
+import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.entity.*;
 import work.lclpnet.kibu.hook.player.CraftingRecipeCallback;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
@@ -25,12 +26,10 @@ import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
 import work.lclpnet.kibu.hook.world.ItemScatterCallback;
 import work.lclpnet.kibu.hook.world.WorldPhysicsHooks;
-import work.lclpnet.kibu.plugin.hook.HookContainer;
 import work.lclpnet.lobby.game.api.prot.ProtectionConfig;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
 import work.lclpnet.lobby.game.api.prot.Protector;
 import work.lclpnet.lobby.game.api.prot.scope.EntityBlockScope;
-import work.lclpnet.mplugins.ext.Unloadable;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,7 +39,7 @@ import java.util.function.Function;
 
 import static work.lclpnet.lobby.game.impl.prot.ProtectionTypes.*;
 
-public class BasicProtector implements Protector, Unloadable {
+public class BasicProtector implements Protector {
 
     private final ProtectionConfig config;
     private final HookContainer hooks;
@@ -261,7 +260,6 @@ public class BasicProtector implements Protector, Unloadable {
         hooks.unload();
     }
 
-    @Override
     public void unload() {
         deactivate();
     }

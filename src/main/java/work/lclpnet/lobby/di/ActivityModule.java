@@ -4,7 +4,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import net.minecraft.server.MinecraftServer;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.decor.seat.DefaultSeatProvider;
 import work.lclpnet.lobby.decor.seat.SeatProvider;

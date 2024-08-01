@@ -5,15 +5,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
-import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.kibu.cmd.type.CommandRegistrar;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
-import work.lclpnet.kibu.translate.TranslationService;
-import work.lclpnet.lobby.LobbyPlugin;
+import work.lclpnet.kibu.translate.Translations;
+import work.lclpnet.kibu.translate.util.ModTranslations;
+import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.cmd.*;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
@@ -25,10 +26,10 @@ import work.lclpnet.lobby.di.ActivityComponent;
 import work.lclpnet.lobby.di.ActivityModule;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.GameOwner;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameInstance;
 import work.lclpnet.lobby.game.api.GameStarter;
+import work.lclpnet.lobby.game.api.TranslatedGame;
 import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
 import work.lclpnet.lobby.game.impl.prot.ProtectionTypes;
 import work.lclpnet.lobby.game.start.LobbyArgs;
@@ -37,9 +38,13 @@ import work.lclpnet.lobby.game.util.ProtectorComponent;
 import work.lclpnet.lobby.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
+import work.lclpnet.translations.DefaultLanguageTranslator;
+import work.lclpnet.translations.loader.translation.MultiTranslationLoader;
 
 import javax.inject.Inject;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
@@ -50,24 +55,25 @@ public class LobbyActivity extends ComponentActivity {
     private final ActivityManager childActivity;
     private final ActivityComponent.Builder componentBuilder;
     private final GameStartingActivity.Builder startingBuilder;
-    private final PluginContext context;
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
-    private final TranslationService translationService;
+    private final Translations translations;
+    private final ReentrantLock gameLock = new ReentrantLock();
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
     private TicTacToeManager ticTacToeManager;
+    private volatile boolean changeInProgress = false;
+    private volatile Game changingToGame = null;
 
     @Inject
-    public LobbyActivity(PluginContext context, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
-                         GameStartingActivity.Builder startingBuilder, TranslationService translationService) {
-        super(context);
-        this.context = context;
+    public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
+                         GameStartingActivity.Builder startingBuilder, Translations translations) {
+        super(server, logger);
         this.lobbyManager = lobbyManager;
         this.childActivity = new SyncActivityManager();
         this.componentBuilder = componentBuilder;
         this.startingBuilder = startingBuilder;
-        this.translationService = translationService;
+        this.translations = translations;
     }
 
     @Override
@@ -147,7 +153,7 @@ public class LobbyActivity extends ComponentActivity {
         Supplier<GameStarter> gameStarterSupplier = () -> gameStarter;
 
         new StartCommand(gameStarterSupplier).register(commands);
-        new SetGameCommand(gameManager, this::changeGame, getLogger(), translationService).register(commands);
+        new SetGameCommand(gameManager, this::changeGame, getLogger(), translations).register(commands);
         new PauseCommand(gameStarterSupplier).register(commands);
         new ResumeCommand(gameStarterSupplier).register(commands);
 
@@ -178,7 +184,7 @@ public class LobbyActivity extends ComponentActivity {
 
         final Game nextGame = game;
 
-        getServer().submit(() -> changeGame(nextGame));
+        getServer().execute(() -> changeGame(nextGame));
     }
 
     @Nullable
@@ -195,37 +201,87 @@ public class LobbyActivity extends ComponentActivity {
                 .orElse(null);
     }
 
-    private void changeGame(Game game) {
-        if (gameStarter != null) {
-            gameStarter.destroy();
+    private void changeGame(@Nullable Game game) {
+        // when currently changing to the same game, abort
+        synchronized (this) {
+            if (changeInProgress && changingToGame == game) return;
+
+            changingToGame = game;
+            changeInProgress = true;
         }
 
+        // dispatch game change process in another thread to prevent server thread blocking
+        Thread.startVirtualThread(() -> {
+            // ensure atomic
+            gameLock.lock();
+
+            try {
+                changeAtomicAsync(game);
+            } catch (Throwable err) {
+                getLogger().error("Error while changing game", err);
+            } finally {
+                gameLock.unlock();
+            }
+        });
+    }
+
+    private void changeAtomicAsync(@Nullable Game game) {
         lobbyManager.getGameManager().setCurrentGame(game);
 
         if (game == null) return;
 
-        FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig());
+        Translations translations = createGameTranslations(game).join();
 
-        // create a GameOwner that is responsible for properly unloading the game when the owning plugin is unloaded
-        GameOwner owner = LobbyPlugin.getInstance().getGameOwnerCache().getOwner(game.getOwner());
-        owner.setFinisher(environment.getFinisher());
-        environment.bind(owner);
+        // make sure to activate the game on the server thread
+        getServer().submit(() -> activateGame(game, translations)).join();
+
+        synchronized (this) {
+            changingToGame = null;
+            changeInProgress = false;
+        }
+    }
+
+    private void activateGame(Game game, Translations translations) {
+        FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger(),
+                game.getConfig(), translations);
 
         GameInstance instance = game.createInstance(environment);
 
-        var args = new LobbyArgs(context, childActivity, configurator);
+        var args = new LobbyArgs(childActivity, configurator);
 
-        gameStarter = instance.createStarter(args, () -> {
-            // register end command
-            new EndCommand(environment.getFinisher()).register(environment.getCommandStack());
+        synchronized (this) {
+            if (gameStarter != null) {
+                gameStarter.destroy();
+            }
 
-            // now actually start the instance
-            instance.start();
-        });
+            gameStarter = instance.createStarter(args, () -> {
+                // register end command
+                new EndCommand(environment.getFinisher()).register(environment.getCommandStack());
 
-        args.injectStartingSupplier(() -> startingBuilder.create(game.getConfig(), gameStarter));
+                // now actually start the instance
+                instance.start();
+            });
 
-        gameStarter.start();
+            args.injectStartingSupplier(() -> startingBuilder.create(game.getConfig(), gameStarter));
+
+            gameStarter.start();
+        }
+    }
+
+    private CompletableFuture<Translations> createGameTranslations(Game game) {
+        if (!(game instanceof TranslatedGame translatedGame)) {
+            return CompletableFuture.completedFuture(this.translations);
+        }
+
+        // the game provides a translation loader, load translations union
+        var lobbyTranslationLoader = ModTranslations.assetTranslationLoader(LobbyMod.ID, getLogger());
+        var gameTranslationLoader = translatedGame.getTranslationLoader();
+
+        var loader = new MultiTranslationLoader(lobbyTranslationLoader, gameTranslationLoader);
+        var translator = new DefaultLanguageTranslator(loader);
+
+        // make sure the translations are loaded
+        return translator.reload().thenApply(nil -> new Translations(translator));
     }
 
     @Override

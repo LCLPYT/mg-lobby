@@ -8,27 +8,26 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
+import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
-import work.lclpnet.kibu.plugin.hook.HookStack;
-import work.lclpnet.kibu.plugin.scheduler.SchedulerStack;
 import work.lclpnet.kibu.scheduler.Ticks;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.scheduler.util.SchedulerStack;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.kibu.translate.util.Partial;
-import work.lclpnet.lobby.LobbyPlugin;
+import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameStarter;
-import work.lclpnet.mplugins.ext.Unloadable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ConditionGameStarter implements GameStarter, Unloadable {
+public class ConditionGameStarter implements GameStarter {
 
     private final BooleanSupplier condition;
     private final Args args;
@@ -80,7 +79,6 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
         onStart.start();
     }
 
-    @Override
     public void unload() {
         environment.getHookStack().pop();
         environment.getSchedulerStack().pop();
@@ -192,8 +190,8 @@ public class ConditionGameStarter implements GameStarter, Unloadable {
     }
 
     public void setConditionBossBarValue(Object value) {
-        TranslationService translations = LobbyPlugin.getInstance().getTranslationService();
-        Identifier barId = LobbyPlugin.identifier("waiting_condition");
+        Translations translations = environment.getTranslations();
+        Identifier barId = LobbyMod.identifier("waiting_condition");
 
         configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",
                         translations.translateText(environment.getGameConfig().titleKey())

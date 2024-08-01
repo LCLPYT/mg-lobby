@@ -24,7 +24,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.text.FormatWrapper;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
@@ -65,7 +65,7 @@ public class JumpAndRun {
     private final Stack<BlockPos> nodes;
     private final PosGenerator generator;
     private final WorldModifier modifier;
-    private final TranslationService translations;
+    private final Translations translations;
     private Team redTeam, greenTeam;
     private BlockPos next;
     private ShulkerEntity shulkerEntity;
@@ -74,12 +74,12 @@ public class JumpAndRun {
 
     @Inject
     public JumpAndRun(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config, WorldModifier modifier,
-                      Scheduler scheduler, TranslationService translations) {
+                      Scheduler scheduler, Translations translations) {
         this(world, config.jumpAndRunStart, modifier, scheduler, translations);
     }
 
     public JumpAndRun(ServerWorld world, BlockPos start, WorldModifier modifier, Scheduler scheduler,
-                      TranslationService translations) {
+                      Translations translations) {
         this.world = world;
         this.start = start;
         this.modifier = modifier;

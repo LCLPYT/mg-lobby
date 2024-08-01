@@ -2,9 +2,8 @@ package work.lclpnet.activity.component.builtin;
 
 import work.lclpnet.activity.component.Component;
 import work.lclpnet.kibu.hook.Hook;
-import work.lclpnet.kibu.plugin.hook.HookListenerModule;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
-import work.lclpnet.mplugins.ext.Unloadable;
+import work.lclpnet.kibu.hook.HookListenerModule;
+import work.lclpnet.kibu.hook.HookRegistrar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ public class HookComponent implements Component {
         return hooks;
     }
 
-    private static class LockableHookContainer implements HookRegistrar, Unloadable {
+    private static class LockableHookContainer implements HookRegistrar {
 
         private final Object mutex = new Object();
         private final Map<Hook<?>, List<?>> eventListeners = new HashMap<>();
@@ -75,7 +74,6 @@ public class HookComponent implements Component {
             listeners.forEach(hook::unregister);
         }
 
-        @Override
         public void unload() {
             synchronized (mutex) {
                 locked = true;

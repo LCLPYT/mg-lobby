@@ -1,10 +1,10 @@
 package work.lclpnet.lobby.event;
 
 import net.minecraft.server.network.ServerPlayerEntity;
+import work.lclpnet.kibu.hook.HookListenerModule;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerMoveCallback;
 import work.lclpnet.kibu.hook.util.PositionRotation;
-import work.lclpnet.kibu.plugin.hook.HookListenerModule;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.decor.jnr.JumpAndRun;
 
 import javax.inject.Inject;

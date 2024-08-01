@@ -1,17 +1,18 @@
 package work.lclpnet.lobby.dev;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
+import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 
 public class TestGameActivity extends ComponentActivity {
 
-    public TestGameActivity(PluginContext context) {
-        super(context);
+    public TestGameActivity(MinecraftServer server, Logger logger) {
+        super(server, logger);
     }
 
     @Override

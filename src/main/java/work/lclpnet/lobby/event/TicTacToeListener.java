@@ -9,9 +9,9 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import work.lclpnet.kibu.hook.HookListenerModule;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
-import work.lclpnet.kibu.plugin.hook.HookListenerModule;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.decor.seat.PlayerSeatCallback;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
 

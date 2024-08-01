@@ -1,5 +1,6 @@
 package work.lclpnet.lobby;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -8,8 +9,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
 import work.lclpnet.lobby.config.LobbyConfig;
@@ -18,30 +18,30 @@ import work.lclpnet.lobby.config.WorldConfigHandler;
 import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.service.PalService;
 import work.lclpnet.lobby.util.PlayerReset;
-import work.lclpnet.mplugins.MPluginsAPI;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.concurrent.Future;
 
 @Singleton
 public class LobbyManagerImpl implements LobbyManager {
 
     private final ConfigHandler<LobbyConfig> configHandler;
-    private final PluginContext pluginContext;
     private final Logger logger;
-    private final TranslationService translationService;
+    private final Translations translations;
     private final GameManager gameManager;
+    private final Future<MinecraftServer> server;
     private volatile WorldConfigHandler<LobbyWorldConfig> worldConfigHandler = null;
 
     @Inject
-    public LobbyManagerImpl(PluginContext pluginContext, TranslationService translationService, Logger logger,
-                            GameManager gameManager, ConfigHandler<LobbyConfig> configHandler) {
-        this.pluginContext = pluginContext;
+    public LobbyManagerImpl(Translations translations, Logger logger,
+                            GameManager gameManager, ConfigHandler<LobbyConfig> configHandler, Future<MinecraftServer> server) {
         this.logger = logger;
-        this.translationService = translationService;
+        this.translations = translations;
         this.gameManager = gameManager;
         this.configHandler = configHandler;
+        this.server = server;
     }
 
     @Override
@@ -58,10 +58,10 @@ public class LobbyManagerImpl implements LobbyManager {
         return config;
     }
 
+    @SuppressWarnings("resource")
     @Override
     public ServerWorld getLobbyWorld() {
-        MinecraftServer server = pluginContext.getEnvironment().getServer();
-        return server.getOverworld();
+        return this.server.resultNow().getOverworld();
     }
 
     @Override
@@ -86,8 +86,8 @@ public class LobbyManagerImpl implements LobbyManager {
     }
 
     @Override
-    public TranslationService getTranslationService() {
-        return translationService;
+    public Translations getTranslations() {
+        return translations;
     }
 
     @Override
@@ -125,13 +125,11 @@ public class LobbyManagerImpl implements LobbyManager {
         worldConfigHandler = new WorldConfigHandler<>(world, path, serializer, logger);
         worldConfigHandler.loadConfig();
 
-        gameManager.reload();
-
         configurePal();
     }
 
     private void configurePal() {
-        if (!MPluginsAPI.get().getPluginFrame().getPluginManager().isPluginLoaded("pal")) return;
+        if (!FabricLoader.getInstance().isModLoaded("pal")) return;
 
         try {
             Class.forName("work.lclpnet.pal.PalApi", false, getClass().getClassLoader());

@@ -6,8 +6,6 @@ plugins {
     id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
-    id 'kibu-plugin-dev' version '0.15.0'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')
@@ -64,10 +62,14 @@ standaloneSourceSets.each {
 }
 
 sourceSets {
-    dev.compileClasspath += game.output
-    dev.compileClasspath += main.output
-    dev.compileClasspath += activity.output
-    game.compileClasspath += activity.output
+    dev {
+        compileClasspath += main.compileClasspath + main.output + activity.output + game.output
+        runtimeClasspath += main.runtimeClasspath + main.output + activity.output + game.output
+    }
+
+    game {
+        compileClasspath += activity.output
+    }
 }
 
 dependencies {
@@ -78,31 +80,26 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-world-api:${project.kibu_world_api_version}"
-    modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
     modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
     modImplementation "maven.modrinth:sqlite-jdbc:3.41.2.1+20230506"
-    pluginImplementation("work.lclpnet.mcserver-api:mcserver-api-kibu:${project.mcserver_api_version}")
-    pluginCompileOnly(pluginLocalRuntime("work.lclpnet.plugins:pal:${project.pal_version}"))
 
-    gameCompileOnly(compileOnly('org.jetbrains:annotations:24.1.0'))
+    modCompileOnly(modLocalRuntime("work.lclpnet.mods:pal:${project.pal_version}"))
+
+    // optional runtime mods (and their dependencies, because jar-in-jars are not loaded via dependencies)
+    modLocalRuntime "work.lclpnet.mcserver-api:mcserver-api-fabric:${project.mcserver_api_version}"
+    localRuntime "work.lclpnet:translations4j:${project.translations4j_version}:network"
+
+    activityCompileOnly(gameCompileOnly(compileOnly('org.jetbrains:annotations:24.1.0')))
     implementation 'org.json:json:20231013'
     implementation'com.google.dagger:dagger:2.46.1'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.46.1'
 
-    // bundle these dependencies
-    bundle(implementation('org.apache.commons:commons-compress:1.23.0'))
-    bundle(implementation('org.tukaani:xz:1.9'))
-    bundle(implementation('org.apache.tika:tika-core:2.5.0'))
-
-    "work.lclpnet:maze-lib:${project.maze_lib_version}".with {
-        implementation it
-        bundle (it) { transitive = false }
-    }
-
-    'work.lclpnet:json-config4j:1.0.0'.with {
-        implementation it
-        bundle (it) { transitive = false }
-    }
+    // include these dependencies
+    include(implementation('org.apache.commons:commons-compress:1.26.2'))
+    include(implementation('org.tukaani:xz:1.9'))
+    include(implementation('org.apache.tika:tika-core:2.5.0'))
+    include(implementation("work.lclpnet:maze-lib:${project.maze_lib_version}"))
+    include(implementation('work.lclpnet:json-config4j:1.0.0'))
 
     // test dependencies
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
@@ -115,6 +112,10 @@ loom {
 
     runs {
         remove client
+
+        server {
+            source 'dev'
+        }
     }
 }
 
@@ -134,11 +135,11 @@ tasks.withType(JavaCompile).configureEach {
     it.options.release.set(21)
 }
 
-processResources {
+[processResources, processDevResources].each {
     // replace placeholders in resources
-    inputs.property "version", project.version
+    it.inputs.property "version", project.version
 
-    filesMatching("plugin.json") {
+    it.filesMatching("fabric.mod.json") {
         expand "version": project.version
     }
 }
@@ -163,11 +164,6 @@ extraMcSourceSets.each { name ->
         configurations.named("${name}RuntimeClasspath").get().extendsFrom(configurations.minecraftNamedRuntime)
     }
 
-    kibu {
-        // add extra source sets to the dev plugin loader
-        pluginPaths.from(sourceSets.named(name).get().output)
-    }
-
     def set = sourceSets.named(name).get()
 
     sourceSets.named('test').configure {
@@ -181,8 +177,8 @@ extraMcSourceSets.each { name ->
         }
 
         // include extra sourceSet in main jar tasks
-        [jar, shadowJar].each {
-            it.from set.output
+        jar {
+            from set.output
         }
 
         sourcesJar {
@@ -191,7 +187,7 @@ extraMcSourceSets.each { name ->
     }
 }
 
-def licenseJarTasks = [jar, sourcesJar, shadowJar]
+def licenseJarTasks = [jar, sourcesJar]
 
 artifactExtraSourceSets.each { name ->
     // add extra jar tasks
@@ -230,14 +226,10 @@ licenseJarTasks.each {
     }
 }
 
-shadowJar {
-    mergeServiceFiles()
-}
-
 def env = System.getenv()
 
 tasks.register("github", GithubDeploymentTask) {
-    dependsOn tasks.remapShadowJar
+    dependsOn tasks.remapJar
 
     config {
         token = env.get("GITHUB_TOKEN")
@@ -249,11 +241,7 @@ tasks.register("github", GithubDeploymentTask) {
         tag = buildUtils.latestTag()
     }
 
-    assets.add(tasks.remapShadowJar.archiveFile.get())
-}
-
-kibu {
-    addArtifact(remapActivityJar)
+    assets.add(tasks.remapJar.archiveFile.get())
 }
 
 publishing {
@@ -263,11 +251,11 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
-            from components.kibu
+            from components.java
 
             pom {
-                name = 'Minigame Lobby'
-                description = 'A kibu plugin for managing minigame lobbies in FabricMC.'
+                name = 'Mini Game Lobby'
+                description = 'A mod that introduces a game lifecycle along with a waiting lobby'
             }
         }
     }

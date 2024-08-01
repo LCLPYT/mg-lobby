@@ -9,10 +9,10 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerMountHooks;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 

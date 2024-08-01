@@ -3,8 +3,7 @@ package work.lclpnet.activity;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import work.lclpnet.activity.component.*;
-import work.lclpnet.kibu.plugin.ext.PluginContext;
-import work.lclpnet.plugin.graph.DAG;
+import work.lclpnet.activity.util.DAG;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,12 +11,14 @@ import java.util.Map;
 
 public abstract class ComponentActivity implements Activity, ComponentContext {
 
-    private final PluginContext context;
+    private final MinecraftServer server;
+    private final Logger logger;
     private final ComponentView components;
     private final DAG<ComponentKey<?>> dependencyTree;
 
-    public ComponentActivity(PluginContext context) {
-        this.context = context;
+    public ComponentActivity(MinecraftServer server, Logger logger) {
+        this.server = server;
+        this.logger = logger;
 
         final ComponentBundle componentBundle = new ListComponentBundle();
         registerComponents(componentBundle);
@@ -78,12 +79,12 @@ public abstract class ComponentActivity implements Activity, ComponentContext {
 
     @Override
     public final MinecraftServer getServer() {
-        return context.getEnvironment().getServer();
+        return server;
     }
 
     @Override
     public final Logger getLogger() {
-        return context.getLogger();
+        return logger;
     }
 
     @Override

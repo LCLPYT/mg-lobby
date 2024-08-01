@@ -40,8 +40,6 @@ public class DataPackService {
     }
 
     public void downloadRequired() {
-        gameManager.reload();
-
         DataPackSink packSink = sink.get();
 
         gameManager.getGames().stream()

@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.game.api;
 
 import net.minecraft.server.MinecraftServer;
-import work.lclpnet.kibu.plugin.cmd.CommandStack;
-import work.lclpnet.kibu.plugin.hook.HookStack;
-import work.lclpnet.kibu.plugin.scheduler.SchedulerStack;
+import work.lclpnet.kibu.cmd.impl.CommandStack;
+import work.lclpnet.kibu.hook.HookStack;
+import work.lclpnet.kibu.scheduler.util.SchedulerStack;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.map.MapManager;
-import work.lclpnet.mplugins.ext.Unloadable;
 
 import java.util.function.Supplier;
 
@@ -26,5 +26,7 @@ public interface GameEnvironment {
 
     GameFinisher getFinisher();
 
-    void closeWhenDone(Unloadable unloadable);
+    void whenDone(Runnable action);
+
+    Translations getTranslations();
 }
