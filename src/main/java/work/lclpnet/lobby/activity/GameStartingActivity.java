@@ -37,8 +37,8 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
     private boolean wasPaused = false;
 
     @AssistedInject
-    public GameStartingActivity(MinecraftServer server, Logger logger, Translations translations,
-                                @Assisted GameConfig gameConfig, @Assisted GameStarter starter) {
+    public GameStartingActivity(MinecraftServer server, Logger logger, @Assisted GameConfig gameConfig,
+                                @Assisted GameStarter starter, @Assisted Translations translations) {
         super(server, logger);
         this.gameConfig = gameConfig;
         this.starter = starter;
@@ -150,6 +150,6 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
     @AssistedFactory
     public interface Builder {
-        GameStartingActivity create(GameConfig gameConfig, GameStarter starter);
+        GameStartingActivity create(GameConfig gameConfig, GameStarter starter, Translations translations);
     }
 }

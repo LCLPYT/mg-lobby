@@ -262,7 +262,7 @@ public class LobbyActivity extends ComponentActivity {
                 instance.start();
             });
 
-            args.injectStartingSupplier(() -> startingBuilder.create(game.getConfig(), gameStarter));
+            args.injectStartingSupplier(() -> startingBuilder.create(game.getConfig(), gameStarter, translations));
 
             gameStarter.start();
         }
