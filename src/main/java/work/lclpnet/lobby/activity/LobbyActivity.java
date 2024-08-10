@@ -39,7 +39,7 @@ import work.lclpnet.lobby.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 import work.lclpnet.translations.DefaultLanguageTranslator;
-import work.lclpnet.translations.loader.translation.MultiTranslationLoader;
+import work.lclpnet.translations.loader.MultiTranslationLoader;
 
 import javax.inject.Inject;
 import java.util.Random;
@@ -277,7 +277,10 @@ public class LobbyActivity extends ComponentActivity {
         var lobbyTranslationLoader = ModTranslations.assetTranslationLoader(LobbyMod.ID, getLogger());
         var gameTranslationLoader = translatedGame.getTranslationLoader();
 
-        var loader = new MultiTranslationLoader(lobbyTranslationLoader, gameTranslationLoader);
+        var loader = new MultiTranslationLoader();
+        loader.addLoader(lobbyTranslationLoader);
+        loader.addLoader(gameTranslationLoader);
+
         var translator = new DefaultLanguageTranslator(loader);
 
         // make sure the translations are loaded

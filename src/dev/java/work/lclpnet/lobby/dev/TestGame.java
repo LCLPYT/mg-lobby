@@ -12,7 +12,7 @@ import work.lclpnet.lobby.game.api.TranslatedGame;
 import work.lclpnet.lobby.game.api.data.GameDataPacks;
 import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.conf.MinecraftGameConfig;
-import work.lclpnet.translations.loader.translation.TranslationLoader;
+import work.lclpnet.translations.loader.TranslationLoader;
 
 public class TestGame implements Game, TranslatedGame {
 
