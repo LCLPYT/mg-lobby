@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
@@ -26,10 +27,8 @@ import work.lclpnet.lobby.di.ActivityComponent;
 import work.lclpnet.lobby.di.ActivityModule;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.api.Game;
-import work.lclpnet.lobby.game.api.GameInstance;
-import work.lclpnet.lobby.game.api.GameStarter;
-import work.lclpnet.lobby.game.api.TranslatedGame;
+import work.lclpnet.lobby.game.api.*;
+import work.lclpnet.lobby.game.conf.GameConfig;
 import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
 import work.lclpnet.lobby.game.impl.prot.ProtectionTypes;
 import work.lclpnet.lobby.game.start.LobbyArgs;
@@ -40,6 +39,7 @@ import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
+import work.lclpnet.translations.loader.TranslationLoader;
 
 import javax.inject.Inject;
 import java.util.Random;
@@ -225,15 +225,17 @@ public class LobbyActivity extends ComponentActivity {
         });
     }
 
+    @Blocking
     private void changeAtomicAsync(@Nullable Game game) {
         lobbyManager.getGameManager().setCurrentGame(game);
 
         if (game == null) return;
 
-        Translations translations = createGameTranslations(game).join();
+        GameFactory factory = game.createFactory();
+        Translations translations = createGameTranslations(factory).join();
 
         // make sure to activate the game on the server thread
-        getServer().submit(() -> activateGame(game, translations)).join();
+        getServer().submit(() -> activateGame(factory, game.getConfig(), translations)).join();
 
         synchronized (this) {
             changingToGame = null;
@@ -241,11 +243,11 @@ public class LobbyActivity extends ComponentActivity {
         }
     }
 
-    private void activateGame(Game game, Translations translations) {
+    private void activateGame(GameFactory factory, GameConfig config, Translations translations) {
         FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger(),
-                game.getConfig(), translations);
+                config, translations);
 
-        GameInstance instance = game.createInstance(environment);
+        GameInstance instance = factory.createInstance(environment);
 
         var args = new LobbyArgs(childActivity, configurator);
 
@@ -262,20 +264,22 @@ public class LobbyActivity extends ComponentActivity {
                 instance.start();
             });
 
-            args.injectStartingSupplier(() -> startingBuilder.create(game.getConfig(), gameStarter, translations));
+            args.injectStartingSupplier(() -> startingBuilder.create(config, gameStarter, translations));
 
             gameStarter.start();
         }
     }
 
-    private CompletableFuture<Translations> createGameTranslations(Game game) {
-        if (!(game instanceof TranslatedGame translatedGame)) {
+    private CompletableFuture<Translations> createGameTranslations(GameFactory factory) {
+        TranslationLoader gameTranslationLoader = factory.createTranslationLoader();
+
+        if (gameTranslationLoader == null) {
+            // game factory doesn't provide game translations, use lobby translations
             return CompletableFuture.completedFuture(this.translations);
         }
 
         // the game provides a translation loader, load translations union
         var lobbyTranslationLoader = ModTranslations.assetTranslationLoader(LobbyMod.ID, getLogger());
-        var gameTranslationLoader = translatedGame.getTranslationLoader();
 
         var loader = new MultiTranslationLoader();
         loader.addLoader(lobbyTranslationLoader);

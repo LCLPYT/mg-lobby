@@ -13,7 +13,7 @@ public interface GameConfig {
     String identifier();
 
     /**
-     * The translation key of  title of the game.
+     * The translation key of the title of the game.
      * @return The game title.
      */
     default String titleKey() {
