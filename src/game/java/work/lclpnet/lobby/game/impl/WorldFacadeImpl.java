@@ -80,7 +80,7 @@ public class WorldFacadeImpl implements WorldFacade {
             throw new IllegalStateException("World %s is not loaded".formatted(mapKey.getValue()));
         }
 
-        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), yaw, 0F);
+        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), yaw, 0F, true);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class WorldFacadeImpl implements WorldFacade {
         this.yaw = MapUtils.getSpawnYaw(map);
 
         for (ServerPlayerEntity player : PlayerLookup.all(server)) {
-            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), yaw, 0);
+            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), yaw, 0, true);
         }
 
         // cleanup current map if requested

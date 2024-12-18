@@ -8,6 +8,7 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.decoration.LeashKnotEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.world.explosion.ExplosionImpl;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
 import work.lclpnet.lobby.game.api.prot.scope.*;
 import work.lclpnet.lobby.game.impl.prot.type.*;
@@ -37,7 +38,7 @@ public class ProtectionTypes {
     public static final ProtectionType<EntityBlockScope> TAKE_LECTERN_BOOK;
     public static final ProtectionType<EntityBlockScope> TRAMPLE_TURTLE_EGG;
     public static final ProtectionType<WorldBlockScope> CAULDRON_DRIP_STONE;
-    public static final ProtectionType<EntityBlockScope> EXPLOSION;
+    public static final ProtectionType<GenericScope<ExplosionImpl>> EXPLOSION;
     public static final ProtectionType<WorldBlockScope> MELT;
     public static final ProtectionType<WorldBlockScope> FREEZE;
     public static final ProtectionType<WorldBlockScope> SNOW_FALL;
@@ -97,7 +98,7 @@ public class ProtectionTypes {
                 .add(TAKE_LECTERN_BOOK = new EntityBlockProtectionType())
                 .add(TRAMPLE_TURTLE_EGG = new EntityBlockProtectionType())
                 .add(CAULDRON_DRIP_STONE = new WorldBlockProtectionType())
-                .add(EXPLOSION = new EntityBlockProtectionType())
+                .add(EXPLOSION = new GenericProtectionType<>())
                 .add(MELT = new WorldBlockProtectionType())
                 .add(FREEZE = new WorldBlockProtectionType())
                 .add(SNOW_FALL = new WorldBlockProtectionType())

@@ -5,15 +5,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.ItemActionResult;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookContainer;
@@ -21,7 +18,7 @@ import work.lclpnet.kibu.hook.entity.*;
 import work.lclpnet.kibu.hook.player.CraftingRecipeCallback;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
-import work.lclpnet.kibu.hook.util.PendingRecipe;
+import work.lclpnet.kibu.hook.util.PendingResult;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.kibu.hook.world.BlockModificationHooks;
 import work.lclpnet.kibu.hook.world.ItemScatterCallback;
@@ -68,7 +65,7 @@ public class BasicProtector implements Protector {
 
         protect(USE_ITEM_ON_BLOCK, BlockModificationHooks.USE_ITEM_ON_BLOCK, scope
                 -> (ctx)
-                -> scope.isWithinScope(ctx.getPlayer(), ctx.getBlockPos()) ? ItemActionResult.FAIL : null);
+                -> scope.isWithinScope(ctx.getPlayer(), ctx.getBlockPos()) ? ActionResult.FAIL : null);
 
         protect(TRAMPLE_FARMLAND, BlockModificationHooks.TRAMPLE_FARMLAND, BasicProtector::onModify);
 
@@ -105,9 +102,7 @@ public class BasicProtector implements Protector {
                 -> (world, pos, newState)
                 -> scope.isWithinScope(world, pos));
 
-        protect(EXPLOSION, WorldPhysicsHooks.EXPLOSION, scope
-                -> (exploder)
-                -> scope.isWithinScope(exploder, exploder.getBlockPos()));
+        protect(EXPLOSION, WorldPhysicsHooks.EXPLOSION, scope -> scope::isWithinScope);
 
         protect(MELT, WorldPhysicsHooks.MELT, scope -> scope::isWithinScope);
 
@@ -230,14 +225,8 @@ public class BasicProtector implements Protector {
                 -> scope.isWithinScope(entity, itemEntity));
 
         protect(CRAFT_ITEM, CraftingRecipeCallback.HOOK, scope
-                -> (player, recipeManager, type, input, cached)
-                -> recipeManager.getFirstMatch(type, input, player.getWorld())
-                .map(RecipeEntry::value)
-                .map(recipe -> recipe.getResult(player.getRegistryManager()))
-                // disallowed results will be mapped to empty, others will pass
-                .filter(result -> scope.isWithinScope(player, result))
-                .map(result -> PendingRecipe.empty())
-                .orElse(PendingRecipe.pass()));
+                -> (player, input, result)
+                -> scope.isWithinScope(player, result) ? PendingResult.empty() : PendingResult.pass());
 
         protect(MOUNT, EntityMountCallback.HOOK, scope
                 -> (entity, vehicle, force)
@@ -248,10 +237,10 @@ public class BasicProtector implements Protector {
             ItemStack stack = player.getStackInHand(hand);
 
             if (!stack.contains(DataComponentTypes.FOOD) || !scope.isWithinScope(player, stack)) {
-                return TypedActionResult.pass(ItemStack.EMPTY);
+                return ActionResult.PASS;
             }
 
-            return TypedActionResult.fail(ItemStack.EMPTY);
+            return ActionResult.FAIL;
         });
     }
 

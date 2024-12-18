@@ -28,7 +28,7 @@ import work.lclpnet.kibu.hook.ServerPlayConnectionHooks;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerAdvancementPacketCallback;
 import work.lclpnet.kibu.hook.player.PlayerMoveCallback;
-import work.lclpnet.kibu.hook.player.PlayerRecipePacketCallback;
+import work.lclpnet.kibu.hook.player.PlayerRecipeNotificationCallback;
 import work.lclpnet.kibu.hook.util.PositionRotation;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
@@ -56,7 +56,7 @@ public class LobbyListener implements HookListenerModule {
         registrar.registerHook(PlayerMoveCallback.HOOK, this::onMove);
         registrar.registerHook(PlayerInteractionHooks.ATTACK_ENTITY, this::onAttack);
         registrar.registerHook(PlayerAdvancementPacketCallback.HOOK, (player, packet) -> true);
-        registrar.registerHook(PlayerRecipePacketCallback.HOOK, (player, packet) -> true);
+        registrar.registerHook(PlayerRecipeNotificationCallback.HOOK, (player, entry, displayEntry) -> true);
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -90,7 +90,7 @@ public class LobbyListener implements HookListenerModule {
             // teleport player back to spawn location
             Vec3d spawn = lobbyManager.getLobbySpawn();
 
-            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), 0, 0);
+            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), 0, 0, true);
             return;
         }
 

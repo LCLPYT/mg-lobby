@@ -152,7 +152,7 @@ public class Geyser {
     }
 
     public <T extends ParticleEffect> void spawnForceParticles(T particle, double x, double y, double z, int count, double dx, double dy, double dz, double speed) {
-        final ParticleS2CPacket packet = new ParticleS2CPacket(particle, true, x, y, z, (float) dx, (float) dy, (float) dz, (float) speed, count);
+        final ParticleS2CPacket packet = new ParticleS2CPacket(particle, true, false, x, y, z, (float) dx, (float) dy, (float) dz, (float) speed, count);
 
         final double rangeSquared = Math.pow(PARTICLE_RANGE, 2);
 

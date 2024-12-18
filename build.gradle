@@ -3,7 +3,7 @@ import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
     id 'java'
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.9-SNAPSHOT'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
 }
@@ -87,6 +87,7 @@ dependencies {
 
     // optional runtime mods (and their dependencies, because jar-in-jars are not loaded via dependencies)
     modLocalRuntime "work.lclpnet.mcserver-api:mcserver-api-fabric:${project.mcserver_api_version}"
+    implementation "work.lclpnet:translations4j:${project.translations4j_version}"
     localRuntime "work.lclpnet:translations4j:${project.translations4j_version}:network"
 
     activityCompileOnly(gameCompileOnly(compileOnly('org.jetbrains:annotations:24.1.0')))

@@ -60,38 +60,38 @@ public class PlayerReset {
     }
 
     public static void resetAttributes(ServerPlayerEntity player) {
-        resetAttribute(player, GENERIC_ARMOR);
-        resetAttribute(player, GENERIC_ARMOR_TOUGHNESS);
-        resetAttribute(player, GENERIC_ATTACK_DAMAGE);
-        resetAttribute(player, GENERIC_ATTACK_KNOCKBACK);
-        resetAttribute(player, GENERIC_ATTACK_SPEED);
-        resetAttribute(player, PLAYER_BLOCK_BREAK_SPEED);
-        resetAttribute(player, PLAYER_BLOCK_INTERACTION_RANGE);
-        resetAttribute(player, GENERIC_BURNING_TIME);
-        resetAttribute(player, GENERIC_EXPLOSION_KNOCKBACK_RESISTANCE);
-        resetAttribute(player, PLAYER_ENTITY_INTERACTION_RANGE);
-        resetAttribute(player, GENERIC_FALL_DAMAGE_MULTIPLIER);
-        resetAttribute(player, GENERIC_GRAVITY);
-        resetAttribute(player, GENERIC_JUMP_STRENGTH);
-        resetAttribute(player, GENERIC_KNOCKBACK_RESISTANCE);
-        resetAttribute(player, GENERIC_LUCK);
-        resetAttribute(player, GENERIC_MAX_ABSORPTION);
-        resetAttribute(player, GENERIC_MAX_HEALTH);
-        resetAttribute(player, PLAYER_MINING_EFFICIENCY);
-        resetAttribute(player, GENERIC_MOVEMENT_EFFICIENCY);
-        resetAttribute(player, GENERIC_MOVEMENT_SPEED);
-        resetAttribute(player, GENERIC_OXYGEN_BONUS);
-        resetAttribute(player, GENERIC_SAFE_FALL_DISTANCE);
-        resetAttribute(player, GENERIC_SCALE);
-        resetAttribute(player, PLAYER_SNEAKING_SPEED);
-        resetAttribute(player, GENERIC_STEP_HEIGHT);
-        resetAttribute(player, PLAYER_SUBMERGED_MINING_SPEED);
-        resetAttribute(player, PLAYER_SWEEPING_DAMAGE_RATIO);
-        resetAttribute(player, GENERIC_WATER_MOVEMENT_EFFICIENCY);
+        resetAttribute(player, ARMOR);
+        resetAttribute(player, ARMOR_TOUGHNESS);
+        resetAttribute(player, ATTACK_DAMAGE);
+        resetAttribute(player, ATTACK_KNOCKBACK);
+        resetAttribute(player, ATTACK_SPEED);
+        resetAttribute(player, BLOCK_BREAK_SPEED);
+        resetAttribute(player, BLOCK_INTERACTION_RANGE);
+        resetAttribute(player, BURNING_TIME);
+        resetAttribute(player, EXPLOSION_KNOCKBACK_RESISTANCE);
+        resetAttribute(player, ENTITY_INTERACTION_RANGE);
+        resetAttribute(player, FALL_DAMAGE_MULTIPLIER);
+        resetAttribute(player, GRAVITY);
+        resetAttribute(player, JUMP_STRENGTH);
+        resetAttribute(player, KNOCKBACK_RESISTANCE);
+        resetAttribute(player, LUCK);
+        resetAttribute(player, MAX_ABSORPTION);
+        resetAttribute(player, MAX_HEALTH);
+        resetAttribute(player, MINING_EFFICIENCY);
+        resetAttribute(player, MOVEMENT_EFFICIENCY);
+        resetAttribute(player, MOVEMENT_SPEED);
+        resetAttribute(player, OXYGEN_BONUS);
+        resetAttribute(player, SAFE_FALL_DISTANCE);
+        resetAttribute(player, SCALE);
+        resetAttribute(player, SNEAKING_SPEED);
+        resetAttribute(player, STEP_HEIGHT);
+        resetAttribute(player, SUBMERGED_MINING_SPEED);
+        resetAttribute(player, SWEEPING_DAMAGE_RATIO);
+        resetAttribute(player, WATER_MOVEMENT_EFFICIENCY);
     }
 
     public static void resetAttribute(ServerPlayerEntity player, RegistryEntry<EntityAttribute> attribute) {
-        if (attribute == GENERIC_MOVEMENT_SPEED) {
+        if (attribute == MOVEMENT_SPEED) {
             setAttribute(player, attribute, player.getAbilities().getWalkSpeed());
             return;
         }
@@ -114,7 +114,7 @@ public class PlayerReset {
     public static void modifyWalkSpeed(ServerPlayerEntity player, float value, boolean update) {
         player.getAbilities().setWalkSpeed(value);
 
-        EntityAttributeInstance attribute = player.getAttributeInstance(GENERIC_MOVEMENT_SPEED);
+        EntityAttributeInstance attribute = player.getAttributeInstance(MOVEMENT_SPEED);
 
         if (attribute != null) {
             attribute.setBaseValue(value);

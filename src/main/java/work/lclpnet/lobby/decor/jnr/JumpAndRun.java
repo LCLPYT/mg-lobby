@@ -87,7 +87,7 @@ public class JumpAndRun {
         this.nodes = new Stack<>();
         this.nodes.push(start.down());
 
-        final int maxY = world.getTopY() - start.getY();  // max offset
+        final int maxY = world.getTopYInclusive() + 1 - start.getY();  // max offset
 
         @SuppressWarnings("SuspiciousNameCombination")
         var config = new DefaultPosGenerator.Config(25, maxY - 25, List.of(
@@ -117,7 +117,7 @@ public class JumpAndRun {
     }
 
     private void next(ServerPlayerEntity player) {
-        if (this.next.getY() >= world.getTopY()) {
+        if (this.next.getY() >= world.getTopYInclusive()) {
             this.collapse();
             this.win(player);
             return;

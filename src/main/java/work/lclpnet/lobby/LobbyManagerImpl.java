@@ -22,6 +22,7 @@ import work.lclpnet.lobby.util.PlayerReset;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 @Singleton
@@ -82,7 +83,7 @@ public class LobbyManagerImpl implements LobbyManager {
 
         PlayerReset.reset(player);
 
-        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), 0F, 0F);
+        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), 0F, 0F, true);
     }
 
     @Override
