@@ -66,6 +66,8 @@ public class Voting<T> implements Interactable {
             List<Text> lore = icon.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).lines();
             List<Text> newLore = new ArrayList<>(lore.isEmpty() ? 1 : lore.size() + 2);
 
+            newLore.addAll(lore);
+
             // newline if there is already lore
             if (!lore.isEmpty()) {
                 newLore.add(Text.empty());

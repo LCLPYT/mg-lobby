@@ -18,5 +18,6 @@
   "lobby.game.waiting_boss_bar": "%s %s",
   "lobby.game.not_enough_players": "Es müssen mindestens %s Spieler online sein, damit das Spiel beginnen kann.",
   "lobby.voting.selected": "Ausgewählt",
-  "lobby.voting.voted_for": "Du hast für %s gestimmt"
+  "lobby.voting.voted_for": "Du hast für %s gestimmt",
+  "lobby.item.start_game": "Spiel starten"
 }

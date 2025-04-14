@@ -58,7 +58,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
         this.translations = translations;
 
         var context = new LobbyGameContext(server, game.getConfig(), translations);
-        this.waitingManager = new LobbyWaitingManager(world, context);
+        this.waitingManager = new LobbyWaitingManager(world, context, starter);
     }
 
     @Override
