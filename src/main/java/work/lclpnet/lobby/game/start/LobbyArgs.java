@@ -4,7 +4,6 @@ import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.activity.LobbyActivity;
-import work.lclpnet.lobby.game.api.GameStarter;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

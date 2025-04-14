@@ -1,10 +1,10 @@
-package work.lclpnet.lobby.game.conf;
+package work.lclpnet.lobby.game.api;
 
 import net.minecraft.item.ItemStack;
 
 public interface GameConfig {
 
-    int DEFAULT_START_DURATION_SECONDS = 90;
+    int DEFAULT_LOBBY_DURATION_SECONDS = 45;
 
     /**
      * A unique string identifier of the game.
@@ -26,7 +26,11 @@ public interface GameConfig {
      */
     ItemStack icon();
 
-    default int startDuration() {
-        return DEFAULT_START_DURATION_SECONDS;
+    /**
+     * The time for lobby-like game-hosts to wait for players to join, in seconds.
+     * @return The wait duration in seconds.
+     */
+    default int lobbyDurationSeconds() {
+        return DEFAULT_LOBBY_DURATION_SECONDS;
     }
 }

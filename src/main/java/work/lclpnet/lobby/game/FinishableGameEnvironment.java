@@ -11,7 +11,7 @@ import work.lclpnet.lobby.LobbyAPI;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameFinisher;
 import work.lclpnet.lobby.game.api.WorldFacade;
-import work.lclpnet.lobby.game.conf.GameConfig;
+import work.lclpnet.lobby.game.api.GameConfig;
 import work.lclpnet.lobby.game.impl.WorldContainer;
 import work.lclpnet.lobby.game.impl.WorldFacadeImpl;
 import work.lclpnet.lobby.game.map.MapManager;

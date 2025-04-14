@@ -10,16 +10,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
-import work.lclpnet.lobby.game.api.GameStarter;
-
-import java.util.function.Supplier;
+import work.lclpnet.lobby.game.start.GameStarter;
 
 public class ResumeCommand implements KibuCommand {
 
-    private final Supplier<GameStarter> gameStarterSupplier;
+    private final GameStarter starter;
 
-    public ResumeCommand(Supplier<GameStarter> gameStarterSupplier) {
-        this.gameStarterSupplier = gameStarterSupplier;
+    public ResumeCommand(GameStarter starter) {
+        this.starter = starter;
     }
 
     @Override
@@ -34,8 +32,6 @@ public class ResumeCommand implements KibuCommand {
     }
 
     private int resume(CommandContext<ServerCommandSource> ctx) {
-        GameStarter starter = gameStarterSupplier.get();
-
         if (starter == null) {
             ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
                     .append(Text.literal("There is no game starting at the moment").formatted(Formatting.RED)));

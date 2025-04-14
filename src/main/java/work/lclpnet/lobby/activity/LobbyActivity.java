@@ -17,7 +17,8 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.api.LobbyManager;
-import work.lclpnet.lobby.cmd.*;
+import work.lclpnet.lobby.cmd.EndCommand;
+import work.lclpnet.lobby.cmd.SetGameCommand;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
@@ -27,10 +28,12 @@ import work.lclpnet.lobby.di.ActivityComponent;
 import work.lclpnet.lobby.di.ActivityModule;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.api.*;
-import work.lclpnet.lobby.game.conf.GameConfig;
+import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.lobby.game.api.GameFactory;
+import work.lclpnet.lobby.game.api.start.GameScope;
 import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
 import work.lclpnet.lobby.game.impl.prot.ProtectionTypes;
+import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.game.start.LobbyGameConfigurator;
 import work.lclpnet.lobby.game.util.ProtectorComponent;
@@ -45,7 +48,6 @@ import javax.inject.Inject;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
 
@@ -150,12 +152,7 @@ public class LobbyActivity extends ComponentActivity {
         // game stuff
         final GameManager gameManager = lobbyManager.getGameManager();
 
-        Supplier<GameStarter> gameStarterSupplier = () -> gameStarter;
-
-        new StartCommand(gameStarterSupplier).register(commands);
         new SetGameCommand(gameManager, this::changeGame, getLogger(), translations).register(commands);
-        new PauseCommand(gameStarterSupplier).register(commands);
-        new ResumeCommand(gameStarterSupplier).register(commands);
 
         changeGame(gameManager.getCurrentGame());
 
@@ -235,7 +232,7 @@ public class LobbyActivity extends ComponentActivity {
         Translations translations = createGameTranslations(factory).join();
 
         // make sure to activate the game on the server thread
-        getServer().submit(() -> activateGame(factory, game.getConfig(), translations)).join();
+        getServer().submit(() -> activateGame(game, factory, translations)).join();
 
         synchronized (this) {
             changingToGame = null;
@@ -243,28 +240,24 @@ public class LobbyActivity extends ComponentActivity {
         }
     }
 
-    private void activateGame(GameFactory factory, GameConfig config, Translations translations) {
-        FinishableGameEnvironment environment = new FinishableGameEnvironment(getServer(), getLogger(),
-                config, translations);
-
-        GameInstance instance = factory.createInstance(environment);
+    private void activateGame(Game game, GameFactory factory, Translations translations) {
+        var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations);
 
         var args = new LobbyArgs(childActivity, configurator);
+        var scope = new Scope(getServer());
 
         synchronized (this) {
             if (gameStarter != null) {
                 gameStarter.destroy();
             }
 
-            gameStarter = instance.createStarter(args, () -> {
-                // register end command
+            gameStarter = new GameStarter(() -> game.canBePlayed(scope), args, options -> {
                 new EndCommand(environment.getFinisher()).register(environment.getCommandStack());
 
-                // now actually start the instance
-                instance.start();
-            });
+                factory.createInstance(environment).start(options);
+            }, environment);
 
-            args.injectStartingSupplier(() -> startingBuilder.create(config, gameStarter, translations));
+            args.injectStartingSupplier(() -> startingBuilder.create(game, gameStarter, translations));
 
             gameStarter.start();
         }
@@ -316,8 +309,16 @@ public class LobbyActivity extends ComponentActivity {
 
         cfg.allow(ProtectionTypes.USE_BLOCK, (entity, pos) ->
                 entity instanceof ServerPlayerEntity player && ticTacToeManager.isTableCenter(pos)
-                && ticTacToeManager.isPlaying(player));
+                        && ticTacToeManager.isPlaying(player));
 
         ProtectorUtils.allowCreativeOperatorBypass(cfg);
+    }
+
+    private record Scope(MinecraftServer server) implements GameScope {
+
+        @Override
+        public int playerCount() {
+            return PlayerLookup.all(server).size();
+        }
     }
 }

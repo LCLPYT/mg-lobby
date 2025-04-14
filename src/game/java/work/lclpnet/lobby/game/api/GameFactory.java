@@ -18,9 +18,7 @@ public interface GameFactory {
      * @apiNote This method is called before creating the game instance.
      * @return A translation loader, or null if no translations should be loaded (default).
      */
-    default @Nullable TranslationLoader createTranslationLoader() {
-        return null;
-    }
+    @Nullable TranslationLoader createTranslationLoader();
 
     /**
      * Creates an actual {@link GameInstance} from a {@link GameEnvironment}.

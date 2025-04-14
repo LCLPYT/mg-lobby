@@ -8,16 +8,17 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
-import work.lclpnet.lobby.game.api.GameStarter;
-
-import java.util.function.Supplier;
+import work.lclpnet.lobby.game.api.option.GameOptions;
+import work.lclpnet.lobby.game.start.GameStarter;
 
 public class StartCommand implements KibuCommand {
 
-    private final Supplier<GameStarter> starterSupplier;
+    private final GameStarter starter;
+    private final GameOptions options;
 
-    public StartCommand(Supplier<GameStarter> starterSupplier) {
-        this.starterSupplier = starterSupplier;
+    public StartCommand(GameStarter starter, GameOptions options) {
+        this.starter = starter;
+        this.options = options;
     }
 
     @Override
@@ -32,8 +33,6 @@ public class StartCommand implements KibuCommand {
     }
 
     private int execute(CommandContext<ServerCommandSource> ctx) {
-        GameStarter starter = starterSupplier.get();
-
         if (starter == null) {
             ctx.getSource().sendError(Text.literal("There is no game to start at the moment."));
             return -1;
@@ -47,7 +46,7 @@ public class StartCommand implements KibuCommand {
         ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
                 .append(Text.literal("Started the game.").formatted(Formatting.GRAY)));
 
-        starter.finish();
+        starter.finish(options);
 
         return 0;
     }

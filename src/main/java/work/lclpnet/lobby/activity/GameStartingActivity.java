@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Formatting;
@@ -17,44 +18,71 @@ import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BossBarComponent;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
+import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.lobby.LobbyMod;
-import work.lclpnet.lobby.game.api.GameStarter;
-import work.lclpnet.lobby.game.conf.GameConfig;
+import work.lclpnet.lobby.cmd.PauseCommand;
+import work.lclpnet.lobby.cmd.ResumeCommand;
+import work.lclpnet.lobby.cmd.StartCommand;
+import work.lclpnet.lobby.game.LobbyWaitingManager;
+import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.lobby.game.api.GameConfig;
+import work.lclpnet.lobby.game.start.GameStarter;
+import work.lclpnet.lobby.util.LobbyGameContext;
+
+import javax.inject.Named;
 
 public class GameStartingActivity extends ComponentActivity implements SchedulerAction {
 
-    private final GameConfig gameConfig;
+    private final Game game;
+    private final GameConfig config;
     private final GameStarter starter;
     private final Translations translations;
+    private final LobbyWaitingManager waitingManager;
     private TranslatedBossBar bossBar;
     private int timer;
     private int colorIndex;
     private boolean wasPaused = false;
 
     @AssistedInject
-    public GameStartingActivity(MinecraftServer server, Logger logger, @Assisted GameConfig gameConfig,
-                                @Assisted GameStarter starter, @Assisted Translations translations) {
+    public GameStartingActivity(MinecraftServer server, Logger logger, @Named("lobbyWorld") ServerWorld world,
+                                @Assisted Game game, @Assisted GameStarter starter, @Assisted Translations translations) {
         super(server, logger);
-        this.gameConfig = gameConfig;
+        this.game = game;
+        this.config = game.getConfig();
         this.starter = starter;
         this.translations = translations;
+
+        var context = new LobbyGameContext(server, game.getConfig(), translations);
+        this.waitingManager = new LobbyWaitingManager(world, context);
     }
 
     @Override
     protected void registerComponents(ComponentBundle components) {
-        components.add(BuiltinComponents.BOSS_BAR).add(BuiltinComponents.SCHEDULER);
+        components
+                .add(BuiltinComponents.BOSS_BAR)
+                .add(BuiltinComponents.SCHEDULER)
+                .add(BuiltinComponents.HOOKS)
+                .add(BuiltinComponents.COMMANDS);
     }
 
     @Override
     public void start() {
         super.start();
 
-        timer = gameConfig.startDuration() * 20;
+        game.configureStatusManager(starter);
+
+        CommandRegistrar commands = component(BuiltinComponents.COMMANDS).commands();
+
+        new StartCommand(starter, waitingManager).register(commands);
+        new PauseCommand(starter).register(commands);
+        new ResumeCommand(starter).register(commands);
+
+        timer = config.lobbyDurationSeconds() * 20;
         colorIndex = 0;
 
         final BossBarComponent bossBars = component(BuiltinComponents.BOSS_BAR);
@@ -71,15 +99,23 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         bossBars.showOnJoin(bossBar);
 
+        initWaitingManager();
+
         final Scheduler scheduler = component(BuiltinComponents.SCHEDULER).scheduler();
 
         scheduler.interval(this, 1).whenComplete(() -> bossBar.setVisible(false));
     }
 
+    private void initWaitingManager() {
+        game.configureOptions(waitingManager);
+
+        waitingManager.init(component(BuiltinComponents.HOOKS).hooks());
+    }
+
     private Pair<String, Object[]> titleTranslation() {
         if (wasPaused) {
             return Pair.of("lobby.countdown.title.paused", new Object[] {
-                    translations.translateText(gameConfig.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD)
+                    translations.translateText(config.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD)
             });
         }
 
@@ -89,14 +125,14 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         if (minutes > 0) {
             return Pair.of("lobby.countdown.title.minutes", new Object[] {
-                    translations.translateText(gameConfig.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
+                    translations.translateText(config.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
                     minutes,
                     seconds
             });
         }
 
         return Pair.of("lobby.countdown.title.seconds", new Object[] {
-                translations.translateText(gameConfig.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
+                translations.translateText(config.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
                 seconds
         });
     }
@@ -108,7 +144,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         bossBar.setTitle(titleTranslation.left(), titleTranslation.right());
         bossBar.setColor(BossBar.Color.values()[colorIndex]);
-        bossBar.setPercent(timer / (float) (gameConfig.startDuration() * 20));
+        bossBar.setPercent(timer / (float) (config.lobbyDurationSeconds() * 20));
     }
 
     @Override
@@ -131,7 +167,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         if (timer-- == 0) {
             task.cancel();
-            starter.finish();
+            starter.finish(waitingManager);
             return;
         }
 
@@ -150,6 +186,6 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
     @AssistedFactory
     public interface Builder {
-        GameStartingActivity create(GameConfig gameConfig, GameStarter starter, Translations translations);
+        GameStartingActivity create(Game game, GameStarter starter, Translations translations);
     }
 }

@@ -7,6 +7,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -19,35 +20,36 @@ import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.kibu.translate.util.Partial;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.activity.GameStartingActivity;
+import work.lclpnet.lobby.game.api.GameContext;
 import work.lclpnet.lobby.game.api.GameEnvironment;
-import work.lclpnet.lobby.game.api.GameStarter;
+import work.lclpnet.lobby.game.api.option.GameOptions;
+import work.lclpnet.lobby.game.api.start.GameStatusManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ConditionGameStarter implements GameStarter {
+public class GameStarter implements GameStatusManager {
 
     private final BooleanSupplier condition;
     private final Args args;
-    private final Callback onStart;
+    private final Consumer<GameOptions> onStart;
     private final GameEnvironment environment;
     private final AtomicBoolean gameStarting = new AtomicBoolean(false);
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
+    private final int conditionCheckInterval = Ticks.seconds(20);
     private boolean paused = false;
-    private int conditionCheckInterval = Ticks.seconds(20);
-    private Function<ServerPlayerEntity, Text> conditionMessage = null;
+    private Function<ServerPlayerEntity, Text> cannotStartMessage = null;
     private TranslatedBossBar bossBar = null;
 
-    public ConditionGameStarter(BooleanSupplier condition, Args args, Callback onStart, GameEnvironment environment) {
+    public GameStarter(BooleanSupplier condition, Args args, Consumer<GameOptions> onStart, GameEnvironment environment) {
         this.condition = condition;
         this.args = args;
         this.onStart = onStart;
         this.environment = environment;
     }
 
-    @Override
     public void start() {
         HookStack hookStack = environment.getHookStack();
         hookStack.push();
@@ -64,8 +66,7 @@ public class ConditionGameStarter implements GameStarter {
                 this::periodicCheck), 1);
     }
 
-    @Override
-    public void finish() {
+    public void finish(GameOptions options) {
         gameStarting.set(false);
 
         if (gameStarted.get()) return;
@@ -76,7 +77,7 @@ public class ConditionGameStarter implements GameStarter {
 
         unload();
 
-        onStart.start();
+        onStart.accept(options);
     }
 
     public void unload() {
@@ -84,22 +85,18 @@ public class ConditionGameStarter implements GameStarter {
         environment.getSchedulerStack().pop();
     }
 
-    @Override
     public boolean isStarted() {
         return gameStarted.get();
     }
 
-    @Override
     public void setPaused(boolean paused) {
         this.paused = paused;
     }
 
-    @Override
     public boolean isPaused() {
         return paused;
     }
 
-    @Override
     public void destroy() {
         abortGameStart();
         hideBossBar();
@@ -110,10 +107,10 @@ public class ConditionGameStarter implements GameStarter {
     private void periodicCheck() {
         updateGameStatus();
 
-        if (conditionMessage == null || gameStarting.get() || gameStarted.get()) return;
+        if (cannotStartMessage == null || gameStarting.get() || gameStarted.get()) return;
 
         for (ServerPlayerEntity player : PlayerLookup.all(environment.getServer())) {
-            Text text = conditionMessage.apply(player);
+            Text text = cannotStartMessage.apply(player);
             player.sendMessage(text);
 
             player.playSoundToPlayer(SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.NEUTRAL, 0.4f, 1f);
@@ -181,26 +178,6 @@ public class ConditionGameStarter implements GameStarter {
         updateGameStatus();
     }
 
-    public void setConditionCheckInterval(int conditionCheckInterval) {
-        this.conditionCheckInterval = conditionCheckInterval;
-    }
-
-    public void setConditionMessage(Function<ServerPlayerEntity, Text> conditionText) {
-        this.conditionMessage = conditionText;
-    }
-
-    public void setConditionBossBarValue(Object value) {
-        Translations translations = environment.getTranslations();
-        Identifier barId = LobbyMod.identifier("waiting_condition");
-
-        configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",
-                        translations.translateText(environment.getGameConfig().titleKey())
-                                .formatted(Formatting.AQUA, Formatting.BOLD)
-                                .styled(style -> style.withItalic(false)),
-                        value),
-                bar -> bar.formatted(Formatting.YELLOW, Formatting.ITALIC));
-    }
-
     public void configureConditionBossBar(Partial<TranslatedBossBar, BossBarProvider> bossBarPartial, Consumer<TranslatedBossBar> action) {
         hideBossBar();
         bossBar = null;
@@ -218,5 +195,35 @@ public class ConditionGameStarter implements GameStarter {
 
             action.accept(bossBar);
         });
+    }
+
+    @Override
+    public GameContext getContext() {
+        return environment;
+    }
+
+    @Override
+    public void setCannotStartMessage(Function<ServerPlayerEntity, Text> messageFunction) {
+        this.cannotStartMessage = messageFunction;
+    }
+
+    @Override
+    public void setCannotStartBossBarValue(Object value) {
+        Translations translations = environment.getTranslations();
+        Identifier barId = LobbyMod.identifier("waiting_condition");
+
+        configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",
+                        translations.translateText(environment.getGameConfig().titleKey())
+                                .formatted(Formatting.AQUA, Formatting.BOLD)
+                                .styled(style -> style.withItalic(false)),
+                        value),
+                bar -> bar.formatted(Formatting.YELLOW, Formatting.ITALIC));
+    }
+
+    public interface Args {
+
+        void startChildActivity(Activity activity);
+
+        void stopChildActivity();
     }
 }

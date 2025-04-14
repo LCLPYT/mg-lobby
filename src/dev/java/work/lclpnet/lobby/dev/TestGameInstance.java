@@ -1,18 +1,16 @@
 package work.lclpnet.lobby.dev;
 
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.scheduler.Ticks;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameInstance;
-import work.lclpnet.lobby.game.api.GameStarter;
-import work.lclpnet.lobby.game.start.ConditionGameStarter;
+import work.lclpnet.lobby.game.api.option.GameOptions;
+import work.lclpnet.lobby.game.api.option.VoteResult;
 
-import java.util.function.BooleanSupplier;
+import java.util.Comparator;
+import java.util.Map.Entry;
 
 public class TestGameInstance implements GameInstance {
 
@@ -24,33 +22,17 @@ public class TestGameInstance implements GameInstance {
     }
 
     @Override
-    public GameStarter createStarter(GameStarter.Args args, GameStarter.Callback onStart) {
-        int minPlayers = !FabricLoader.getInstance().isDevelopmentEnvironment() ? 1 : 2;
-
-        BooleanSupplier condition = () -> PlayerLookup.all(environment.getServer()).size() >= minPlayers;
-
-        var starter = new ConditionGameStarter(condition, args, onStart, environment);
-
-        // optionally, you can configure the starter:
-
-        var translations = environment.getTranslations();
-
-        // you can set a periodic condition message that gets sent to everyone, if the game cannot start.
-        var notEnoughPlayers = translations.translateText("lobby.game.not_enough_players", minPlayers)
-                .formatted(Formatting.RED);
-
-        starter.setConditionMessage(notEnoughPlayers::translateFor);
-        starter.setConditionCheckInterval(Ticks.seconds(20));
-
-        // you can set a title that gets displayed as boss bar if the game cannot start
-        starter.setConditionBossBarValue(translations.translateText("lobby.game.waiting_for_players"));
-
-        return starter;
-    }
-
-    @Override
-    public void start() {
+    public void start(GameOptions options) {
         System.out.println("The test game was started! (will end in 10 seconds)");
+
+        VoteResult<String> mapVotingResult = options.getVotingResults("map", String.class).orElseThrow();
+        System.out.println("Most voted map: " + mapVotingResult.getMostVoted());
+
+        System.out.println("All map votes:");
+        mapVotingResult.asMap().entrySet().stream()
+                .sorted(Comparator.<Entry<String, Integer>>comparingInt(Entry::getValue).reversed())
+                .forEach(entry
+                        -> System.out.println(entry.getKey() + ": " + entry.getValue() + " votes"));
 
         TestGameActivity activity = new TestGameActivity(environment.getServer(), logger);
 
@@ -59,6 +41,6 @@ public class TestGameInstance implements GameInstance {
         environment.getSchedulerStack().timeout(() -> {
             System.out.println("The test game has ended!");
             environment.getFinisher().finishGame();
-        }, 200);
+        }, Ticks.seconds(10));
     }
 }
