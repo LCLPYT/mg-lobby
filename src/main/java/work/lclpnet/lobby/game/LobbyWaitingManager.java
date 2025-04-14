@@ -75,9 +75,14 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
 
     public void init(HookRegistrar hooks) {
         hooks.registerHook(PlayerConnectionHooks.JOIN, this::giveItems);
+        hooks.registerHook(PlayerConnectionHooks.QUIT, this::onQuit);
         hooks.registerHook(PlayerInteractionHooks.USE_ITEM, this::useItem);
 
         PlayerLookup.world(world).forEach(this::giveItems);
+    }
+
+    private void onQuit(ServerPlayerEntity player) {
+        states.remove(player.getUuid());
     }
 
     private ActionResult useItem(PlayerEntity _player, World world, Hand hand) {
