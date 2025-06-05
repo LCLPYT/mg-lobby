@@ -4,7 +4,7 @@ import net.minecraft.item.ItemStack;
 
 public interface GameConfig {
 
-    int DEFAULT_LOBBY_DURATION_SECONDS = 45;
+    int DEFAULT_LOBBY_DURATION_SECONDS = 75;
 
     /**
      * A unique string identifier of the game.
