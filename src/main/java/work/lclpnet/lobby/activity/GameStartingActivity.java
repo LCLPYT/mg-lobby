@@ -21,7 +21,6 @@ import work.lclpnet.activity.component.builtin.BuiltinComponents;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
-import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.lobby.LobbyMod;
@@ -36,7 +35,7 @@ import work.lclpnet.lobby.util.LobbyGameContext;
 
 import javax.inject.Named;
 
-public class GameStartingActivity extends ComponentActivity implements SchedulerAction {
+public class GameStartingActivity extends ComponentActivity {
 
     private final Game game;
     private final GameConfig config;
@@ -103,7 +102,8 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
 
         final Scheduler scheduler = component(BuiltinComponents.SCHEDULER).scheduler();
 
-        scheduler.interval(this, 1).whenComplete(() -> bossBar.setVisible(false));
+        scheduler.interval(this::tick, 1)
+                .whenComplete(() -> bossBar.setVisible(false));
     }
 
     private void initWaitingManager() {
@@ -147,8 +147,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
         bossBar.setPercent(timer / (float) (config.lobbyDurationSeconds() * 20));
     }
 
-    @Override
-    public void run(RunningTask task) {
+    public void tick(RunningTask task) {
         if (starter.isStarted()) {
             task.cancel();
             return;
@@ -164,6 +163,7 @@ public class GameStartingActivity extends ComponentActivity implements Scheduler
         }
 
         wasPaused = false;
+        waitingManager.runTimedActions(timer);
 
         if (timer-- == 0) {
             task.cancel();

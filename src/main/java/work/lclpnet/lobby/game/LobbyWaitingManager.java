@@ -10,6 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -19,10 +21,7 @@ import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.lobby.game.api.GameContext;
-import work.lclpnet.lobby.game.api.option.GameOptionConfig;
-import work.lclpnet.lobby.game.api.option.GameOptions;
-import work.lclpnet.lobby.game.api.option.OptionVoting;
-import work.lclpnet.lobby.game.api.option.VoteResult;
+import work.lclpnet.lobby.game.api.option.*;
 import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.game.util.GameConstants;
 import work.lclpnet.lobby.util.Interactable;
@@ -37,6 +36,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
     private final GameStarter starter;
     private final List<Voting<?>> votings = new ArrayList<>();
     private final Map<UUID, PlayerState> states = new HashMap<>();
+    private final Map<Integer, Set<Runnable>> timedActions = new HashMap<>();
 
     public LobbyWaitingManager(ServerWorld world, GameContext context, GameStarter starter) {
         this.world = world;
@@ -50,12 +50,63 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
     }
 
     @Override
-    public synchronized <T> void registerVoting(String name, OptionVoting<T> voting) {
+    public synchronized <T> VotingConfig registerVoting(String name, OptionVoting<T> voting) {
         if (getVoting(name, null).isPresent()) {
             throw new IllegalArgumentException("Voting named %s already exists".formatted(name));
         }
 
-        votings.add(new Voting<>(name, voting, context.getTranslations()));
+        var impl = new Voting<>(name, voting, context.getTranslations());
+
+        votings.add(impl);
+
+        return ticksBeforeStart -> {
+            // only one runnable should exist for each voting instance, wrap in equivalence class
+            record VotingRunnable(Voting<?> voting, LobbyWaitingManager waitingManager) implements Runnable {
+
+                @Override
+                public void run() {
+                    waitingManager.openVotingIfNotYetVoted(voting);
+                }
+            }
+
+            addTimedAction(new VotingRunnable(impl, this), ticksBeforeStart);
+        };
+    }
+
+    @Override
+    public synchronized void addTimedAction(Runnable runnable, int ticksBeforeStart) {
+        Objects.requireNonNull(runnable, "Action must not be null");
+
+        if (ticksBeforeStart < 0) {
+            throw new IllegalArgumentException("Ticks before start must not be negative");
+        }
+
+        Set<Runnable> actions = timedActions.computeIfAbsent(ticksBeforeStart, t -> new HashSet<>());
+
+        actions.add(runnable);
+    }
+
+    public void runTimedActions(int ticksRemaining) {
+        Set<Runnable> actions;
+
+        synchronized (this) {
+            actions = timedActions.getOrDefault(ticksRemaining, Set.of());
+        }
+
+        actions.forEach(Runnable::run);
+    }
+
+    private <T> void openVotingIfNotYetVoted(Voting<T> voting) {
+        Set<UUID> voted = voting.getVoters();
+
+        for (ServerPlayerEntity player : world.getPlayers()) {
+            // check if the player has another screen open or has already voted
+            if (player.currentScreenHandler != player.playerScreenHandler || voted.contains(player.getUuid())) continue;
+
+            voting.open(player);
+
+            player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.NEUTRAL, 0.5f, 0.5f);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -83,6 +134,14 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
 
     private void onQuit(ServerPlayerEntity player) {
         states.remove(player.getUuid());
+
+        removeVotesOf(player);
+    }
+
+    private void removeVotesOf(ServerPlayerEntity player) {
+        for (var voting : votings) {
+            voting.removeVote(player);
+        }
     }
 
     private ActionResult useItem(PlayerEntity _player, World world, Hand hand) {
@@ -110,12 +169,12 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
 
             int slot = state.getFreeSlot(4);
             inventory.setStack(slot, getStack(player, voting));
-            state.setInteractable(slot, voting);
+            state.setInteractable(slot, voting::open);
         } else {
             for (Voting<?> voting : votings) {
                 int slot = state.getFirstFreeSlot();
                 inventory.setStack(slot, getStack(player, voting));
-                state.setInteractable(slot, voting);
+                state.setInteractable(slot, voting::open);
             }
         }
     }

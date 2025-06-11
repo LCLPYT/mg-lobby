@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.summingInt;
 import static net.minecraft.util.Formatting.*;
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
-public class Voting<T> implements Interactable {
+public class Voting<T> {
 
     private final String id;
     private final OptionVoting<T> data;
@@ -52,8 +52,7 @@ public class Voting<T> implements Interactable {
         return data;
     }
 
-    @Override
-    public void onInteract(ServerPlayerEntity player) {
+    public void open(ServerPlayerEntity player) {
         T currentVote;
         VoteResult<T> current;
 
@@ -61,7 +60,7 @@ public class Voting<T> implements Interactable {
             if (!open) return;
 
             currentVote = votes.getOrDefault(player.getUuid(), null);
-            current = currentResult();
+            current = getCurrentResult();
         }
 
         Text title = data.title().apply(player);
@@ -112,20 +111,26 @@ public class Voting<T> implements Interactable {
             votes.put(player.getUuid(), option);
         }
 
-        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.RECORDS, 0.5f, 1f);
+        player.playSoundToPlayer(SoundEvents.ENTITY_ENDER_DRAGON_HURT, SoundCategory.RECORDS, 0.4f, 1f);
 
         Text name = data.optionName().apply(player, option);
 
         player.sendMessage(translations.translateText(player, "lobby.voting.voted_for", styled(name, YELLOW)).formatted(GREEN));
     }
 
+    public synchronized void removeVote(ServerPlayerEntity player) {
+        if (!open) return;
+
+        votes.remove(player.getUuid());
+    }
+
     public synchronized VoteResult<T> end() {
         open = false;
 
-        return currentResult();
+        return getCurrentResult();
     }
 
-    public synchronized @NotNull VoteResult<T> currentResult() {
+    public synchronized @NotNull VoteResult<T> getCurrentResult() {
         Map<T, Integer> resultMap = votes.values().stream()
                 .collect(Collectors.groupingBy(identity(), summingInt(e -> 1)));
 
@@ -134,5 +139,9 @@ public class Voting<T> implements Interactable {
         }
 
         return () -> resultMap;
+    }
+
+    public synchronized Set<UUID> getVoters() {
+        return Set.copyOf(votes.keySet());
     }
 }

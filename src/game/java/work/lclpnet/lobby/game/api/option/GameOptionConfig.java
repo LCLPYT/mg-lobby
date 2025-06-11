@@ -6,5 +6,7 @@ public interface GameOptionConfig {
 
     GameContext getContext();
 
-    <T> void registerVoting(String name, OptionVoting<T> voting);
+    <T> VotingConfig registerVoting(String name, OptionVoting<T> voting);
+
+    void addTimedAction(Runnable runnable, int ticksBeforeStart);
 }

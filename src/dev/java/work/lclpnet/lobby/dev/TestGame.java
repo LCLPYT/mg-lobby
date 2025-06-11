@@ -10,18 +10,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.game.api.Game;
-import work.lclpnet.lobby.game.api.GameFactory;
+import work.lclpnet.lobby.game.api.GameConfig;
 import work.lclpnet.lobby.game.api.GameConfigurator;
+import work.lclpnet.lobby.game.api.GameFactory;
+import work.lclpnet.lobby.game.api.data.GameDataPacks;
 import work.lclpnet.lobby.game.api.option.GameOptionConfig;
 import work.lclpnet.lobby.game.api.option.OptionVoting;
-import work.lclpnet.lobby.game.api.data.GameDataPacks;
-import work.lclpnet.lobby.game.api.GameConfig;
 import work.lclpnet.lobby.game.api.start.GameScope;
 import work.lclpnet.lobby.game.api.start.GameStatusManager;
 import work.lclpnet.lobby.game.impl.MinecraftGameConfig;
 import work.lclpnet.lobby.game.impl.ModGameFactory;
 
 import java.util.List;
+
+import static work.lclpnet.kibu.scheduler.Ticks.seconds;
 
 public class TestGame implements Game, GameConfigurator {
 
@@ -75,7 +77,7 @@ public class TestGame implements Game, GameConfigurator {
 
                     return stack;
                 })
-        );
+        ).openBeforeStart(seconds(15));
     }
 
     @Override
