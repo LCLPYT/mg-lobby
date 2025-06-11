@@ -20,6 +20,6 @@ public class RuntimeWorldListener implements HookListenerModule {
     private MapState getRuntimeMapState(ServerWorld world, MapIdComponent id) {
         if (!(world instanceof RuntimeWorld runtimeWorld)) return null;
 
-        return runtimeWorld.getPersistentStateManager().get(MapState.getPersistentStateType(), id.asString());
+        return runtimeWorld.getPersistentStateManager().get(MapState.createStateType(id));
     }
 }

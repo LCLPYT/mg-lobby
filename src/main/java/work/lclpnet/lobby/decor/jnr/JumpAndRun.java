@@ -28,6 +28,7 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.text.FormatWrapper;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
+import work.lclpnet.lobby.mixin.ShulkerEntityAccessor;
 import work.lclpnet.lobby.util.WorldModifier;
 
 import javax.inject.Inject;
@@ -182,9 +183,10 @@ public class JumpAndRun {
         shulkerEntity.setSilent(true);
         shulkerEntity.setNoGravity(true);
         shulkerEntity.setInvulnerable(true);
-        shulkerEntity.setVariant(dyeColor(block));
         shulkerEntity.setInvisible(true);
         shulkerEntity.getWorld().getScoreboard().addScoreHolderToTeam(shulkerEntity.getNameForScoreboard(), team);
+
+        ((ShulkerEntityAccessor) shulkerEntity).invokeSetColor(dyeColor(block));
 
         modifier.spawnEntity(shulkerEntity);
     }

@@ -9,7 +9,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
-import net.minecraft.world.World;
 import work.lclpnet.kibu.access.VelocityModifier;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 
@@ -55,7 +54,7 @@ public class PlayerReset {
         MinecraftServer server = player.getServer();
 
         if (server != null) {
-            player.setSpawnPoint(World.OVERWORLD, null, 0f, true, false);
+            player.setSpawnPoint(null, false);
         }
     }
 

@@ -43,8 +43,8 @@ public class PauseCommand implements KibuCommand {
                     .append(Text.literal("The game start is already paused. Use ").formatted(Formatting.RED))
                     .append(Text.literal("/resume").formatted(Formatting.YELLOW)
                             .styled(style -> style
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/resume"))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to resume")))))
+                                    .withClickEvent(new ClickEvent.RunCommand("/resume"))
+                                    .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to resume")))))
                     .append(Text.literal(" to unpause.").formatted(Formatting.RED)));
             return 0;
         }

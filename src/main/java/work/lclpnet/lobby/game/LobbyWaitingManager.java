@@ -150,7 +150,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
         }
 
         public boolean onInteract(ServerPlayerEntity player) {
-            int slot = player.getInventory().selectedSlot;
+            int slot = player.getInventory().getSelectedSlot();
             Interactable interactable = interactables.getOrDefault(slot, null);
 
             if (interactable == null) return false;

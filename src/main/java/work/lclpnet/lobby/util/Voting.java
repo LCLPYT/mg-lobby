@@ -1,14 +1,13 @@
 package work.lclpnet.lobby.util;
 
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.LoreComponent;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.Unit;
 import work.lclpnet.kibu.inv.prompt.OptionPrompt;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.game.api.option.OptionVoting;
@@ -78,8 +77,11 @@ public class Voting<T> implements Interactable {
             icon.set(DataComponentTypes.LORE, new LoreComponent(newLore));
         }
 
-        icon.set(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
-        icon.apply(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT, c -> c.withShowInTooltip(false));
+        icon.set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT
+                .with(DataComponentTypes.ATTRIBUTE_MODIFIERS, true)
+                .with(DataComponentTypes.UNBREAKABLE, true)
+                .with(DataComponentTypes.ENCHANTMENTS, true)
+                .with(DataComponentTypes.DAMAGE, true));
 
         return icon;
     }

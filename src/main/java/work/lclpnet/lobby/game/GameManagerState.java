@@ -1,7 +1,6 @@
 package work.lclpnet.lobby.game;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.game.api.Game;
 
@@ -47,14 +46,16 @@ public class GameManagerState {
     }
 
     public void fromNbt(NbtCompound nbt, GameMangerLoader loader) {
-        if (nbt.contains(CURRENT_GAME_KEY, NbtElement.STRING_TYPE)) {
-            String gameId = nbt.getString(CURRENT_GAME_KEY);
+        if (!nbt.contains(CURRENT_GAME_KEY)) return;
 
-            Game game = loader.getGame(gameId);
+        String gameId = nbt.getString(CURRENT_GAME_KEY, null);
 
-            if (game != null) {
-                setCurrentGame(game);
-            }
+        if (gameId == null) return;
+
+        Game game = loader.getGame(gameId);
+
+        if (game != null) {
+            setCurrentGame(game);
         }
     }
 }
