@@ -58,6 +58,10 @@ public class BossBarTimer implements SchedulerAction {
     }
 
     public void stop() {
+        if (bossBar.isVisible()) {
+            bossBar.setVisible(false);
+        }
+
         if (taskHandle == null) return;
 
         taskHandle.cancel();
