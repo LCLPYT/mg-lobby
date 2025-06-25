@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
 import org.json.JSONObject;
+import work.lclpnet.lobby.game.util.JsonUtil;
 
 import java.util.Map;
 import java.util.Objects;
@@ -8,14 +9,18 @@ import java.util.Objects;
 public class MapRef {
 
     private final String path;
-    private final Map<String, Object> properties;
+    private final JSONObject properties;
 
     public MapRef(Map<String, Object> properties) {
+        this(new JSONObject(properties));
+    }
+
+    public MapRef(JSONObject properties) {
         this.properties = properties;
 
-        Object pathObj = properties.get("path");
+        String str = properties.optString("path", null);
 
-        if (!(pathObj instanceof String str)) {
+        if (str == null) {
             throw new AssertionError("String property \"path\" doesn't exist");
         }
 
@@ -26,7 +31,7 @@ public class MapRef {
         return path;
     }
 
-    public Map<String, Object> getProperties() {
+    public JSONObject getProperties() {
         return properties;
     }
 
@@ -44,6 +49,6 @@ public class MapRef {
     }
 
     public void toJson(JSONObject json) {
-        properties.forEach(json::put);
+        JsonUtil.putAll(properties, json);
     }
 }

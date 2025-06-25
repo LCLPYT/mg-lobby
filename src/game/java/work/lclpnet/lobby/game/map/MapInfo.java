@@ -2,43 +2,43 @@ package work.lclpnet.lobby.game.map;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import work.lclpnet.lobby.game.util.JsonUtil;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public record MapInfo(URI uri, String target, Map<String, Object> properties, @Nullable MapRepository origin) {
+public record MapInfo(URI uri, String target, JSONObject properties, @Nullable MapRepository origin) {
 
     public MapInfo(URI uri, String target, Map<String, Object> properties) {
+        this(uri, target, new JSONObject(properties));
+    }
+
+    public MapInfo(URI uri, String target, JSONObject properties) {
         this(uri, target, properties, null);
     }
 
     @Nullable
     public String getSource() {
-        Object target = properties.get("source");
-
-        if (target instanceof String str) {
-            return str;
-        }
-
-        return null;
+        return properties.optString("source", null);
     }
 
-    public void merge(Map<String, Object> props) {
-        props.forEach((key, val) -> {
-            if (properties.containsKey(key) || "target".equals(key)) return;
+    public void merge(JSONObject props) {
+        for (String key : props.keySet()) {
+            if (properties.has(key) || "target".equals(key)) continue;
+
+            Object val = props.get(key);
 
             properties.put(key, val);
-        });
+        }
     }
 
     public void toJson(JSONObject json) {
-        properties.forEach(json::put);
+        JsonUtil.putAll(properties, json);
     }
 
     public MapInfo withSource(String source) {
-        var copy = new HashMap<>(properties);
+        JSONObject copy = JsonUtil.copy(properties);
 
         copy.put("source", source);
 
@@ -54,7 +54,7 @@ public record MapInfo(URI uri, String target, Map<String, Object> properties, @N
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MapInfo mapInfo = (MapInfo) o;
-        return Objects.equals(uri, mapInfo.uri) && Objects.equals(target, mapInfo.target) && Objects.equals(properties, mapInfo.properties);
+        return Objects.equals(uri, mapInfo.uri) && Objects.equals(target, mapInfo.target) && JsonUtil.equals(properties, mapInfo.properties);
     }
 
     @Override

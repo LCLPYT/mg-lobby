@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.lobby.game.map.*;
+import work.lclpnet.lobby.util.JsonAssertions;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static work.lclpnet.lobby.util.JsonAssertions.assertSimilar;
 
 class CacheMapRepositoryTest {
 
@@ -121,7 +123,7 @@ class CacheMapRepositoryTest {
         assertNotNull(cached);
         assertNotEquals(info.uri(), cached.uri());
         assertEquals(info.target(), cached.target());
-        assertEquals(info.properties(), cached.properties());
+        assertSimilar(info.properties(), cached.properties());
     }
 
     @ParameterizedTest
@@ -136,7 +138,7 @@ class CacheMapRepositoryTest {
         assertNotNull(actual);
         assertNotEquals(expected.uri(), actual.uri());
         assertEquals(expected.target(), actual.target());
-        assertEquals(expected.properties(), actual.properties());
+        assertSimilar(expected.properties(), actual.properties());
     }
 
     @ParameterizedTest
@@ -153,7 +155,7 @@ class CacheMapRepositoryTest {
         assertNotNull(cached);
         assertNotEquals(info.uri(), cached.uri());
         assertEquals(info.target(), cached.target());
-        assertEquals(info.properties(), cached.properties());
+        assertSimilar(info.properties(), cached.properties());
 
         // should be the same as path
         cached = cache.getCachedMapInfo(target);
@@ -161,7 +163,7 @@ class CacheMapRepositoryTest {
         assertNotNull(cached);
         assertNotEquals(info.uri(), cached.uri());
         assertEquals(info.target(), cached.target());
-        assertEquals(info.properties(), cached.properties());
+        assertSimilar(info.properties(), cached.properties());
     }
 
     @ParameterizedTest
@@ -175,7 +177,7 @@ class CacheMapRepositoryTest {
 
         assertNotEquals(expected.uri(), actual.uri());
         assertEquals(expected.target(), actual.target());
-        assertEquals(expected.properties(), actual.properties());
+        assertSimilar(expected.properties(), actual.properties());
     }
 
     @ParameterizedTest

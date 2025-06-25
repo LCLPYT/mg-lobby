@@ -114,7 +114,7 @@ public class UriMapRepositoryTest {
     void testInfoLinkTargetPropertyRemoved() throws IOException {
         var info = repo.getMapInfo("linked/test");
 
-        assertNull(info.properties().get("target"));
+        assertNull(info.properties().opt("target"));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -142,7 +143,7 @@ class MultiMapRepositoryTest {
         var multi = new MultiMapRepository(new MapRepository[] { repoA, repoB });
 
         // simulate info from repoB
-        var info = new MapInfo(URI.create("some/uri"), "foo", Map.of(), repoB);
+        var info = new MapInfo(URI.create("some/uri"), "foo", new JSONObject(), repoB);
 
         // resource should be taken from repoB first, as the info originates from repoB
         assertSame(resB, multi.getResource(info, "res.txt").orElseThrow());

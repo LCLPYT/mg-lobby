@@ -1,6 +1,5 @@
 package work.lclpnet.lobby.game.map;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -8,8 +7,12 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import work.lclpnet.lobby.game.util.JsonUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -19,7 +22,7 @@ public class GameMap {
     public static final Item DEFAULT_ICON = Items.GRASS_BLOCK;
 
     private final MapDescriptor descriptor;
-    private final Map<String, Object> properties;
+    private final JSONObject properties;
     @Nullable
     private final MapDescriptor referrer;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -27,16 +30,16 @@ public class GameMap {
     private volatile Item icon = null;
 
     public GameMap(MapDescriptor descriptor) {
-        this(descriptor, Map.of());
+        this(descriptor, new JSONObject());
     }
 
-    public GameMap(MapDescriptor descriptor, Map<String, Object> properties) {
+    public GameMap(MapDescriptor descriptor, JSONObject properties) {
         this(descriptor, properties, null);
     }
 
-    public GameMap(MapDescriptor descriptor, Map<String, Object> properties, @Nullable MapDescriptor referrer) {
+    public GameMap(MapDescriptor descriptor, JSONObject properties, @Nullable MapDescriptor referrer) {
         this.descriptor = descriptor;
-        this.properties = new Object2ObjectOpenHashMap<>(properties);
+        this.properties = JsonUtil.copy(properties);
         this.referrer = referrer;
     }
 
@@ -58,7 +61,7 @@ public class GameMap {
 
         try {
             readLock.lock();
-            o = properties.get(name);
+            o = properties.opt(name);
         } finally {
             readLock.unlock();
         }
@@ -86,10 +89,10 @@ public class GameMap {
         return type.isInstance(prop);
     }
 
-    public void putProperties(Map<String, Object> extra) {
+    public void putProperties(JSONObject extra) {
         try {
             writeLock.lock();
-            properties.putAll(extra);
+            JsonUtil.putAll(extra, properties);
         } finally {
             writeLock.unlock();
         }
@@ -104,8 +107,8 @@ public class GameMap {
         }
     }
 
-    public Map<String, Object> getProperties() {
-        return Collections.unmodifiableMap(properties);
+    public JSONObject getProperties() {
+        return JsonUtil.copy(properties);
     }
 
     public Item getIcon() {
@@ -116,9 +119,9 @@ public class GameMap {
         synchronized (this) {
             if (icon != null) return icon;
 
-            Object iconObj = properties.get("icon");
+            String iconStr = properties.optString("icon", null);
 
-            if (iconObj instanceof String iconStr) {
+            if (iconStr != null) {
                 Identifier iconId = Identifier.of(iconStr);
                 icon = Registries.ITEM.get(iconId);
             }
@@ -185,18 +188,16 @@ public class GameMap {
         return "GameMap{descriptor=%s}".formatted(descriptor);
     }
 
-    public static GameMap parse(Map<String, Object> properties, MapDescriptor parentDescriptor) {
-        Object pathObj = properties.get("path");
+    public static GameMap parse(JSONObject properties, MapDescriptor parentDescriptor) {
+        String path = properties.optString("path", null);
 
-        if (!(pathObj instanceof String path)) {
+        if (path == null) {
             throw new IllegalArgumentException("String property \"path\" is missing");
         }
 
         MapDescriptor descriptor = parentDescriptor.resolve(path);
 
-        var props = new HashMap<String, Object>(properties.size());
-
-        props.putAll(properties);
+        JSONObject props = JsonUtil.copy(properties);
 
         props.remove("path");
         props.remove("target");

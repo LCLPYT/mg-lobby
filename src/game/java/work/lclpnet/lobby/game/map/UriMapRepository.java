@@ -43,13 +43,7 @@ public class UriMapRepository implements MapRepository {
                 continue;
             }
 
-            Map<String, Object> props = new HashMap<>();
-
-            for (String key : json.keySet()) {
-                props.put(key, json.get(key));
-            }
-
-            maps.add(new MapRef(props));
+            maps.add(new MapRef(json));
         }
 
         return maps;
@@ -106,21 +100,15 @@ public class UriMapRepository implements MapRepository {
             throw new IOException("Path outside of repository");
         }
 
-        JSONObject json = fetchJsonObject(mapUri);
-
-        Map<String, Object> props = new HashMap<>();
-
-        for (String key : json.keySet()) {
-            props.put(key, json.get(key));
-        }
+        JSONObject props = fetchJsonObject(mapUri);
 
         URI rootRelative = this.root.relativize(root.resolve(path));
         String rootPath = Objects.requireNonNull(rootRelative.getPath());
 
         MapInfo currentInfo = new MapInfo(mapUri, rootPath, props, this);
-        Object targetObj = props.get("target");
+        String target = props.optString("target", null);
 
-        if (!(targetObj instanceof String target)) {
+        if (target == null) {
             return currentInfo;
         }
 
