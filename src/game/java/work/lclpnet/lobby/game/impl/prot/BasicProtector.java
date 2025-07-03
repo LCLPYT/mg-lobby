@@ -15,6 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.entity.*;
+import work.lclpnet.kibu.hook.entity.leash.*;
 import work.lclpnet.kibu.hook.player.CraftingRecipeCallback;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
@@ -168,22 +169,23 @@ public class BasicProtector implements Protector {
                 -> (player, entity, hand, stack)
                 -> scope.isWithinScope(player, entity));
 
-        protect(ATTACH_LEASH, LeashAttachCallback.HOOK, scope
-                -> (player, world, pos)
-                -> scope.isWithinScope(player, pos));
-
-        protect(DETACH_LEASH, LeashDetachCallback.HOOK, scope
+        protect(DESTROY_LEASH, LeashDestroyCallback.HOOK, scope
                 -> scope::isWithinScope);
 
-        protect(LEASH_MOB, LeashEntityCallback.HOOK, scope
+        protect(LEASH_ENTITIES_TO_BLOCK, LeashEntitiesToBlockCallback.HOOK, scope
                 -> scope::isWithinScope);
 
-        protect(UNLEASH_MOB, UnleashEntityCallback.HOOK, scope
+        protect(LEASH_ENTITIES_TO_ENTITY, LeashEntitiesToEntityCallback.HOOK, scope
                 -> scope::isWithinScope);
 
-        protect(LEASH_MOB_TO_BLOCK, LeashEntityToBlockCallback.HOOK, scope
-                -> (player, entity, leashKnot)
-                -> scope.isWithinScope(player, entity));
+        protect(ATTACH_LEASH, LeashEntityCallback.HOOK, scope
+                -> scope::isWithinScope);
+
+        protect(DETACH_LEASH, UnleashEntityCallback.HOOK, scope
+                -> scope::isWithinScope);
+
+        protect(LEASH_KNOT_TAKE, LeashKnotTakeCallback.HOOK, scope
+                -> scope::isWithinScope);
 
         protect(PICKUP_PROJECTILE, ProjectilePickupCallback.HOOK, scope
                 -> scope::isWithinScope);

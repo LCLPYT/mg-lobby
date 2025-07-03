@@ -2,17 +2,18 @@ package work.lclpnet.lobby.game.impl.prot;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.Leashable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.decoration.LeashKnotEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.explosion.ExplosionImpl;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
 import work.lclpnet.lobby.game.api.prot.scope.*;
 import work.lclpnet.lobby.game.impl.prot.type.*;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class ProtectionTypes {
@@ -55,11 +56,12 @@ public class ProtectionTypes {
     public static final ProtectionType<PlayerEntityScope<ItemFrameEntity>> ITEM_FRAME_ROTATE_ITEM;
     public static final ProtectionType<PlayerEntityScope<ArmorStandEntity>> ARMOR_STAND_MANIPULATE;
     public static final ProtectionType<PlayerEntityScope<LivingEntity>> USE_ITEM_ON_ENTITY;
-    public static final ProtectionType<EntityBlockScope> ATTACH_LEASH;
-    public static final ProtectionType<PlayerEntityScope<LeashKnotEntity>> DETACH_LEASH;
-    public static final ProtectionType<PlayerGenericScope<Leashable>> LEASH_MOB;
-    public static final ProtectionType<PlayerGenericScope<Leashable>> UNLEASH_MOB;
-    public static final ProtectionType<PlayerGenericScope<Leashable>> LEASH_MOB_TO_BLOCK;
+    public static final ProtectionType<PlayerEntityScope<Entity>> DESTROY_LEASH;
+    public static final ProtectionType<PlayerEntityScope<Entity>> ATTACH_LEASH;
+    public static final ProtectionType<PlayerEntityScope<Entity>> DETACH_LEASH;
+    public static final ProtectionType<PlayerEntityScope<LeashKnotEntity>> LEASH_KNOT_TAKE;
+    public static final ProtectionType<PlayerGeneric2Scope<BlockPos, Collection<Entity>>> LEASH_ENTITIES_TO_BLOCK;
+    public static final ProtectionType<PlayerGeneric2Scope<Entity, Collection<Entity>>> LEASH_ENTITIES_TO_ENTITY;
     public static final ProtectionType<PlayerEntityScope<ProjectileEntity>> PICKUP_PROJECTILE;
     public static final ProtectionType<ClickEventScope> MODIFY_INVENTORY;
     public static final ProtectionType<EntityBlockScope> EDIT_SIGN;
@@ -115,11 +117,12 @@ public class ProtectionTypes {
                 .add(ITEM_FRAME_ROTATE_ITEM = new PlayerEntityProtectionType<>())
                 .add(ARMOR_STAND_MANIPULATE = new PlayerEntityProtectionType<>())
                 .add(USE_ITEM_ON_ENTITY = new PlayerEntityProtectionType<>())
-                .add(ATTACH_LEASH = new EntityBlockProtectionType())
+                .add(ATTACH_LEASH = new PlayerEntityProtectionType<>())
                 .add(DETACH_LEASH = new PlayerEntityProtectionType<>())
-                .add(LEASH_MOB = new PlayerGenericProtectionType<>())
-                .add(UNLEASH_MOB = new PlayerGenericProtectionType<>())
-                .add(LEASH_MOB_TO_BLOCK = new PlayerGenericProtectionType<>())
+                .add(LEASH_KNOT_TAKE = new PlayerEntityProtectionType<>())
+                .add(LEASH_ENTITIES_TO_BLOCK = new PlayerGeneric2ProtectionType<>())
+                .add(LEASH_ENTITIES_TO_ENTITY = new PlayerGeneric2ProtectionType<>())
+                .add(DESTROY_LEASH = new PlayerEntityProtectionType<>())
                 .add(PICKUP_PROJECTILE = new PlayerEntityProtectionType<>())
                 .add(MODIFY_INVENTORY = new ClickEventProtectionType())
                 .add(EDIT_SIGN = new EntityBlockProtectionType())

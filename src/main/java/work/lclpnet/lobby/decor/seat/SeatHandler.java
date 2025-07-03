@@ -67,7 +67,7 @@ public class SeatHandler {
         Vec3d prev = positions.remove(uuid);
         if (prev == null) return;
 
-        player.teleport(player.getServerWorld(), prev.getX(), prev.getY(), prev.getZ(), Set.of(), player.getYaw(), player.getPitch(), true);
+        player.teleport(player.getWorld(), prev.getX(), prev.getY(), prev.getZ(), Set.of(), player.getYaw(), player.getPitch(), true);
     }
 
     protected boolean sit(ServerPlayerEntity player, World world, BlockPos pos) {

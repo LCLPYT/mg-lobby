@@ -8,6 +8,7 @@ import work.lclpnet.lobby.io.copy.UrlWorldCopier;
 import work.lclpnet.lobby.util.TestHttpServer;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +52,7 @@ class UrlWorldCopierTest {
         try (TestHttpServer server = builder.build()) {
             server.start();
 
-            URL url = new URL("http://localhost:8000/dl/lobby-dl");
+            URL url = URI.create("http://localhost:8000/dl/lobby-dl").toURL();
 
             new UrlWorldCopier(url).copyTo(dst);
         }

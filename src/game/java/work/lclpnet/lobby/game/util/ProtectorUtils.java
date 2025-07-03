@@ -11,7 +11,7 @@ public class ProtectorUtils {
     public static void allowCreativeOperatorBypass(MutableProtectionConfig config) {
         config.allow(EntityBlockScope.CREATIVE_OP, BREAK_BLOCKS, PLACE_BLOCKS, USE_ITEM_ON_BLOCK, PICKUP_FLUID,
                 PICKUP_FLUID, CHARGE_RESPAWN_ANCHOR, COMPOSTER, EAT_CAKE, EXPLODE_RESPAWN_LOCATION, PRIME_TNT,
-                EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, ATTACH_LEASH, EDIT_SIGN, USE_BLOCK, DECORATED_POT_STORE);
+                EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, EDIT_SIGN, USE_BLOCK, DECORATED_POT_STORE);
 
         config.allow(SWAP_HAND_ITEMS, PlayerIntScope.CREATIVE_OP);
         config.allow(DROP_ITEM, PlayerIntBoolScope.CREATIVE_OP);
@@ -25,17 +25,20 @@ public class ProtectorUtils {
         // LivingEntity
         config.allow(PlayerEntityScope.creativeOp(), USE_ITEM_ON_ENTITY);
 
-        // Leashable
-        config.allow(PlayerGenericScope.creativeOp(), LEASH_MOB, UNLEASH_MOB, LEASH_MOB_TO_BLOCK);
+        // BlockPos, Collection<Entity>
+        config.allow(PlayerGeneric2Scope.creativeOp(), LEASH_ENTITIES_TO_BLOCK);
+
+        // Entity, Collection<Entity>
+        config.allow(PlayerGeneric2Scope.creativeOp(), LEASH_ENTITIES_TO_ENTITY);
 
         // LeashKnotEntity
-        config.allow(PlayerEntityScope.creativeOp(), DETACH_LEASH);
+        config.allow(PlayerEntityScope.creativeOp(), LEASH_KNOT_TAKE);
 
         // ProjectileEntity
         config.allow(PlayerEntityScope.creativeOp(), PICKUP_PROJECTILE);
 
         // Entity
-        config.allow(PlayerEntityScope.creativeOp(), MOUNT);
+        config.allow(PlayerEntityScope.creativeOp(), MOUNT, DESTROY_LEASH, ATTACH_LEASH, DETACH_LEASH);
 
         config.allow(ALLOW_DAMAGE, (entity, source) -> source.getAttacker() instanceof ServerPlayerEntity player
                                                        && player.isCreativeLevelTwoOp());

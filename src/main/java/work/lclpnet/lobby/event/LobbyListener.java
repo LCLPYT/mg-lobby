@@ -76,7 +76,7 @@ public class LobbyListener implements HookListenerModule {
     }
 
     private boolean onMove(ServerPlayerEntity player, PositionRotation from, PositionRotation to) {
-        ServerWorld world = player.getServerWorld();
+        ServerWorld world = player.getWorld();
 
         if (isLobby(world)) {
             onLobbyMove(player, to, world);
