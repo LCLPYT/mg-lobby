@@ -160,6 +160,8 @@ public class LobbyActivity extends ComponentActivity {
 
         GreetingDisplay greetingDisplay = component.greetingDisplay();
         greetingDisplay.show();
+
+        lobbyManager.getLobbyWorld().getWaypointHandler().clear();
     }
 
     /**

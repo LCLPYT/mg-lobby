@@ -29,6 +29,7 @@ import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerAdvancementPacketCallback;
 import work.lclpnet.kibu.hook.player.PlayerMoveCallback;
 import work.lclpnet.kibu.hook.player.PlayerRecipeNotificationCallback;
+import work.lclpnet.kibu.hook.player.PlayerWaypointCallback;
 import work.lclpnet.kibu.hook.util.PositionRotation;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
@@ -57,6 +58,7 @@ public class LobbyListener implements HookListenerModule {
         registrar.registerHook(PlayerInteractionHooks.ATTACK_ENTITY, this::onAttack);
         registrar.registerHook(PlayerAdvancementPacketCallback.HOOK, (player, packet) -> true);
         registrar.registerHook(PlayerRecipeNotificationCallback.HOOK, (player, entry, displayEntry) -> true);
+        registrar.registerHook(PlayerWaypointCallback.HOOK, (player, waypoint) -> true);
     }
 
     @SuppressWarnings("SameReturnValue")
