@@ -66,7 +66,7 @@ public class BasicProtector implements Protector {
 
         protect(USE_ITEM_ON_BLOCK, BlockModificationHooks.USE_ITEM_ON_BLOCK, scope
                 -> (ctx)
-                -> scope.isWithinScope(ctx.getPlayer(), ctx.getBlockPos()) ? ActionResult.FAIL : null);
+                -> scope.isWithinScope(ctx.getPlayer(), ctx) ? ActionResult.FAIL : null);
 
         protect(TRAMPLE_FARMLAND, BlockModificationHooks.TRAMPLE_FARMLAND, BasicProtector::onModify);
 
@@ -167,7 +167,7 @@ public class BasicProtector implements Protector {
 
         protect(USE_ITEM_ON_ENTITY, ItemUseOnEntityCallback.HOOK, scope
                 -> (player, entity, hand, stack)
-                -> scope.isWithinScope(player, entity));
+                -> scope.isWithinScope(player, entity, stack));
 
         protect(DESTROY_LEASH, LeashDestroyCallback.HOOK, scope
                 -> scope::isWithinScope);

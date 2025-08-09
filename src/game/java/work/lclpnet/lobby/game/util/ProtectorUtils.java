@@ -9,7 +9,7 @@ import static work.lclpnet.lobby.game.impl.prot.ProtectionTypes.*;
 public class ProtectorUtils {
 
     public static void allowCreativeOperatorBypass(MutableProtectionConfig config) {
-        config.allow(EntityBlockScope.CREATIVE_OP, BREAK_BLOCKS, PLACE_BLOCKS, USE_ITEM_ON_BLOCK, PICKUP_FLUID,
+        config.allow(EntityBlockScope.CREATIVE_OP, BREAK_BLOCKS, PLACE_BLOCKS, PICKUP_FLUID,
                 PICKUP_FLUID, CHARGE_RESPAWN_ANCHOR, COMPOSTER, EAT_CAKE, EXPLODE_RESPAWN_LOCATION, PRIME_TNT,
                 EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, EDIT_SIGN, USE_BLOCK, DECORATED_POT_STORE);
 
@@ -22,8 +22,11 @@ public class ProtectorUtils {
 
         config.allow(PlayerEntityScope.creativeOp(), ARMOR_STAND_MANIPULATE);
 
-        // LivingEntity
-        config.allow(PlayerEntityScope.creativeOp(), USE_ITEM_ON_ENTITY);
+        // Player, LivingEntity, ItemStack
+        config.allow(PlayerGeneric2Scope.creativeOp(), USE_ITEM_ON_ENTITY);
+
+        // Player, ItemUsageContext
+        config.allow(PlayerGenericScope.creativeOp(), USE_ITEM_ON_BLOCK);
 
         // BlockPos, Collection<Entity>
         config.allow(PlayerGeneric2Scope.creativeOp(), LEASH_ENTITIES_TO_BLOCK);

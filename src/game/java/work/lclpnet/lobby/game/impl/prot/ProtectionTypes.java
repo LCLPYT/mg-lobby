@@ -7,6 +7,8 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.decoration.LeashKnotEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.explosion.ExplosionImpl;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
@@ -26,7 +28,7 @@ public class ProtectionTypes {
     public static final ProtectionType<EntityBlockScope> PLACE_BLOCKS;
     public static final ProtectionType<EntityBlockScope> PICKUP_FLUID;
     public static final ProtectionType<EntityBlockScope> PLACE_FLUID;
-    public static final ProtectionType<EntityBlockScope> USE_ITEM_ON_BLOCK;
+    public static final ProtectionType<PlayerGenericScope<ItemUsageContext>> USE_ITEM_ON_BLOCK;
     public static final ProtectionType<EntityBlockScope> TRAMPLE_FARMLAND;
     public static final ProtectionType<PlayerScope> HUNGER;
     public static final ProtectionType<EntityBlockScope> MOB_GRIEFING;
@@ -55,7 +57,7 @@ public class ProtectionTypes {
     public static final ProtectionType<PlayerEntityScope<ItemFrameEntity>> ITEM_FRAME_REMOVE_ITEM;
     public static final ProtectionType<PlayerEntityScope<ItemFrameEntity>> ITEM_FRAME_ROTATE_ITEM;
     public static final ProtectionType<PlayerEntityScope<ArmorStandEntity>> ARMOR_STAND_MANIPULATE;
-    public static final ProtectionType<PlayerEntityScope<LivingEntity>> USE_ITEM_ON_ENTITY;
+    public static final ProtectionType<PlayerGeneric2Scope<LivingEntity, ItemStack>> USE_ITEM_ON_ENTITY;
     public static final ProtectionType<PlayerEntityScope<Entity>> DESTROY_LEASH;
     public static final ProtectionType<PlayerEntityScope<Entity>> ATTACH_LEASH;
     public static final ProtectionType<PlayerEntityScope<Entity>> DETACH_LEASH;
@@ -87,7 +89,7 @@ public class ProtectionTypes {
                 .add(PLACE_BLOCKS = new EntityBlockProtectionType())
                 .add(PICKUP_FLUID = new EntityBlockProtectionType())
                 .add(PLACE_FLUID = new EntityBlockProtectionType())
-                .add(USE_ITEM_ON_BLOCK = new EntityBlockProtectionType())
+                .add(USE_ITEM_ON_BLOCK = new PlayerGenericProtectionType<>())
                 .add(TRAMPLE_FARMLAND = new EntityBlockProtectionType())
                 .add(HUNGER = new PlayerProtectionType())
                 .add(MOB_GRIEFING = new EntityBlockProtectionType())
@@ -116,7 +118,7 @@ public class ProtectionTypes {
                 .add(ITEM_FRAME_REMOVE_ITEM = new PlayerEntityProtectionType<>())
                 .add(ITEM_FRAME_ROTATE_ITEM = new PlayerEntityProtectionType<>())
                 .add(ARMOR_STAND_MANIPULATE = new PlayerEntityProtectionType<>())
-                .add(USE_ITEM_ON_ENTITY = new PlayerEntityProtectionType<>())
+                .add(USE_ITEM_ON_ENTITY = new PlayerGeneric2ProtectionType<>())
                 .add(ATTACH_LEASH = new PlayerEntityProtectionType<>())
                 .add(DETACH_LEASH = new PlayerEntityProtectionType<>())
                 .add(LEASH_KNOT_TAKE = new PlayerEntityProtectionType<>())
