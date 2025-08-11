@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import work.lclpnet.kibu.assets.OsUtil;
 import work.lclpnet.lobby.game.asset.cache.CacheIndex;
 import work.lclpnet.lobby.game.asset.cache.SqliteCacheIndex;
 import work.lclpnet.lobby.game.asset.cache.VoidCacheIndex;
@@ -23,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Objects;
 
 public class MapCache implements Closeable {
 
@@ -251,14 +251,9 @@ public class MapCache implements Closeable {
     }
 
     public static MapCache createUserCache(Logger logger) throws IOException {
-        String prop = System.getProperty("user.home");
+        var mapCacheRoot = OsUtil.getCacheDir().resolve("game-commons").resolve("maps");
 
-        Objects.requireNonNull(prop, "Property user.home doesn't exist");
-
-        Path userHome = Path.of(prop);
-        Path root = userHome.resolve(".maps");
-
-        return createCache(root, logger);
+        return createCache(mapCacheRoot, logger);
     }
 
     public static MapCache createCache(Path root, Logger logger) throws IOException {
