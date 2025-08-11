@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game.map.cache;
+package work.lclpnet.lobby.game.asset.cache;
 
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;

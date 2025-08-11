@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.lobby.game.asset.cache.CacheIndex;
 import work.lclpnet.lobby.game.map.MapInfo;
 import work.lclpnet.lobby.game.map.MapRef;
 import work.lclpnet.lobby.game.map.UriMapRepository;

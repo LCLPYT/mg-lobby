@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game.map.cache;
+package work.lclpnet.lobby.game.asset.cache;
 
 public class VoidCacheIndex implements CacheIndex {
 

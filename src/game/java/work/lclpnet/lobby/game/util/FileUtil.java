@@ -1,10 +1,9 @@
 package work.lclpnet.lobby.game.util;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.util.Optional;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class FileUtil {
 
@@ -36,5 +35,9 @@ public class FileUtil {
         var relativeUri = base.resolve(source.replace('\\', '/'));
 
         return Optional.of(relativeUri);
+    }
+
+    public static String encodeURIComponent(String s) {
+        return URLEncoder.encode(s, UTF_8).replaceAll("\\+", "%20");
     }
 }

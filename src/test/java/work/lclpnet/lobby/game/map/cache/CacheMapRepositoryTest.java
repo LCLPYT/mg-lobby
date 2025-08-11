@@ -15,8 +15,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.lobby.game.asset.cache.SqliteCacheIndex;
 import work.lclpnet.lobby.game.map.*;
-import work.lclpnet.lobby.util.JsonAssertions;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
