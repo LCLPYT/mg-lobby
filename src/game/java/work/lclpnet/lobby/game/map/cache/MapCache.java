@@ -251,7 +251,7 @@ public class MapCache implements Closeable {
     }
 
     public static MapCache createUserCache(Logger logger) throws IOException {
-        var mapCacheRoot = OsUtil.getCacheDir().resolve("game-commons").resolve("maps");
+        var mapCacheRoot = OsUtil.getCacheDir().resolve("mc-game-commons").resolve("maps");
 
         return createCache(mapCacheRoot, logger);
     }
