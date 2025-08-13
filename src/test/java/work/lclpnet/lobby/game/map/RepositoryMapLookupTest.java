@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import work.lclpnet.lobby.game.asset.AssetRequestOptions;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,8 +97,8 @@ public class RepositoryMapLookupTest {
             }
 
             @Override
-            public InputStream open(String path) throws IOException {
-                throw new IOException("Unsupported");
+            public InputStream open(String path, AssetRequestOptions options) {
+                throw new UnsupportedOperationException();
             }
         };
     }

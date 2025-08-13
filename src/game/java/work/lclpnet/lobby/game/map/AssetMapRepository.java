@@ -1,6 +1,5 @@
 package work.lclpnet.lobby.game.map;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -8,15 +7,17 @@ import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookFactory;
 import work.lclpnet.lobby.game.asset.AssetPath;
 import work.lclpnet.lobby.game.asset.AssetRepository;
-import work.lclpnet.lobby.game.util.FileUtil;
+import work.lclpnet.lobby.game.asset.AssetRequestOptions;
+import work.lclpnet.lobby.game.asset.AssetResult;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class AssetMapRepository implements MapRepository {
+
+    public static final String CACHED_PROPERTY = "__cached";
 
     private final AssetRepository assetRepository;
     private final Logger logger;
@@ -29,8 +30,8 @@ public class AssetMapRepository implements MapRepository {
 
     @Override
     public Collection<MapRef> getMapList(String path) throws IOException {
-        JSONObject index = fetchJsonObject(AssetPath.of(path, "index.json"));
-        JSONArray mapsArray = index.getJSONArray("maps");
+        var index = fetchJsonObject(AssetPath.of(path, "index.json"));
+        JSONArray mapsArray = index.value().getJSONArray("maps");
 
         Set<MapRef> maps = new HashSet<>();
 
@@ -46,31 +47,42 @@ public class AssetMapRepository implements MapRepository {
         return maps;
     }
 
-    private @NotNull JSONObject fetchJsonObject(AssetPath assetPath) throws IOException {
+    private Result<JSONObject> fetchJsonObject(AssetPath assetPath) throws IOException {
+        AssetResult res = assetRepository.get(assetPath);
+
         String content;
 
-        try (InputStream in = assetRepository.open(assetPath)) {
-            content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        try (res) {
+            content = new String(res.resource().readAllBytes(), StandardCharsets.UTF_8);
         }
 
-        return new JSONObject(content);
+        var json = new JSONObject(content);
+
+        return new Result<>(json, res.cached());
     }
 
     @Override
     public MapInfo getMapInfo(String path) throws IOException {
-        return getMapInfo(AssetPath.of(), path, 5);
+        var res = getMapInfo(AssetPath.of(), path, 5);
+
+        res.value().properties().put(CACHED_PROPERTY, res.cached);
+
+
+        return res.value();
     }
 
-    private MapInfo getMapInfo(AssetPath root, String path, final int maxLinkDepth) throws IOException {
+    private Result<MapInfo> getMapInfo(AssetPath root, String path, final int maxLinkDepth) throws IOException {
         AssetPath mapPath = root.resolve(path);
         AssetPath assetPath = mapPath.resolve("map.json");
-        JSONObject props = fetchJsonObject(assetPath);
+
+        var res = fetchJsonObject(assetPath);
+        JSONObject props = res.value();
 
         MapInfo currentInfo = new MapInfo(mapPath.toString(), props, this);
         String target = props.optString("target", null);
 
         if (target == null) {
-            return currentInfo;
+            return new Result<>(currentInfo, res.cached());
         }
 
         if (maxLinkDepth <= 0) {
@@ -90,17 +102,17 @@ public class AssetMapRepository implements MapRepository {
             redirectActionHook.invoker().visit(path, currentInfo);
         }
 
-        MapInfo info = getMapInfo(base, target, maxLinkDepth - 1);
-        info.merge(props);
+        var info = getMapInfo(base, target, maxLinkDepth - 1);
+        info.value().merge(props);
 
-        return info;
+        return new Result<>(info.value(), res.cached() && info.cached());
     }
 
     @Override
-    public InputStream open(String path) throws IOException {
+    public InputStream open(String path, AssetRequestOptions options) throws IOException {
         AssetPath assetPath = AssetPath.of(path);
 
-        return assetRepository.open(assetPath);
+        return assetRepository.get(assetPath, options).resource();
     }
 
     @Override
@@ -125,4 +137,6 @@ public class AssetMapRepository implements MapRepository {
 
         return redirectActionHook;
     }
+
+    private record Result<T>(T value, boolean cached) {}
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.lobby.game.asset.UriAssetRepository;
 
 import java.io.IOException;
 import java.net.URI;
@@ -31,7 +32,7 @@ class DirectMapFetcherTest {
     public void setUp() {
         URI uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        UriMapRepository repository = new UriMapRepository(uri, logger);
+        var repository = new AssetMapRepository(new UriAssetRepository(uri), logger);
 
         RepositoryMapLookup lookup = new RepositoryMapLookup(repository);
 

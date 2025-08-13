@@ -1,5 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
+import work.lclpnet.lobby.game.asset.AssetRequestOptions;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -34,6 +36,10 @@ public class RepositoryMapLookup implements MapLookup {
             return Optional.empty();
         }
 
-        return Optional.of(mapRepository.open(source));
+        // if the map info wasn't cached, fetch the fresh map source to keep it in sync with the info
+        boolean infoWasCached = info.properties().optBoolean(AssetMapRepository.CACHED_PROPERTY, false);
+        var opts = new AssetRequestOptions(!infoWasCached);
+
+        return Optional.of(mapRepository.open(source, opts));
     }
 }

@@ -6,6 +6,7 @@ import work.lclpnet.lobby.game.util.FileUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 
 public class UriAssetRepository implements AssetRepository {
@@ -17,16 +18,17 @@ public class UriAssetRepository implements AssetRepository {
     }
 
     @Override
-    public InputStream open(AssetPath path) throws IOException {
+    public AssetResult get(AssetPath path, AssetRequestOptions options) throws IOException {
         URI uri = uri(path);
 
         if (!uri.getPath().startsWith(root.getPath())) {
             throw new IOException("Path outside of repository");
         }
 
-        var url = uri.toURL();
+        URL url = uri.toURL();
+        InputStream in = url.openStream();
 
-        return url.openStream();
+        return new AssetResult(in, false);
     }
 
     public @NotNull URI uri(AssetPath path) {

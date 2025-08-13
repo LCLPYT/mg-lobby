@@ -3,7 +3,6 @@ package work.lclpnet.lobby.game.asset;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 public class MultiAssetRepository implements AssetRepository {
 
@@ -16,12 +15,12 @@ public class MultiAssetRepository implements AssetRepository {
     }
 
     @Override
-    public InputStream open(AssetPath path) throws IOException {
+    public AssetResult get(AssetPath path, AssetRequestOptions options) throws IOException {
         for (AssetRepository child : children) {
             logger.debug("Requesting asset '{}' from repository {} ...", path, child);
 
             try {
-                return child.open(path);
+                return child.get(path, options);
             } catch (Throwable t) {
                 logger.debug("Repository {} didn't contain asset '{}'", child, path);
             }

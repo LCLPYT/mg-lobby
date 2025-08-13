@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class MultiAssetRepositoryTest {
@@ -22,18 +22,19 @@ class MultiAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("file.txt");
 
-        when(repo1.open(path)).thenThrow(new IOException("not found"));
-        when(repo2.open(path)).thenReturn(new ByteArrayInputStream("ok".getBytes()));
+        when(repo1.get(path)).thenThrow(new IOException("not found"));
+        when(repo2.get(path))
+                .thenReturn(new AssetResult(new ByteArrayInputStream("ok".getBytes()), false));
 
         MultiAssetRepository multi = new MultiAssetRepository(new AssetRepository[]{repo1, repo2}, logger);
 
-        try (InputStream in = multi.open(path)) {
-            assertEquals("ok", new String(in.readAllBytes()));
+        try (var res = multi.get(path)) {
+            assertEquals("ok", new String(res.resource().readAllBytes()));
         }
 
         verify(logger, atLeastOnce()).debug(anyString(), any(), any());
-        verify(repo1).open(path);
-        verify(repo2).open(path);
+        verify(repo1).get(path);
+        verify(repo2).get(path);
     }
 
     @Test
@@ -44,12 +45,12 @@ class MultiAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("missing");
 
-        when(repo1.open(path)).thenThrow(new IOException("fail1"));
-        when(repo2.open(path)).thenThrow(new IOException("fail2"));
+        when(repo1.get(path)).thenThrow(new IOException("fail1"));
+        when(repo2.get(path)).thenThrow(new IOException("fail2"));
 
         MultiAssetRepository multi = new MultiAssetRepository(new AssetRepository[]{repo1, repo2}, logger);
 
-        IOException ex = assertThrows(IOException.class, () -> multi.open(path));
+        IOException ex = assertThrows(IOException.class, () -> multi.get(path));
         assertEquals("Asset not found", ex.getMessage());
 
         verify(logger, atLeast(2)).debug(anyString(), any(), any());
@@ -63,13 +64,14 @@ class MultiAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("file.txt");
 
-        when(repo1.open(path)).thenThrow(new RuntimeException("unexpected"));
-        when(repo2.open(path)).thenReturn(new ByteArrayInputStream("data".getBytes()));
+        when(repo1.get(path)).thenThrow(new RuntimeException("unexpected"));
+        when(repo2.get(path))
+                .thenReturn(new AssetResult(new ByteArrayInputStream("data".getBytes()), false));
 
         MultiAssetRepository multi = new MultiAssetRepository(new AssetRepository[]{repo1, repo2}, logger);
 
-        try (InputStream in = multi.open(path)) {
-            assertEquals("data", new String(in.readAllBytes()));
+        try (var res = multi.get(path)) {
+            assertEquals("data", new String(res.resource().readAllBytes()));
         }
 
         verify(logger, atLeastOnce()).debug(anyString(), any(), any());

@@ -25,7 +25,7 @@ class UriAssetRepositoryTest {
     }
 
     @Test
-    void openReadsFromUrl() throws IOException {
+    void getReadsFromUrl() throws IOException {
         Path dir = Files.createTempDirectory("mgl_uar");
         Path path = dir.resolve("dir").resolve("hello.txt");
 
@@ -34,8 +34,8 @@ class UriAssetRepositoryTest {
 
         UriAssetRepository repo = new UriAssetRepository(dir.toUri());
 
-        try (InputStream in = repo.open(AssetPath.of("dir", "hello.txt"))) {
-            assertEquals("hello", new String(in.readAllBytes(), UTF_8));
+        try (var res = repo.get(AssetPath.of("dir", "hello.txt"))) {
+            assertEquals("hello", new String(res.resource().readAllBytes(), UTF_8));
         }
     }
 

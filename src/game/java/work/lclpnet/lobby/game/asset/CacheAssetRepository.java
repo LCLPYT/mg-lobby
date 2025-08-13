@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import work.lclpnet.lobby.game.asset.cache.AssetCache;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -23,30 +22,35 @@ public class CacheAssetRepository implements AssetRepository {
     }
 
     @Override
-    public InputStream open(AssetPath path) throws IOException {
+    public AssetResult get(AssetPath path, AssetRequestOptions options) throws IOException {
+        if (options.disableCache()) {
+            logger.debug("Cache is disable for resource '{}', fetching from upstream {} ...", path, upstream);
+            return upstream.get(path, options);
+        }
+
         Path cachedPath = cache.getCached(path).orElse(null);
 
         if (cachedPath != null) {
-            logger.debug("Using cached asset from {}", cachedPath);
-            return Files.newInputStream(cachedPath);
+            logger.debug("Using cached asset from '{}'", cachedPath);
+            return new AssetResult(Files.newInputStream(cachedPath), true);
         }
 
         logger.debug("Cache miss for asset '{}', fetching from upstream {} ...", path, upstream);
 
-        try (var in = upstream.open(path)) {
+        try (var in = upstream.get(path, options)) {
             try {
-                cachedPath = cache.cache(path, in, ttlSeconds);
+                cachedPath = cache.cache(path, in.resource(), ttlSeconds);
             } catch (IOException e) {
                 logger.error("Failed to cache asset '{}', refetching uncached...", path, e);
             }
         }
 
         if (cachedPath == null) {
-            return upstream.open(path);
+            return upstream.get(path, options);
         }
 
         logger.debug("Asset '{}' has been cached to {}", path, cachedPath);
 
-        return Files.newInputStream(cachedPath);
+        return new AssetResult(Files.newInputStream(cachedPath), false);
     }
 }

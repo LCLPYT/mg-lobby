@@ -31,11 +31,11 @@ class CacheAssetRepositoryTest {
 
         when(cache.getCached(path)).thenReturn(Optional.of(tempFile));
 
-        try (InputStream in = repo.open(path)) {
-            assertEquals("cachedData", new String(in.readAllBytes()));
+        try (var res = repo.get(path)) {
+            assertEquals("cachedData", new String(res.resource().readAllBytes()));
         }
 
-        verify(upstream, never()).open(any());
+        verify(upstream, never()).get(any());
     }
 
     @Test
@@ -46,14 +46,15 @@ class CacheAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("new.txt");
         when(cache.getCached(path)).thenReturn(Optional.empty());
-        when(upstream.open(path)).thenReturn(new ByteArrayInputStream("fresh".getBytes()));
+        when(upstream.get(path))
+                .thenReturn(new AssetResult(new ByteArrayInputStream("fresh".getBytes()), false));
 
         Path tempFile = Files.createTempFile("store", ".txt");
         Files.writeString(tempFile, "fresh");
         when(cache.cache(eq(path), any(), eq(3600))).thenReturn(tempFile);
 
-        try (InputStream in = repo.open(path)) {
-            assertEquals("fresh", new String(in.readAllBytes()));
+        try (var res = repo.get(path)) {
+            assertEquals("fresh", new String(res.resource().readAllBytes()));
         }
     }
 
@@ -67,11 +68,12 @@ class CacheAssetRepositoryTest {
         when(cache.getCached(path)).thenReturn(Optional.empty());
 
         byte[] data = "data".getBytes();
-        when(upstream.open(path)).thenReturn(new ByteArrayInputStream(data));
+        when(upstream.get(path))
+                .thenReturn(new AssetResult(new ByteArrayInputStream(data), false));
         when(cache.cache(eq(path), any(), eq(3600))).thenThrow(new IOException("fail"));
 
-        try (InputStream in = repo.open(path)) {
-            assertEquals("data", new String(in.readAllBytes()));
+        try (var res = repo.get(path)) {
+            assertEquals("data", new String(res.resource().readAllBytes()));
         }
     }
 }

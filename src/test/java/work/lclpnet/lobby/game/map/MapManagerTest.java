@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.lobby.game.asset.UriAssetRepository;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,7 +35,8 @@ class MapManagerTest {
     void loadAll_loadedIntoCollection(String namespace, String path, Set<MapDescriptor> expected) throws IOException {
         URI uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        var lookup = new RepositoryMapLookup(new UriMapRepository(uri, logger));
+        var repository = new AssetMapRepository(new UriAssetRepository(uri), logger);
+        var lookup = new RepositoryMapLookup(repository);
         var fetcher = new DirectMapFetcher(lookup);
         var maps = new SimpleMapCollection();
 

@@ -1,9 +1,12 @@
 package work.lclpnet.lobby.game.asset;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 public interface AssetRepository {
 
-    InputStream open(AssetPath path) throws IOException;
+    AssetResult get(AssetPath path, AssetRequestOptions options) throws IOException;
+
+    default AssetResult get(AssetPath path) throws IOException {
+        return get(path, AssetRequestOptions.DEFAULT);
+    }
 }
