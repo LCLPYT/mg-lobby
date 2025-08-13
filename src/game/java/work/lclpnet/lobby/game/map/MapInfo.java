@@ -4,18 +4,17 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import work.lclpnet.lobby.game.util.JsonUtil;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 
-public record MapInfo(URI uri, String target, JSONObject properties, @Nullable MapRepository origin) {
+public record MapInfo(String target, JSONObject properties, @Nullable MapRepository origin) {
 
-    public MapInfo(URI uri, String target, Map<String, Object> properties) {
-        this(uri, target, new JSONObject(properties));
+    public MapInfo(String target, Map<String, Object> properties) {
+        this(target, new JSONObject(properties));
     }
 
-    public MapInfo(URI uri, String target, JSONObject properties) {
-        this(uri, target, properties, null);
+    public MapInfo(String target, JSONObject properties) {
+        this(target, properties, null);
     }
 
     @Nullable
@@ -42,11 +41,11 @@ public record MapInfo(URI uri, String target, JSONObject properties, @Nullable M
 
         copy.put("source", source);
 
-        return new MapInfo(uri, target, copy, origin);
+        return new MapInfo(target, copy, origin);
     }
 
     public MapInfo withOrigin(MapRepository repo) {
-        return new MapInfo(uri, target, properties, repo);
+        return new MapInfo(target, properties, repo);
     }
 
     @Override
@@ -54,11 +53,11 @@ public record MapInfo(URI uri, String target, JSONObject properties, @Nullable M
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MapInfo mapInfo = (MapInfo) o;
-        return Objects.equals(uri, mapInfo.uri) && Objects.equals(target, mapInfo.target) && JsonUtil.equals(properties, mapInfo.properties);
+        return Objects.equals(target, mapInfo.target) && JsonUtil.equals(properties, mapInfo.properties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri, target, properties);
+        return Objects.hash(target, properties);
     }
 }

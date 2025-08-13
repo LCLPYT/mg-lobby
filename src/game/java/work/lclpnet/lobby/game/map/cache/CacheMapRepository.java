@@ -5,6 +5,7 @@ import work.lclpnet.lobby.game.map.MapRef;
 import work.lclpnet.lobby.game.map.MapRepository;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -52,27 +53,13 @@ public class CacheMapRepository implements MapRepository {
         cache.cacheMapInfo(mapInfo.target(), mapInfo);
 
         // invalidate the map source to keep it in sync with the info
-        cache.invalidateSource(mapInfo);
+        cache.invalidateSource(mapInfo);  // TODO important!!
 
         return mapInfo.withOrigin(this);
     }
 
     @Override
-    public Optional<URI> getResource(String path, String resource) {
-        var cached = cache.getCachedResource(path, resource);
-
-        if (cached != null) {
-            return Optional.of(cached.toUri());
-        }
-
-        return upstream.getResource(path, resource).map(uri -> {
-            Path cachedResource = cache.cacheResource(path, resource, uri);
-
-            if (cachedResource == null) {
-                return uri;
-            }
-
-            return cachedResource.toUri();
-        });
+    public InputStream open(String path) throws IOException {
+        throw new IOException("unsupported");
     }
 }

@@ -24,6 +24,7 @@ public class UriMapRepository implements MapRepository {
         this.logger = logger;
     }
 
+    @Deprecated
     @Override
     public Collection<MapRef> getMapList(String path) throws IOException {
         URI indexUri = root.resolve(path + "/index.json");
@@ -55,8 +56,8 @@ public class UriMapRepository implements MapRepository {
     }
 
     @Override
-    public Optional<URI> getResource(String path, String resource) {
-        return getResourceUnchecked(path, resource).filter(this::insideRepository);
+    public InputStream open(String path) throws IOException {
+        throw new IOException("unsupported");
     }
 
     private Optional<URI> getResourceUnchecked(String path, String resource) {
@@ -105,7 +106,7 @@ public class UriMapRepository implements MapRepository {
         URI rootRelative = this.root.relativize(root.resolve(path));
         String rootPath = Objects.requireNonNull(rootRelative.getPath());
 
-        MapInfo currentInfo = new MapInfo(mapUri, rootPath, props, this);
+        MapInfo currentInfo = new MapInfo(rootPath, props, this);
         String target = props.optString("target", null);
 
         if (target == null) {

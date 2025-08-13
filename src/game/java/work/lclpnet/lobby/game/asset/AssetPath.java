@@ -6,7 +6,9 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.join;
@@ -33,7 +35,7 @@ public class AssetPath implements Comparable<AssetPath> {
 
         String[] split = relative.split("/");
 
-        return ofChecked(concatenated(segments, split));
+        return of(concatenated(segments, split));
     }
 
     public AssetPath resolve(AssetPath relative) {
@@ -114,9 +116,27 @@ public class AssetPath implements Comparable<AssetPath> {
     public static AssetPath of(String... segments) {
         if (segments.length == 0) return EMPTY;
 
-        return ofChecked(Arrays.stream(segments)
-                .flatMap(s -> Arrays.stream(s.split("/")))
-                .toArray(String[]::new));
+        List<String> list = new ArrayList<>();
+
+        for (String segment : segments) {
+            if (segment.isEmpty()) continue;
+
+            if (segment.charAt(0) == '/') list.clear();
+
+            for (String string : segment.split("/")) {
+                if (string.isEmpty()) continue;
+
+                // eagerly resolve parent directory, if possible
+                if (string.equals("..") && !list.isEmpty()) {
+                    list.removeLast();
+                    continue;
+                }
+
+                list.add(string);
+            }
+        }
+
+        return ofChecked(list.toArray(new String[0]));
     }
 
     private static @NotNull AssetPath ofChecked(String[] filteredSegments) {

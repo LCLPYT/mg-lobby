@@ -1,7 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
 import java.io.IOException;
-import java.net.URI;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -23,27 +23,17 @@ public class RepositoryMapLookup implements MapLookup {
     }
 
     @Override
-    public Optional<URI> getSource(GameMap map) throws IOException {
+    public Optional<InputStream> openSource(GameMap map) throws IOException {
         MapInfo info = mapRepository.getMapInfo(map.getDescriptor().getMapPath());
 
         map.putProperties(info.properties());
 
-        var source = getSource(info);
-
-        source.ifPresent(uri -> map.putProperty("source", uri));
-
-        map.putProperty("target", info.target());
-
-        return source;
-    }
-
-    private Optional<URI> getSource(MapInfo info) {
         String source = info.getSource();
 
         if (source == null) {
             return Optional.empty();
         }
 
-        return mapRepository.getResource(info, source);
+        return Optional.of(mapRepository.open(source));
     }
 }

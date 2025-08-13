@@ -26,9 +26,12 @@ public interface WorldCopier {
 
         // uri is local path
         Path path = uri.getScheme() != null ? Path.of(uri) : Path.of(uri.getPath());
+
         if (Files.isDirectory(path)) {
             return new DirectoryWorldCopier(path);
-        } else if (Files.isRegularFile(path)) {
+        }
+
+        if (Files.isRegularFile(path)) {
             try {
                 return new UrlWorldCopier(path.toUri().toURL());
             } catch (MalformedURLException e) {

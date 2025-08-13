@@ -6,11 +6,14 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import work.lclpnet.lobby.game.util.FileUtil;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -51,13 +54,13 @@ public class RepositoryMapLookupTest {
     }
 
     @Test
-    void testGetSourceDataLoaded() throws IOException {
+    void testOpenSourceDataLoaded() throws IOException {
         var repo = getMapRepository();
         var lookup = new RepositoryMapLookup(repo);
 
         GameMap map = new GameMap(new MapDescriptor("test", "hello"));
 
-        var source = lookup.getSource(map).orElseThrow();
+        var source = lookup.openSource(map).orElseThrow();
 
         assertEquals(URI.create("test/hello/here"), source);
     }
@@ -86,15 +89,15 @@ public class RepositoryMapLookupTest {
             @Override
             public MapInfo getMapInfo(String path) throws IOException {
                 if ("test/hello".equals(path)) {
-                    return new MapInfo(URI.create("test/hello/map.json"), "test/hello", Map.of("source", "here"));
+                    return new MapInfo("test/hello", Map.of("source", "here"));
                 }
 
                 throw new IOException();
             }
 
             @Override
-            public Optional<URI> getResource(String path, String resource) {
-                return FileUtil.getUri(URI.create(path), resource);
+            public InputStream open(String path) throws IOException {
+                throw new IOException("Unsupported");
             }
         };
     }

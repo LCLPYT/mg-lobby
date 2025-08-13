@@ -36,6 +36,36 @@ class AssetPathTest {
     }
 
     @Test
+    void resolveRootDiscardsPrev() {
+        AssetPath p = AssetPath.of("test", "/foo");
+        assertEquals(AssetPath.of("foo"), p);
+
+        p = AssetPath.of("test", "/", "foo");
+        assertEquals(AssetPath.of("foo"), p);
+    }
+
+    @Test
+    void resolveEmptySkipped() {
+        AssetPath p = AssetPath.of("", "bar", "", "foo");
+        assertEquals(AssetPath.of("bar", "foo"), p);
+    }
+
+    @Test
+    void resolveParent() {
+        AssetPath p = AssetPath.of("foo", "..", "bar");
+        assertEquals(AssetPath.of("bar"), p);
+    }
+
+    @Test
+    void resolveParentAtRoot() {
+        AssetPath p = AssetPath.of("..", "bar");
+        assertEquals("../bar", p.toString());
+
+        p = AssetPath.of("../bar");
+        assertEquals("../bar", p.toString());
+    }
+
+    @Test
     void resolveEmptyAssetPathReturnsSame() {
         AssetPath p = AssetPath.of("a");
         assertSame(p, p.resolve(AssetPath.of()));

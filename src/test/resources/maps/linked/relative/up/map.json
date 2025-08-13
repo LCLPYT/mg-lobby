@@ -1,3 +1,4 @@
 {
-  "target": "../map"
+  "target": "../map",
+  "test": 123
 }

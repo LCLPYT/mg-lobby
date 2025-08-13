@@ -37,7 +37,7 @@ public class LobbyWorldDownloader {
         }
 
         URI worldSource = configAccess.getConfig().lobbySource;
-        WorldCopier copier = WorldCopier.get(worldSource);
+        WorldCopier copier = WorldCopier.get(worldSource);  // TODO adapt mc-game-commons-maps and local caching
 
         try {
             copier.copyTo(lobbyDir);

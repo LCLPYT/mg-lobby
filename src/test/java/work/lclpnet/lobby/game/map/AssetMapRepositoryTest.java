@@ -7,21 +7,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.lobby.game.asset.UriAssetRepository;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UriMapRepositoryTest {
+class AssetMapRepositoryTest {
 
     static final Logger logger = LoggerFactory.getLogger("test");
     URI uri;
-    UriMapRepository repo;
+    AssetMapRepository repo;
+    UriAssetRepository assetRepository;
 
     @BeforeAll
     static void setup() {
@@ -32,7 +33,9 @@ public class UriMapRepositoryTest {
     @BeforeEach
     void setupEach() {
         uri = Path.of("src", "test", "resources", "maps").toUri();
-        repo = new UriMapRepository(uri, logger);
+
+        assetRepository = new UriAssetRepository(uri);
+        repo = new AssetMapRepository(assetRepository, logger);
     }
 
     @Test
@@ -66,7 +69,9 @@ public class UriMapRepositoryTest {
     void testInfoSimple() throws IOException {
         var info = repo.getMapInfo("test/map_three");
 
-        assertEquals(uri.resolve("test/map_three"), info.target());
+        assertEquals("test/map_three", info.target());
+        assertEquals("world.tar.xz", info.properties().get("source"));
+        assertSame(repo, info.origin());
     }
 
     @Test
@@ -80,7 +85,7 @@ public class UriMapRepositoryTest {
     void testInfoLink() throws IOException {
         var info = repo.getMapInfo("linked/test");
 
-        assertEquals(uri.resolve("test/map_three"), info.target());
+        assertEquals("test/map_three", info.target());
     }
 
     @Test
@@ -95,14 +100,17 @@ public class UriMapRepositoryTest {
     void testInfoLinkRelative() throws IOException {
         var info = repo.getMapInfo("linked/relative");
 
-        assertEquals(uri.resolve("linked/relative/map"), info.target());
+        assertEquals("linked/relative/map", info.target());
+        assertEquals("here", info.properties().get("source"));
     }
 
     @Test
     void testInfoLinkRelativeUp() throws IOException {
         var info = repo.getMapInfo("linked/relative/up");
 
-        assertEquals(uri.resolve("linked/relative/map"), info.target());
+        assertEquals("linked/relative/map", info.target());
+        assertEquals("here", info.properties().get("source"));
+        assertEquals(123, info.properties().get("test"));
     }
 
     @Test

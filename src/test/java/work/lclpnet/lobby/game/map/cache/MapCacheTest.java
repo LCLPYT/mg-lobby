@@ -74,8 +74,7 @@ class MapCacheTest {
 
     @Test
     void cachedMapInfo_uncached_isCached() {
-        URI uri = cacheRoot.resolve("test").resolve("map_one").resolve("map.json").toUri();
-        MapInfo info = new MapInfo(uri, "test/map_one", Map.of("foo", "bar", "baz", 11, "test", true));
+        MapInfo info = new MapInfo("test/map_one", Map.of("foo", "bar", "baz", 11, "test", true));
 
         cache.cacheMapInfo("test/map_one", info);
 

@@ -25,6 +25,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.Collection;
 
+@Deprecated
 public class MapCache implements Closeable {
 
     private final CacheIndex index;
@@ -83,27 +84,29 @@ public class MapCache implements Closeable {
             return null;
         }
 
-        var res = cacheRepository.getResource(path, resource);
-
-        if (res.isEmpty()) {
-            return null;
-        }
-
-        URI uri = res.get();
-        Path resourcePath;
-
-        try {
-            resourcePath = Path.of(uri);
-        } catch (RuntimeException e) {
-            logger.error("Failed to resolve path from cache uri {}", uri);
-            return null;
-        }
-
-        if (Files.isRegularFile(resourcePath)) {
-            return resourcePath;
-        }
-
         return null;
+
+//        var res = cacheRepository.getResource(path, resource);
+//
+//        if (res.isEmpty()) {
+//            return null;
+//        }
+//
+//        URI uri = res.get();
+//        Path resourcePath;
+//
+//        try {
+//            resourcePath = Path.of(uri);
+//        } catch (RuntimeException e) {
+//            logger.error("Failed to resolve path from cache uri {}", uri);
+//            return null;
+//        }
+//
+//        if (Files.isRegularFile(resourcePath)) {
+//            return resourcePath;
+//        }
+//
+//        return null;
     }
 
     @Override

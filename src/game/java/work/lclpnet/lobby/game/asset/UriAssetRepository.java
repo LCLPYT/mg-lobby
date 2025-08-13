@@ -19,6 +19,11 @@ public class UriAssetRepository implements AssetRepository {
     @Override
     public InputStream open(AssetPath path) throws IOException {
         URI uri = uri(path);
+
+        if (!uri.getPath().startsWith(root.getPath())) {
+            throw new IOException("Path outside of repository");
+        }
+
         var url = uri.toURL();
 
         return url.openStream();
