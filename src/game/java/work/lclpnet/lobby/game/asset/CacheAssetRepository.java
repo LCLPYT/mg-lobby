@@ -12,11 +12,13 @@ public class CacheAssetRepository implements AssetRepository {
 
     private final AssetCache cache;
     private final AssetRepository upstream;
+    private final int ttlSeconds;
     private final Logger logger;
 
-    public CacheAssetRepository(AssetCache cache, AssetRepository upstream, Logger logger) {
+    public CacheAssetRepository(AssetCache cache, AssetRepository upstream, int ttlSeconds, Logger logger) {
         this.cache = cache;
         this.upstream = upstream;
+        this.ttlSeconds = ttlSeconds;
         this.logger = logger;
     }
 
@@ -33,7 +35,7 @@ public class CacheAssetRepository implements AssetRepository {
 
         try (var in = upstream.open(path)) {
             try {
-                cachedPath = cache.cache(path, in);
+                cachedPath = cache.cache(path, in, ttlSeconds);
             } catch (IOException e) {
                 logger.error("Failed to cache asset '{}', refetching uncached...", path, e);
             }

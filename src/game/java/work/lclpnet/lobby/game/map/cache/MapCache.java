@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 @Deprecated
-public class MapCache implements Closeable {
+public class MapCache implements AutoCloseable {
 
     private final CacheIndex index;
     private final UriMapRepository cacheRepository;
@@ -41,6 +41,7 @@ public class MapCache implements Closeable {
     }
 
     @Nullable
+    @Deprecated
     public Collection<MapRef> getCachedMapList(String path) {
         String entry = path + "/index.json";
 
@@ -57,6 +58,7 @@ public class MapCache implements Closeable {
     }
 
     @Nullable
+    @Deprecated
     public MapInfo getCachedMapInfo(String path) {
         String entry = path + "/map.json";
 
@@ -77,6 +79,7 @@ public class MapCache implements Closeable {
     }
 
     @Nullable
+    @Deprecated
     public Path getCachedResource(String path, String resource) {
         String entry = getResourceEntry(path, resource);
 
@@ -110,7 +113,7 @@ public class MapCache implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         index.close();
     }
 
@@ -126,6 +129,7 @@ public class MapCache implements Closeable {
         return null;
     }
 
+    @Deprecated
     public void cacheMapInfo(String path, MapInfo info) {
         String entry = path + "/map.json";
         Path cachePath = getCachePath(entry);
@@ -150,6 +154,7 @@ public class MapCache implements Closeable {
         index.updateEntry(entry, ttlSeconds);
     }
 
+    @Deprecated
     public void cacheMapList(String path, Collection<MapRef> mapList) {
         String entry = path + "/index.json";
         Path cachePath = getCachePath(entry);
@@ -184,6 +189,7 @@ public class MapCache implements Closeable {
     }
 
     @Nullable
+    @Deprecated
     public Path cacheResource(String path, String resource, URI uri) {
         // only cache remote files
         if (uri.getHost() == null) {

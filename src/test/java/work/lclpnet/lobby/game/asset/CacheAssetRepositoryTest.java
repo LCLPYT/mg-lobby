@@ -23,7 +23,7 @@ class CacheAssetRepositoryTest {
     void usesCacheIfAvailable() throws IOException {
         AssetCache cache = mock(AssetCache.class);
         AssetRepository upstream = mock(AssetRepository.class);
-        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, logger);
+        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, 3600, logger);
 
         AssetPath path = AssetPath.of("cached.txt");
         Path tempFile = Files.createTempFile("cached", ".txt");
@@ -42,7 +42,7 @@ class CacheAssetRepositoryTest {
     void fetchesFromUpstreamIfNotCached() throws IOException {
         AssetCache cache = mock(AssetCache.class);
         AssetRepository upstream = mock(AssetRepository.class);
-        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, logger);
+        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, 3600, logger);
 
         AssetPath path = AssetPath.of("new.txt");
         when(cache.getCached(path)).thenReturn(Optional.empty());
@@ -50,7 +50,7 @@ class CacheAssetRepositoryTest {
 
         Path tempFile = Files.createTempFile("store", ".txt");
         Files.writeString(tempFile, "fresh");
-        when(cache.cache(eq(path), any())).thenReturn(tempFile);
+        when(cache.cache(eq(path), any(), eq(3600))).thenReturn(tempFile);
 
         try (InputStream in = repo.open(path)) {
             assertEquals("fresh", new String(in.readAllBytes()));
@@ -61,14 +61,14 @@ class CacheAssetRepositoryTest {
     void retriesUpstreamIfCachingFails() throws IOException {
         AssetCache cache = mock(AssetCache.class);
         AssetRepository upstream = mock(AssetRepository.class);
-        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, logger);
+        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, 3600, logger);
 
         AssetPath path = AssetPath.of("retry.txt");
         when(cache.getCached(path)).thenReturn(Optional.empty());
 
         byte[] data = "data".getBytes();
         when(upstream.open(path)).thenReturn(new ByteArrayInputStream(data));
-        when(cache.cache(eq(path), any())).thenThrow(new IOException("fail"));
+        when(cache.cache(eq(path), any(), eq(3600))).thenThrow(new IOException("fail"));
 
         try (InputStream in = repo.open(path)) {
             assertEquals("data", new String(in.readAllBytes()));

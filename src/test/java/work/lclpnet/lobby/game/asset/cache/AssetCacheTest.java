@@ -11,8 +11,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class AssetCacheTest {
 
@@ -46,20 +45,24 @@ class AssetCacheTest {
         Path tempDir = Files.createTempDirectory("mgl_act");
         AssetCache cache = new AssetCache(index, tempDir);
 
-        AssetPath path = AssetPath.of("file.txt");
+        AssetPath path = AssetPath.of("test", "file.txt");
         byte[] data = "testContent".getBytes();
 
+        int ttlSeconds = 3600;
+
         try (InputStream in = new ByteArrayInputStream(data)) {
-            Path stored = cache.cache(path, in);
+            Path stored = cache.cache(path, in, ttlSeconds);
             assertEquals(path.toPath(), tempDir.relativize(stored));
             assertTrue(Files.exists(stored));
             assertEquals("testContent", Files.readString(stored));
         }
+
+        verify(index).updateEntry(eq("test/file.txt"), eq(ttlSeconds));
     }
 
     @Test
     void cacheEmptyPathThrows() {
         AssetCache cache = new AssetCache(mock(CacheIndex.class), Path.of("root"));
-        assertThrows(IllegalArgumentException.class, () -> cache.cache(AssetPath.of(), InputStream.nullInputStream()));
+        assertThrows(IllegalArgumentException.class, () -> cache.cache(AssetPath.of(), InputStream.nullInputStream(), 3600));
     }
 }

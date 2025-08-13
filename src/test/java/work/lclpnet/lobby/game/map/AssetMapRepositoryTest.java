@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import work.lclpnet.lobby.game.asset.UriAssetRepository;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Set;
@@ -136,44 +137,38 @@ class AssetMapRepositoryTest {
     }
 
     @Test
-    void testGetResourceBasic() {
-//        URI res = repo.getResource("test/map_two", "world.zip").orElseThrow();
-//
-//        assertEquals(uri.resolve("test/map_two/world.zip"), res);
+    void testGetResourceBasic() throws IOException {
+        consume(repo.open("test/map_two/world.zip"));
     }
 
     @Test
-    void testGetResourceRelative() {
-//        URI res = repo.getResource("test/map_two", "../map_three/world.tar.xz").orElseThrow();
-//
-//        assertEquals(uri.resolve("test/map_three/world.tar.xz"), res);
+    void testGetResourceRelative() throws IOException {
+        consume(repo.open("test/map_two/../map_three/world.tar.xz"));
     }
 
     @Test
-    void testGetResourceAbsolute() {
-//        URI res = repo.getResource("test/map_two", "/test/map_three/world.tar.xz").orElseThrow();
-//
-//        assertEquals(uri.resolve("test/map_three/world.tar.xz"), res);
+    void testGetResourceAbsolute() throws IOException {
+        consume(repo.open("/test/map_three/world.tar.xz"));
     }
 
     @Test
-    void testGetResourcePathOutsideEmpty() {
-//        var res = repo.getResource("../test/map_two", "world.tar");
-//
-//        assertEquals(Optional.empty(), res);
+    void testGetResourcePathOutsideThrows() {
+        assertThrows(IOException.class, () -> consume(repo.open("../test/map_two/world.tar")), "Path outside of repository");
     }
 
     @Test
-    void testGetResourceResourceOutsideEmpty() {
-//        var res = repo.getResource("test/map_two", "../../../world.tar");
-//
-//        assertEquals(Optional.empty(), res);
+    void testGetResourceResourceOutsideThrows() {
+        assertThrows(IOException.class, () -> consume(repo.open("test/map_two/../../../world.tar")), "Path outside of repository");
     }
 
     @Test
     void testGetResourceAbsoluteResourceOutsideEmpty() {
-//        var res = repo.getResource("test/map_two", "/../world.tar");
-//
-//        assertEquals(Optional.empty(), res);
+        assertThrows(IOException.class, () -> consume(repo.open("test/map_two/../../../world.tar")), "Path outside of repository");
+    }
+
+    private void consume(InputStream in) throws IOException {
+        try (in) {
+            assertTrue(in.readAllBytes().length > 0);
+        }
     }
 }

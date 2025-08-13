@@ -1,8 +1,6 @@
 package work.lclpnet.lobby.game.asset.cache;
 
-import java.io.Closeable;
-
-public interface CacheIndex extends Closeable {
+public interface CacheIndex extends AutoCloseable {
 
     boolean isEntryInvalid(String path);
 
