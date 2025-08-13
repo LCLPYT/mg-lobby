@@ -66,6 +66,15 @@ class AssetPathTest {
     }
 
     @Test
+    void resolveParentMultipleAtRoot() {
+        AssetPath p = AssetPath.of("..", "..", "bar");
+        assertEquals("../../bar", p.toString());
+
+        p = AssetPath.of("../../bar");
+        assertEquals("../../bar", p.toString());
+    }
+
+    @Test
     void resolveEmptyAssetPathReturnsSame() {
         AssetPath p = AssetPath.of("a");
         assertSame(p, p.resolve(AssetPath.of()));

@@ -127,7 +127,7 @@ public class AssetPath implements Comparable<AssetPath> {
                 if (string.isEmpty()) continue;
 
                 // eagerly resolve parent directory, if possible
-                if (string.equals("..") && !list.isEmpty()) {
+                if (string.equals("..") && !list.isEmpty() && !list.getLast().equals("..")) {
                     list.removeLast();
                     continue;
                 }
