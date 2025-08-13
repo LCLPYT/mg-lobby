@@ -98,5 +98,13 @@ class SqliteCacheIndexTest {
 
             assertTrue(index.isEntryInvalid(path));
         }
+
+        @Test
+        void invalidate_notExisting_noop() {
+            String key = "test123";
+
+            assertTrue(index.isEntryInvalid(key));
+            index.invalidate(key);  // TODO test result
+        }
     }
 }

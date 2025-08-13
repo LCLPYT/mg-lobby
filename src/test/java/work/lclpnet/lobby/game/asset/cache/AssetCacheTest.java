@@ -65,4 +65,14 @@ class AssetCacheTest {
         AssetCache cache = new AssetCache(mock(CacheIndex.class), Path.of("root"));
         assertThrows(IllegalArgumentException.class, () -> cache.cache(AssetPath.of(), InputStream.nullInputStream(), 3600));
     }
+
+    @Test
+    void invalidateInvoked() {
+        CacheIndex index = mock(CacheIndex.class);
+        AssetCache cache = new AssetCache(index, Path.of("root"));
+
+        cache.invalidate(AssetPath.of("test", "foo"));
+
+        verify(index, times(1)).invalidate("test/foo");
+    }
 }

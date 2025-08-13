@@ -1,7 +1,6 @@
 package work.lclpnet.lobby.game.asset.cache;
 
 import org.slf4j.Logger;
-import work.lclpnet.lobby.game.map.cache.SqliteCacheMigration;
 
 import java.io.IOException;
 import java.nio.file.Path;
