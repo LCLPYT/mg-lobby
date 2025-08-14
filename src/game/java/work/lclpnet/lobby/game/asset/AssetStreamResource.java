@@ -4,12 +4,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
-public record AssetResult(InputStream resource, boolean cached) implements Closeable {
+public record AssetStreamResource(InputStream resource, boolean cached) implements Closeable {
 
     @Override
     public void close() throws IOException {
-        if (resource != null) {
-            resource.close();
-        }
+        resource.close();
     }
 }

@@ -35,9 +35,9 @@ class MapManagerTest {
     void loadAll_loadedIntoCollection(String namespace, String path, Set<MapDescriptor> expected) throws IOException {
         URI uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        var repository = new AssetMapRepository(new UriAssetRepository(uri), logger);
+        var repository = new AssetMapRepository(new UriAssetRepository(uri, logger), logger);
         var lookup = new RepositoryMapLookup(repository);
-        var fetcher = new DirectMapFetcher(lookup);
+        var fetcher = new DirectMapFetcher(lookup, logger);
         var maps = new SimpleMapCollection();
 
         var manager = new MapManager(maps, lookup, fetcher);

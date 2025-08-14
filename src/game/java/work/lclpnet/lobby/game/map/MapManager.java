@@ -1,5 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -9,8 +11,8 @@ public class MapManager {
     private final MapLookup lookup;
     private final MapFetcher fetcher;
 
-    public MapManager(MapLookup lookup) {
-        this(lookup, new DirectMapFetcher(lookup));
+    public MapManager(MapLookup lookup, Logger logger) {
+        this(lookup, new DirectMapFetcher(lookup, logger));
     }
 
     public MapManager(MapLookup lookup, MapFetcher fetcher) {

@@ -1,11 +1,12 @@
 package work.lclpnet.lobby.game.map;
 
+import work.lclpnet.lobby.game.asset.AssetPath;
 import work.lclpnet.lobby.game.asset.AssetRequestOptions;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URI;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Collections;
 
 public class RepositoryMapLookup implements MapLookup {
 
@@ -25,7 +26,7 @@ public class RepositoryMapLookup implements MapLookup {
     }
 
     @Override
-    public Optional<InputStream> openSource(GameMap map) throws IOException {
+    public Iterable<URI> getSource(GameMap map) throws IOException {
         MapInfo info = mapRepository.getMapInfo(map.getDescriptor().getMapPath());
 
         map.putProperties(info.properties());
@@ -33,13 +34,15 @@ public class RepositoryMapLookup implements MapLookup {
         String source = info.getSource();
 
         if (source == null) {
-            return Optional.empty();
+            return Collections::emptyIterator;
         }
 
         // if the map info wasn't cached, fetch the fresh map source to keep it in sync with the info
         boolean infoWasCached = info.properties().optBoolean(AssetMapRepository.CACHED_PROPERTY, false);
         var opts = new AssetRequestOptions(!infoWasCached);
 
-        return Optional.of(mapRepository.open(source, opts));
+        AssetPath path = AssetPath.of(info.target(), source);
+
+        return mapRepository.getUris(path.toString(), opts);
     }
 }

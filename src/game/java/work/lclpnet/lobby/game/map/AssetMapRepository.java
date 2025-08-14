@@ -1,17 +1,16 @@
 package work.lclpnet.lobby.game.map;
 
+import com.google.common.collect.Iterables;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookFactory;
-import work.lclpnet.lobby.game.asset.AssetPath;
-import work.lclpnet.lobby.game.asset.AssetRepository;
-import work.lclpnet.lobby.game.asset.AssetRequestOptions;
-import work.lclpnet.lobby.game.asset.AssetResult;
+import work.lclpnet.lobby.game.asset.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -48,7 +47,7 @@ public class AssetMapRepository implements MapRepository {
     }
 
     private Result<JSONObject> fetchJsonObject(AssetPath assetPath) throws IOException {
-        AssetResult res = assetRepository.get(assetPath);
+        AssetStreamResource res = assetRepository.getStream(assetPath);
 
         String content;
 
@@ -66,7 +65,6 @@ public class AssetMapRepository implements MapRepository {
         var res = getMapInfo(AssetPath.of(), path, 5);
 
         res.value().properties().put(CACHED_PROPERTY, res.cached);
-
 
         return res.value();
     }
@@ -112,7 +110,17 @@ public class AssetMapRepository implements MapRepository {
     public InputStream open(String path, AssetRequestOptions options) throws IOException {
         AssetPath assetPath = AssetPath.of(path);
 
-        return assetRepository.get(assetPath, options).resource();
+        return assetRepository.getStream(assetPath, options).resource();
+    }
+
+    @Override
+    public Iterable<URI> getUris(String path, AssetRequestOptions options) {
+        AssetPath assetPath = AssetPath.of(path);
+
+        return Iterables.transform(
+                assetRepository.getUris(assetPath, options),
+                res -> res != null ? res.resource() : null
+        );
     }
 
     @Override

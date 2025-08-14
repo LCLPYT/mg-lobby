@@ -8,8 +8,11 @@ import work.lclpnet.lobby.game.asset.cache.AssetCache;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,11 +34,11 @@ class CacheAssetRepositoryTest {
 
         when(cache.getCached(path)).thenReturn(Optional.of(tempFile));
 
-        try (var res = repo.get(path)) {
+        try (var res = repo.getStream(path)) {
             assertEquals("cachedData", new String(res.resource().readAllBytes()));
         }
 
-        verify(upstream, never()).get(any());
+        verify(upstream, never()).getStream(any(), any());
     }
 
     @Test
@@ -46,14 +49,14 @@ class CacheAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("new.txt");
         when(cache.getCached(path)).thenReturn(Optional.empty());
-        when(upstream.get(path))
-                .thenReturn(new AssetResult(new ByteArrayInputStream("fresh".getBytes()), false));
+        when(upstream.getStream(eq(path), any()))
+                .thenReturn(new AssetStreamResource(new ByteArrayInputStream("fresh".getBytes()), false));
 
         Path tempFile = Files.createTempFile("store", ".txt");
         Files.writeString(tempFile, "fresh");
-        when(cache.cache(eq(path), any(), eq(3600))).thenReturn(tempFile);
+        when(cache.cache(eq(path), (InputStream) any(), eq(3600))).thenReturn(tempFile);
 
-        try (var res = repo.get(path)) {
+        try (var res = repo.getStream(path)) {
             assertEquals("fresh", new String(res.resource().readAllBytes()));
         }
     }
@@ -68,12 +71,56 @@ class CacheAssetRepositoryTest {
         when(cache.getCached(path)).thenReturn(Optional.empty());
 
         byte[] data = "data".getBytes();
-        when(upstream.get(path))
-                .thenReturn(new AssetResult(new ByteArrayInputStream(data), false));
-        when(cache.cache(eq(path), any(), eq(3600))).thenThrow(new IOException("fail"));
 
-        try (var res = repo.get(path)) {
+        when(upstream.getStream(eq(path), any()))
+                .thenReturn(new AssetStreamResource(new ByteArrayInputStream(data), false));
+
+        when(cache.cache(eq(path), (InputStream) any(), eq(3600))).thenThrow(new IOException("fail"));
+
+        try (var res = repo.getStream(path)) {
             assertEquals("data", new String(res.resource().readAllBytes()));
         }
+    }
+
+    @Test
+    void returnsCachedUriIfPresent() {
+        AssetCache cache = mock(AssetCache.class);
+        AssetRepository upstream = mock(AssetRepository.class);
+        Logger logger = mock(Logger.class);
+        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, 3600, logger);
+
+        AssetPath path = AssetPath.of("cached.txt");
+        Path cachedPath = Path.of("/tmp/cached.txt");
+        when(cache.getCached(path)).thenReturn(Optional.of(cachedPath));
+
+        var uris = repo.getUris(path, AssetRequestOptions.DEFAULT);
+        var it = uris.iterator();
+
+        assertTrue(it.hasNext());
+        assertEquals(cachedPath.toUri(), it.next().resource());
+        assertFalse(it.hasNext());
+        verify(upstream, never()).getUris(any(), any());
+    }
+
+    @Test
+    void delegatesToUpstreamWhenNotCached() {
+        AssetCache cache = mock(AssetCache.class);
+        AssetRepository upstream = mock(AssetRepository.class);
+        Logger logger = mock(Logger.class);
+        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, 3600, logger);
+
+        AssetPath path = AssetPath.of("remote.txt");
+        when(cache.getCached(path)).thenReturn(Optional.empty());
+
+        AssetUriResource upstreamResource = new AssetUriResource(URI.create("http://upstream/remote.txt"), false);
+        when(upstream.getUris(path, AssetRequestOptions.DEFAULT))
+                .thenReturn(List.of(upstreamResource));
+
+        var uris = repo.getUris(path, AssetRequestOptions.DEFAULT);
+        var it = uris.iterator();
+
+        assertTrue(it.hasNext());
+        assertEquals(upstreamResource, it.next());
+        assertFalse(it.hasNext());
     }
 }

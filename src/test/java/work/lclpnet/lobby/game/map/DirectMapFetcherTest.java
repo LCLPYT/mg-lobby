@@ -32,11 +32,11 @@ class DirectMapFetcherTest {
     public void setUp() {
         URI uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        var repository = new AssetMapRepository(new UriAssetRepository(uri), logger);
+        var repository = new AssetMapRepository(new UriAssetRepository(uri, logger), logger);
 
         RepositoryMapLookup lookup = new RepositoryMapLookup(repository);
 
-        fetcher = new DirectMapFetcher(lookup);
+        fetcher = new DirectMapFetcher(lookup, logger);
     }
 
     @Test

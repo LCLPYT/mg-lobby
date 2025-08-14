@@ -6,6 +6,10 @@ import work.lclpnet.lobby.game.asset.AssetPath;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -17,10 +21,12 @@ public class AssetCache implements AutoCloseable {
 
     private final CacheIndex index;
     private final Path root;
+    private final Logger logger;
 
-    public AssetCache(CacheIndex index, Path root) {
+    public AssetCache(CacheIndex index, Path root, Logger logger) {
         this.index = index;
         this.root = root;
+        this.logger = logger;
     }
 
     public Optional<Path> getCached(AssetPath path) {
@@ -36,9 +42,7 @@ public class AssetCache implements AutoCloseable {
     }
 
     public Path cache(AssetPath path, InputStream in, int ttlSeconds) throws IOException {
-        if (path.isEmpty()) {
-            throw new IllegalArgumentException("Cannot cache empty asset path");
-        }
+        validateNotEmpty(path);
 
         Path localPath = root.resolve(path.toPath());
 
@@ -51,6 +55,39 @@ public class AssetCache implements AutoCloseable {
         index.updateEntry(path.toString(), ttlSeconds);
 
         return localPath;
+    }
+
+    public Optional<Path> cache(AssetPath path, URI uri, int ttlSeconds) throws IOException {
+        // only cache remote files
+        if (uri.getHost() == null) {
+            return Optional.empty();
+        }
+
+        URL url;
+
+        try {
+            url = uri.toURL();
+        } catch (MalformedURLException e) {
+            logger.error("Failed to cache resource: {} cannot be converted to a URL", uri, e);
+            return Optional.empty();
+        }
+
+        // only cache remote files
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
+            return Optional.empty();
+        }
+
+        URLConnection connection = url.openConnection();
+
+        try (var in = connection.getInputStream()) {
+            return Optional.of(cache(path, in, ttlSeconds));
+        }
+    }
+
+    private void validateNotEmpty(AssetPath path) {
+        if (path.isEmpty()) {
+            throw new IllegalArgumentException("Cannot cache empty asset path");
+        }
     }
 
     public void invalidate(AssetPath path) {
@@ -85,6 +122,6 @@ public class AssetCache implements AutoCloseable {
             index = VoidCacheIndex.getInstance();
         }
 
-        return new AssetCache(index, root);
+        return new AssetCache(index, root, logger);
     }
 }

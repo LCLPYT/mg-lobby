@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
+import com.google.common.collect.Iterators;
 import net.minecraft.Bootstrap;
 import net.minecraft.SharedConstants;
 import net.minecraft.util.Identifier;
@@ -16,7 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RepositoryMapLookupTest {
 
@@ -55,13 +59,93 @@ public class RepositoryMapLookupTest {
     }
 
     @Test
-    void testOpenSourceDataLoaded() throws IOException {
+    void testGetSourceDataLoaded() throws IOException {
         var repo = getMapRepository();
         var lookup = new RepositoryMapLookup(repo);
 
         GameMap map = new GameMap(new MapDescriptor("test", "hello"));
 
-        var source = lookup.openSource(map).orElseThrow();
+        var source = lookup.getSource(map).iterator().next();
+
+        assertEquals(URI.create("test/hello/here"), source);
+    }
+
+    @Test
+    void testGetSourceUnknownCacheRequestsWithCacheDisabled() throws IOException {
+        var repo = mock(MapRepository.class);
+        var lookup = new RepositoryMapLookup(repo);
+
+        GameMap map = new GameMap(new MapDescriptor("test", "hello"));
+
+        when(repo.getMapInfo(any()))
+                .thenReturn(new MapInfo("test/hello", Map.of(
+                        "source", "here"
+                )));
+
+        when(repo.getUris(any(), any())).then(invocation -> {
+            String path = invocation.getArgument(0);
+            AssetRequestOptions options = invocation.getArgument(1);
+
+            assertTrue(options.disableCache(), "Expected to fetch with disableCache=true");
+
+            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path));
+        });
+
+        var source = lookup.getSource(map).iterator().next();
+
+        assertEquals(URI.create("test/hello/here"), source);
+    }
+
+    @Test
+    void testGetSourceUncachedRequestsWithCacheDisabled() throws IOException {
+        var repo = mock(MapRepository.class);
+        var lookup = new RepositoryMapLookup(repo);
+
+        GameMap map = new GameMap(new MapDescriptor("test", "hello"));
+
+        when(repo.getMapInfo(any()))
+                .thenReturn(new MapInfo("test/hello", Map.of(
+                        "source", "here",
+                        AssetMapRepository.CACHED_PROPERTY, false
+                )));
+
+        when(repo.getUris(any(), any())).then(invocation -> {
+            String path = invocation.getArgument(0);
+            AssetRequestOptions options = invocation.getArgument(1);
+
+            assertTrue(options.disableCache(), "Expected to fetch with disableCache=true");
+
+            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path));
+        });
+
+        var source = lookup.getSource(map).iterator().next();
+
+        assertEquals(URI.create("test/hello/here"), source);
+    }
+
+    @Test
+    void testGetSourceCachedRequestsWithCacheEnabled() throws IOException {
+        var repo = mock(MapRepository.class);
+        var lookup = new RepositoryMapLookup(repo);
+
+        GameMap map = new GameMap(new MapDescriptor("test", "hello"));
+
+        when(repo.getMapInfo(any()))
+                .thenReturn(new MapInfo("test/hello", Map.of(
+                        "source", "here",
+                        AssetMapRepository.CACHED_PROPERTY, true
+                )));
+
+        when(repo.getUris(any(), any())).then(invocation -> {
+            String path = invocation.getArgument(0);
+            AssetRequestOptions options = invocation.getArgument(1);
+
+            assertFalse(options.disableCache(), "Expected to fetch with disableCache=false");
+
+            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path));
+        });
+
+        var source = lookup.getSource(map).iterator().next();
 
         assertEquals(URI.create("test/hello/here"), source);
     }
@@ -99,6 +183,11 @@ public class RepositoryMapLookupTest {
             @Override
             public InputStream open(String path, AssetRequestOptions options) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Iterable<URI> getUris(String path, AssetRequestOptions options) {
+                return () -> Iterators.singletonIterator(URI.create(path));
             }
         };
     }

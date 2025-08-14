@@ -35,7 +35,7 @@ class AssetMapRepositoryTest {
     void setupEach() {
         uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        assetRepository = new UriAssetRepository(uri);
+        assetRepository = new UriAssetRepository(uri, logger);
         repo = new AssetMapRepository(assetRepository, logger);
     }
 
@@ -137,32 +137,32 @@ class AssetMapRepositoryTest {
     }
 
     @Test
-    void testGetResourceBasic() throws IOException {
+    void testOpenBasic() throws IOException {
         consume(repo.open("test/map_two/world.zip"));
     }
 
     @Test
-    void testGetResourceRelative() throws IOException {
+    void testOpenRelative() throws IOException {
         consume(repo.open("test/map_two/../map_three/world.tar.xz"));
     }
 
     @Test
-    void testGetResourceAbsolute() throws IOException {
+    void testOpenAbsolute() throws IOException {
         consume(repo.open("/test/map_three/world.tar.xz"));
     }
 
     @Test
-    void testGetResourcePathOutsideThrows() {
+    void testOpenPathOutsideThrows() {
         assertThrows(IOException.class, () -> consume(repo.open("../test/map_two/world.tar")), "Path outside of repository");
     }
 
     @Test
-    void testGetResourceResourceOutsideThrows() {
+    void testOpenResourceOutsideThrows() {
         assertThrows(IOException.class, () -> consume(repo.open("test/map_two/../../../world.tar")), "Path outside of repository");
     }
 
     @Test
-    void testGetResourceAbsoluteResourceOutsideEmpty() {
+    void testOpenAbsoluteResourceOutsideEmpty() {
         assertThrows(IOException.class, () -> consume(repo.open("test/map_two/../../../world.tar")), "Path outside of repository");
     }
 

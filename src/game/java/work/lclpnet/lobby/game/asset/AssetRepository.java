@@ -4,9 +4,15 @@ import java.io.IOException;
 
 public interface AssetRepository {
 
-    AssetResult get(AssetPath path, AssetRequestOptions options) throws IOException;
+    AssetStreamResource getStream(AssetPath path, AssetRequestOptions options) throws IOException;
 
-    default AssetResult get(AssetPath path) throws IOException {
-        return get(path, AssetRequestOptions.DEFAULT);
+    Iterable<AssetUriResource> getUris(AssetPath path, AssetRequestOptions options);
+
+    default AssetStreamResource getStream(AssetPath path) throws IOException {
+        return getStream(path, AssetRequestOptions.DEFAULT);
+    }
+
+    default Iterable<AssetUriResource> getUris(AssetPath path) {
+        return getUris(path, AssetRequestOptions.DEFAULT);
     }
 }

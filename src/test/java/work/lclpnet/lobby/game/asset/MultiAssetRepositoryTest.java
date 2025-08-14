@@ -6,9 +6,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class MultiAssetRepositoryTest {
@@ -22,19 +23,20 @@ class MultiAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("file.txt");
 
-        when(repo1.get(path)).thenThrow(new IOException("not found"));
-        when(repo2.get(path))
-                .thenReturn(new AssetResult(new ByteArrayInputStream("ok".getBytes()), false));
+        when(repo1.getStream(eq(path), any()))
+                .thenThrow(new IOException("not found"));
+
+        when(repo2.getStream(eq(path), any()))
+                .thenReturn(new AssetStreamResource(new ByteArrayInputStream("ok".getBytes()), false));
 
         MultiAssetRepository multi = new MultiAssetRepository(new AssetRepository[]{repo1, repo2}, logger);
 
-        try (var res = multi.get(path)) {
+        try (var res = multi.getStream(path)) {
             assertEquals("ok", new String(res.resource().readAllBytes()));
         }
 
-        verify(logger, atLeastOnce()).debug(anyString(), any(), any());
-        verify(repo1).get(path);
-        verify(repo2).get(path);
+        verify(repo1).getStream(eq(path), any());
+        verify(repo2).getStream(eq(path), any());
     }
 
     @Test
@@ -45,12 +47,15 @@ class MultiAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("missing");
 
-        when(repo1.get(path)).thenThrow(new IOException("fail1"));
-        when(repo2.get(path)).thenThrow(new IOException("fail2"));
+        when(repo1.getStream(eq(path), any()))
+                .thenThrow(new IOException("fail1"));
+
+        when(repo2.getStream(eq(path), any()))
+                .thenThrow(new IOException("fail2"));
 
         MultiAssetRepository multi = new MultiAssetRepository(new AssetRepository[]{repo1, repo2}, logger);
 
-        IOException ex = assertThrows(IOException.class, () -> multi.get(path));
+        IOException ex = assertThrows(IOException.class, () -> multi.getStream(path));
         assertEquals("Asset not found", ex.getMessage());
 
         verify(logger, atLeast(2)).debug(anyString(), any(), any());
@@ -64,16 +69,41 @@ class MultiAssetRepositoryTest {
 
         AssetPath path = AssetPath.of("file.txt");
 
-        when(repo1.get(path)).thenThrow(new RuntimeException("unexpected"));
-        when(repo2.get(path))
-                .thenReturn(new AssetResult(new ByteArrayInputStream("data".getBytes()), false));
+        when(repo1.getStream(eq(path), any()))
+                .thenThrow(new RuntimeException("unexpected"));
+
+        when(repo2.getStream(eq(path), any()))
+                .thenReturn(new AssetStreamResource(new ByteArrayInputStream("data".getBytes()), false));
 
         MultiAssetRepository multi = new MultiAssetRepository(new AssetRepository[]{repo1, repo2}, logger);
 
-        try (var res = multi.get(path)) {
+        try (var res = multi.getStream(path)) {
             assertEquals("data", new String(res.resource().readAllBytes()));
         }
 
         verify(logger, atLeastOnce()).debug(anyString(), any(), any());
+    }
+
+    @Test
+    void aggregatesUrisFromChildren() {
+        AssetRepository child1 = mock(AssetRepository.class);
+        AssetRepository child2 = mock(AssetRepository.class);
+        Logger logger = mock(Logger.class);
+
+        AssetPath path = AssetPath.of("asset.txt");
+
+        when(child1.getUris(eq(path), eq(AssetRequestOptions.DEFAULT)))
+                .thenReturn(List.of(new AssetUriResource(URI.create("http://repo1/asset.txt"), false)));
+        when(child2.getUris(eq(path), eq(AssetRequestOptions.DEFAULT)))
+                .thenReturn(List.of(new AssetUriResource(URI.create("http://repo2/asset.txt"), false)));
+
+        MultiAssetRepository repo = new MultiAssetRepository(new AssetRepository[]{child1, child2}, logger);
+
+        var uris = repo.getUris(path, AssetRequestOptions.DEFAULT);
+        var it = uris.iterator();
+
+        assertEquals("http://repo1/asset.txt", it.next().resource().toString());
+        assertEquals("http://repo2/asset.txt", it.next().resource().toString());
+        assertFalse(it.hasNext());
     }
 }
