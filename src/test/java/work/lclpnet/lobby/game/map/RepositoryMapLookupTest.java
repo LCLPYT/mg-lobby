@@ -87,7 +87,7 @@ public class RepositoryMapLookupTest {
             AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
-            assertTrue(options.disableCache(), "Expected to fetch with disableCache=true");
+            assertTrue(options.disableCacheRead(), "Expected to fetch with disableCache=true");
 
             return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });
@@ -114,7 +114,7 @@ public class RepositoryMapLookupTest {
             AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
-            assertTrue(options.disableCache(), "Expected to fetch with disableCache=true");
+            assertTrue(options.disableCacheRead(), "Expected to fetch with disableCache=true");
 
             return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });
@@ -141,7 +141,7 @@ public class RepositoryMapLookupTest {
             AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
-            assertFalse(options.disableCache(), "Expected to fetch with disableCache=false");
+            assertFalse(options.disableCacheRead(), "Expected to fetch with disableCache=false");
 
             return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });

@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.asset;
 
+import com.google.common.collect.Iterators;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +59,25 @@ class CacheAssetRepositoryTest {
         try (var res = repo.getStream(path)) {
             assertEquals("fresh", new String(res.resource().readAllBytes()));
         }
+
+        verify(cache, times(1)).cache(eq(path), (InputStream) any(), eq(3600));
+    }
+
+    @Test
+    void cachesButDoesntReadFromCacheIfCacheDisabled() throws IOException {
+        AssetCache cache = mock(AssetCache.class);
+        AssetRepository upstream = mock(AssetRepository.class);
+        CacheAssetRepository repo = new CacheAssetRepository(cache, upstream, 3600, logger);
+
+        AssetPath path = AssetPath.of("new.txt");
+
+        when(upstream.getUris(eq(path), any()))
+                .thenReturn(() -> Iterators.singletonIterator(new AssetUriResource(URI.create(path.toString()), false)));
+
+        repo.getUris(path, AssetRequestOptions.DEFAULT.withDisableCacheRead(true));
+
+        verify(cache, never()).getCached(any());
+        verify(cache, times(1)).cache(eq(path), (URI) any(), eq(3600));
     }
 
     @Test
