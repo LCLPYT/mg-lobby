@@ -4,15 +4,18 @@ import com.google.common.collect.Iterables;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import work.lclpnet.kibu.hook.Hook;
-import work.lclpnet.kibu.hook.HookFactory;
-import work.lclpnet.lobby.game.asset.*;
+import work.lclpnet.lobby.game.asset.AssetPath;
+import work.lclpnet.lobby.game.asset.AssetRepository;
+import work.lclpnet.lobby.game.asset.AssetRequestOptions;
+import work.lclpnet.lobby.game.asset.AssetStreamResource;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AssetMapRepository implements MapRepository {
 
@@ -20,7 +23,6 @@ public class AssetMapRepository implements MapRepository {
 
     private final AssetRepository assetRepository;
     private final Logger logger;
-    private volatile Hook<MapRedirectAction> redirectActionHook = null;
 
     public AssetMapRepository(AssetRepository assetRepository, Logger logger) {
         this.assetRepository = assetRepository;
@@ -28,8 +30,8 @@ public class AssetMapRepository implements MapRepository {
     }
 
     @Override
-    public Collection<MapRef> getMapList(String path) throws IOException {
-        var index = fetchJsonObject(AssetPath.of(path, "index.json"));
+    public Collection<MapRef> getMapList(AssetPath path) throws IOException {
+        var index = fetchJsonObject(path.resolve("index.json"));
         JSONArray mapsArray = index.value().getJSONArray("maps");
 
         Set<MapRef> maps = new HashSet<>();
@@ -61,7 +63,7 @@ public class AssetMapRepository implements MapRepository {
     }
 
     @Override
-    public MapInfo getMapInfo(String path) throws IOException {
+    public MapInfo getMapInfo(AssetPath path) throws IOException {
         var res = getMapInfo(AssetPath.of(), path, 5);
 
         res.value().properties().put(CACHED_PROPERTY, res.cached);
@@ -69,7 +71,7 @@ public class AssetMapRepository implements MapRepository {
         return res.value();
     }
 
-    private Result<MapInfo> getMapInfo(AssetPath root, String path, final int maxLinkDepth) throws IOException {
+    private Result<MapInfo> getMapInfo(AssetPath root, AssetPath path, final int maxLinkDepth) throws IOException {
         AssetPath mapPath = root.resolve(path);
         AssetPath assetPath = mapPath.resolve("map.json");
 
@@ -96,54 +98,23 @@ public class AssetMapRepository implements MapRepository {
             base = mapPath;
         }
 
-        if (redirectActionHook != null) {
-            redirectActionHook.invoker().visit(path, currentInfo);
-        }
-
-        var info = getMapInfo(base, target, maxLinkDepth - 1);
+        var info = getMapInfo(base, AssetPath.of(target), maxLinkDepth - 1);
         info.value().merge(props);
 
         return new Result<>(info.value(), res.cached() && info.cached());
     }
 
     @Override
-    public InputStream open(String path, AssetRequestOptions options) throws IOException {
-        AssetPath assetPath = AssetPath.of(path);
-
-        return assetRepository.getStream(assetPath, options).resource();
+    public InputStream open(AssetPath path, AssetRequestOptions options) throws IOException {
+        return assetRepository.getStream(path, options).resource();
     }
 
     @Override
-    public Iterable<URI> getUris(String path, AssetRequestOptions options) {
-        AssetPath assetPath = AssetPath.of(path);
-
+    public Iterable<URI> getUris(AssetPath path, AssetRequestOptions options) {
         return Iterables.transform(
-                assetRepository.getUris(assetPath, options),
+                assetRepository.getUris(path, options),
                 res -> res != null ? res.resource() : null
         );
-    }
-
-    @Override
-    public void addRedirectAction(MapRedirectAction action) {
-        hook().register(action);
-    }
-
-    private Hook<MapRedirectAction> hook() {
-        if (redirectActionHook != null) {
-            return redirectActionHook;
-        }
-
-        synchronized (this) {
-            if (redirectActionHook == null) {
-                redirectActionHook = HookFactory.createArrayBacked(MapRedirectAction.class, actions -> (path, info) -> {
-                    for (MapRedirectAction action : actions) {
-                        action.visit(path, info);
-                    }
-                });
-            }
-        }
-
-        return redirectActionHook;
     }
 
     private record Result<T>(T value, boolean cached) {}

@@ -2,9 +2,6 @@ package work.lclpnet.lobby.game.asset;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +37,7 @@ public class AssetPath implements Comparable<AssetPath> {
 
     public AssetPath resolve(AssetPath relative) {
         if (relative.segments.length == 0) return this;
-        return ofChecked(concatenated(segments, relative.segments));
+        return of(concatenated(segments, relative.segments));
     }
 
     public AssetPath parent() {

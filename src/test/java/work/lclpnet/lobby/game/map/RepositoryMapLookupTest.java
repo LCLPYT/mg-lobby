@@ -7,6 +7,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import work.lclpnet.lobby.game.asset.AssetPath;
 import work.lclpnet.lobby.game.asset.AssetRequestOptions;
 
 import java.io.IOException;
@@ -83,12 +84,12 @@ public class RepositoryMapLookupTest {
                 )));
 
         when(repo.getUris(any(), any())).then(invocation -> {
-            String path = invocation.getArgument(0);
+            AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
             assertTrue(options.disableCache(), "Expected to fetch with disableCache=true");
 
-            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path));
+            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });
 
         var source = lookup.getSource(map).iterator().next();
@@ -110,12 +111,12 @@ public class RepositoryMapLookupTest {
                 )));
 
         when(repo.getUris(any(), any())).then(invocation -> {
-            String path = invocation.getArgument(0);
+            AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
             assertTrue(options.disableCache(), "Expected to fetch with disableCache=true");
 
-            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path));
+            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });
 
         var source = lookup.getSource(map).iterator().next();
@@ -137,12 +138,12 @@ public class RepositoryMapLookupTest {
                 )));
 
         when(repo.getUris(any(), any())).then(invocation -> {
-            String path = invocation.getArgument(0);
+            AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
             assertFalse(options.disableCache(), "Expected to fetch with disableCache=false");
 
-            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path));
+            return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });
 
         var source = lookup.getSource(map).iterator().next();
@@ -154,15 +155,15 @@ public class RepositoryMapLookupTest {
     private static MapRepository getMapRepository() {
         return new MapRepository() {
             @Override
-            public Collection<MapRef> getMapList(String path) throws IOException {
-                if ("test".equals(path)) {
+            public Collection<MapRef> getMapList(AssetPath path) throws IOException {
+                if ("test".equals(path.toString())) {
                     return Set.of(
                             new MapRef(Map.of("path", "map_one")),
                             new MapRef(Map.of("path", "nested/map_two", "author", "LCLP"))
                     );
                 }
 
-                if ("test/nested".equals(path)) {
+                if ("test/nested".equals(path.toString())) {
                     return Set.of(
                             new MapRef(Map.of("path", "map_two", "author", "LCLP"))
                     );
@@ -172,8 +173,8 @@ public class RepositoryMapLookupTest {
             }
 
             @Override
-            public MapInfo getMapInfo(String path) throws IOException {
-                if ("test/hello".equals(path)) {
+            public MapInfo getMapInfo(AssetPath path) throws IOException {
+                if ("test/hello".equals(path.toString())) {
                     return new MapInfo("test/hello", Map.of("source", "here"));
                 }
 
@@ -181,13 +182,13 @@ public class RepositoryMapLookupTest {
             }
 
             @Override
-            public InputStream open(String path, AssetRequestOptions options) {
+            public InputStream open(AssetPath path, AssetRequestOptions options) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public Iterable<URI> getUris(String path, AssetRequestOptions options) {
-                return () -> Iterators.singletonIterator(URI.create(path));
+            public Iterable<URI> getUris(AssetPath path, AssetRequestOptions options) {
+                return () -> Iterators.singletonIterator(URI.create(path.toString()));
             }
         };
     }

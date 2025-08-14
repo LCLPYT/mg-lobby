@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.lobby.game.asset.AssetPath;
 import work.lclpnet.lobby.game.asset.UriAssetRepository;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ class AssetMapRepositoryTest {
 
     @Test
     void testSimplePath() throws IOException {
-        var maps = repo.getMapList("test");
+        var maps = repo.getMapList(AssetPath.of("test"));
 
         assertEquals(Set.of("map_one", "map_two", "map_three"), maps.stream()
                 .map(MapRef::getPath)
@@ -50,7 +51,7 @@ class AssetMapRepositoryTest {
 
     @Test
     void testNestedPath() throws IOException {
-        var maps = repo.getMapList("foo");
+        var maps = repo.getMapList(AssetPath.of("foo"));
 
         assertEquals(Set.of("bar/baz", "bar/hi"), maps.stream()
                 .map(MapRef::getPath)
@@ -59,7 +60,7 @@ class AssetMapRepositoryTest {
 
     @Test
     void testAbsolutePath() throws IOException {
-        var maps = repo.getMapList("my_collection");
+        var maps = repo.getMapList(AssetPath.of("my_collection"));
 
         assertEquals(Set.of("/test/map_two"), maps.stream()
                 .map(MapRef::getPath)
@@ -68,7 +69,7 @@ class AssetMapRepositoryTest {
 
     @Test
     void testInfoSimple() throws IOException {
-        var info = repo.getMapInfo("test/map_three");
+        var info = repo.getMapInfo(AssetPath.of("test/map_three"));
 
         assertEquals("test/map_three", info.target());
         assertEquals("world.tar.xz", info.properties().get("source"));
@@ -77,21 +78,21 @@ class AssetMapRepositoryTest {
 
     @Test
     void testInfoPropertiesMerged() throws IOException {
-        var info = repo.getMapInfo("test/map_one");
+        var info = repo.getMapInfo(AssetPath.of("test/map_one"));
 
         assertEquals(true, info.properties().get("extraProp"));
     }
 
     @Test
     void testInfoLink() throws IOException {
-        var info = repo.getMapInfo("linked/test");
+        var info = repo.getMapInfo(AssetPath.of("linked/test"));
 
         assertEquals("test/map_three", info.target());
     }
 
     @Test
     void testInfoLinkDataInherited() throws IOException {
-        var info = repo.getMapInfo("linked/with_data");
+        var info = repo.getMapInfo(AssetPath.of("linked/with_data"));
 
         assertEquals(10, info.properties().get("inheritedProp"));
         assertEquals(true, info.properties().get("extraProp"));
@@ -99,7 +100,7 @@ class AssetMapRepositoryTest {
 
     @Test
     void testInfoLinkRelative() throws IOException {
-        var info = repo.getMapInfo("linked/relative");
+        var info = repo.getMapInfo(AssetPath.of("linked/relative"));
 
         assertEquals("linked/relative/map", info.target());
         assertEquals("here", info.properties().get("source"));
@@ -107,7 +108,7 @@ class AssetMapRepositoryTest {
 
     @Test
     void testInfoLinkRelativeUp() throws IOException {
-        var info = repo.getMapInfo("linked/relative/up");
+        var info = repo.getMapInfo(AssetPath.of("linked/relative/up"));
 
         assertEquals("linked/relative/map", info.target());
         assertEquals("here", info.properties().get("source"));
@@ -116,54 +117,57 @@ class AssetMapRepositoryTest {
 
     @Test
     void testInfoLinkMaxDepthExceededThrows() {
-        assertThrows(IOException.class, () -> repo.getMapInfo("cycle/map_a"));
+        assertThrows(IOException.class, () -> repo.getMapInfo(AssetPath.of("cycle/map_a")));
     }
 
     @Test
     void testInfoLinkTargetPropertyRemoved() throws IOException {
-        var info = repo.getMapInfo("linked/test");
+        var info = repo.getMapInfo(AssetPath.of("linked/test"));
 
         assertNull(info.properties().opt("target"));
     }
 
     @Test
     void testInfoLinkOutsideOfRepoThrows() {
-        assertThrows(IOException.class, () -> repo.getMapInfo("broken/escape"));
+        assertThrows(IOException.class, () -> repo.getMapInfo(AssetPath.of("broken/escape")));
     }
 
     @Test
     void testGetMapsPathOutsideOfRepoThrows() {
-        assertThrows(IOException.class, () -> repo.getMapList("../escaped"));
+        assertThrows(IOException.class, () -> repo.getMapList(AssetPath.of("../escaped")));
     }
 
     @Test
     void testOpenBasic() throws IOException {
-        consume(repo.open("test/map_two/world.zip"));
+        consume(repo.open(AssetPath.of("test/map_two/world.zip")));
     }
 
     @Test
     void testOpenRelative() throws IOException {
-        consume(repo.open("test/map_two/../map_three/world.tar.xz"));
+        consume(repo.open(AssetPath.of("test/map_two/../map_three/world.tar.xz")));
     }
 
     @Test
     void testOpenAbsolute() throws IOException {
-        consume(repo.open("/test/map_three/world.tar.xz"));
+        consume(repo.open(AssetPath.of("/test/map_three/world.tar.xz")));
     }
 
     @Test
     void testOpenPathOutsideThrows() {
-        assertThrows(IOException.class, () -> consume(repo.open("../test/map_two/world.tar")), "Path outside of repository");
+        assertThrows(IOException.class, () -> consume(repo.open(AssetPath.of("../test/map_two/world.tar"))),
+                "Path outside of repository");
     }
 
     @Test
     void testOpenResourceOutsideThrows() {
-        assertThrows(IOException.class, () -> consume(repo.open("test/map_two/../../../world.tar")), "Path outside of repository");
+        assertThrows(IOException.class, () -> consume(repo.open(AssetPath.of("test/map_two/../../../world.tar"))),
+                "Path outside of repository");
     }
 
     @Test
     void testOpenAbsoluteResourceOutsideEmpty() {
-        assertThrows(IOException.class, () -> consume(repo.open("test/map_two/../../../world.tar")), "Path outside of repository");
+        assertThrows(IOException.class, () -> consume(repo.open(AssetPath.of("test/map_two/../../../world.tar"))),
+                "Path outside of repository");
     }
 
     private void consume(InputStream in) throws IOException {

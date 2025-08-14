@@ -18,7 +18,7 @@ public class RepositoryMapLookup implements MapLookup {
 
     @Override
     public Collection<GameMap> getMaps(MapDescriptor descriptor) throws IOException {
-        var refs = mapRepository.getMapList(descriptor.getMapPath());
+        var refs = mapRepository.getMapList(AssetPath.of(descriptor.getMapPath()));
 
         return refs.stream()
                 .map(ref -> GameMap.parse(ref.getProperties(), descriptor))
@@ -27,7 +27,7 @@ public class RepositoryMapLookup implements MapLookup {
 
     @Override
     public Iterable<URI> getSource(GameMap map) throws IOException {
-        MapInfo info = mapRepository.getMapInfo(map.getDescriptor().getMapPath());
+        MapInfo info = mapRepository.getMapInfo(AssetPath.of(map.getDescriptor().getMapPath()));
 
         map.putProperties(info.properties());
 
@@ -43,6 +43,6 @@ public class RepositoryMapLookup implements MapLookup {
 
         AssetPath path = AssetPath.of(info.target(), source);
 
-        return mapRepository.getUris(path.toString(), opts);
+        return mapRepository.getUris(AssetPath.of(path.toString()), opts);
     }
 }
