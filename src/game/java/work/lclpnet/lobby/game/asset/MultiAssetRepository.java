@@ -54,6 +54,6 @@ public class MultiAssetRepository implements AssetRepository {
             }
         }
 
-        throw new IOException("Asset not found");
+        throw new IOException("Asset not found: " + path);
     }
 }
