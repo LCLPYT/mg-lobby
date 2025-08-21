@@ -108,7 +108,7 @@ public class CacheAssetRepository implements AssetRepository {
             try {
                 return cache.cache(path, res.resource(), ttlSeconds).orElse(null);
             } catch (IOException e) {
-                logger.error("Failed to cache asset '{}', using uncached...", path, e);
+                logger.debug("Failed to cache asset '{}', skipping...", path, e);
             }
         }
 
