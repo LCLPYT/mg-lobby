@@ -56,7 +56,7 @@ class MultiAssetRepositoryTest {
         MultiAssetRepository multi = new MultiAssetRepository(new AssetRepository[]{repo1, repo2}, logger);
 
         IOException ex = assertThrows(IOException.class, () -> multi.getStream(path));
-        assertEquals("Asset not found", ex.getMessage());
+        assertEquals("Asset not found: missing", ex.getMessage());
 
         verify(logger, atLeast(2)).debug(anyString(), any(), any());
     }
