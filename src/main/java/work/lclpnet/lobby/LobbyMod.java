@@ -64,11 +64,19 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         component.dataPackService().downloadRequired();
 
         ServerWorldReadyCallback.HOOK.register(server -> {
+            logger.info("Lobby world is ready");
+
             serverFuture.complete(server);
 
             manager.onWorldReady();
 
-            loadingTranslations.whenLoaded().thenRun(this::enterLobbyPhase);
+            loadingTranslations.whenLoaded().whenComplete((nil, err) -> {
+                if (err != null) {
+                    logger.error("Failed to load mg-lobby translations", err);
+                }
+
+                enterLobbyPhase();
+            });
         });
 
         ServerWorldUnreadyCallback.HOOK.register(server -> ActivityManager.getInstance().stop());
@@ -83,6 +91,8 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
 
     @Override
     public void enterLobbyPhase() {
+        logger.info("Entering lobby...");
+
         ActivityManager.getInstance().startActivity(component.lobbyActivity());
     }
 
