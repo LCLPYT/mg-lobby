@@ -14,6 +14,7 @@ import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.translate.bossbar.BossBarProvider;
 import work.lclpnet.kibu.translate.bossbar.CustomBossBar;
+import work.lclpnet.kibu.translate.util.TransientBossBars;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -78,7 +79,11 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
     @Override
     public CommandBossBar createBossBar(Identifier id, Text text) {
         CommandBossBar bar = bossBarManager.add(id, text);
+
+        TransientBossBars.setTransient(bar, true);
+
         bars.add(bar);
+
         return bar;
     }
 
