@@ -1,7 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
-import work.lclpnet.lobby.game.asset.AssetPath;
-import work.lclpnet.lobby.game.asset.AssetRequestOptions;
+import work.lclpnet.gaco.asset.AssetPath;
+import work.lclpnet.gaco.asset.AssetRequestOptions;
 
 import java.io.IOException;
 import java.net.URI;

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import work.lclpnet.lobby.game.asset.AssetPath;
-import work.lclpnet.lobby.game.asset.UriAssetRepository;
+import work.lclpnet.gaco.asset.AssetPath;
+import work.lclpnet.gaco.asset.UriAssetRepository;
 
 import java.io.IOException;
 import java.io.InputStream;
