@@ -4,10 +4,10 @@ import com.google.common.collect.Iterables;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import work.lclpnet.lobby.game.asset.AssetPath;
-import work.lclpnet.lobby.game.asset.AssetRepository;
-import work.lclpnet.lobby.game.asset.AssetRequestOptions;
-import work.lclpnet.lobby.game.asset.AssetStreamResource;
+import work.lclpnet.gaco.asset.AssetPath;
+import work.lclpnet.gaco.asset.AssetRepository;
+import work.lclpnet.gaco.asset.AssetRequestOptions;
+import work.lclpnet.gaco.asset.AssetStreamResource;
 
 import java.io.IOException;
 import java.io.InputStream;

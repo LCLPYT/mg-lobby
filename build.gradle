@@ -82,6 +82,7 @@ dependencies {
     modImplementation "work.lclpnet.mods.kibu:kibu-world-api:${project.kibu_world_api_version}"
     modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
     modImplementation "maven.modrinth:sqlite-jdbc:3.41.2.1+20230506"
+    modImplementation("work.lclpnet.mods.gaco:gaco:${project.gaco_version}")
 
     modCompileOnly(modLocalRuntime("work.lclpnet.mods:pal:${project.pal_version}"))
 

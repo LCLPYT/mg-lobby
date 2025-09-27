@@ -7,8 +7,8 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import work.lclpnet.lobby.game.asset.AssetPath;
-import work.lclpnet.lobby.game.asset.AssetRequestOptions;
+import work.lclpnet.gaco.asset.AssetPath;
+import work.lclpnet.gaco.asset.AssetRequestOptions;
 
 import java.io.IOException;
 import java.io.InputStream;
