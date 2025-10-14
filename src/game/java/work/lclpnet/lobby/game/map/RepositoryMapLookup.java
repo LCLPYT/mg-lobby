@@ -45,4 +45,8 @@ public class RepositoryMapLookup implements MapLookup {
 
         return mapRepository.getUris(AssetPath.of(path.toString()), opts);
     }
+
+    public MapRepository getMapRepository() {
+        return mapRepository;
+    }
 }

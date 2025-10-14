@@ -29,6 +29,14 @@ public class MapManager {
         return collection;
     }
 
+    public MapLookup getLookup() {
+        return lookup;
+    }
+
+    public MapFetcher getFetcher() {
+        return fetcher;
+    }
+
     /**
      * Pulls the world save of a {@link GameMap} into a directory.
      * @param map The map
