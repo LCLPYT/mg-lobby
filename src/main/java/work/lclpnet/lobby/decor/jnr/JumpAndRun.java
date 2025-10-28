@@ -108,7 +108,7 @@ public class JumpAndRun {
     }
 
     public void update(ServerPlayerEntity player, Position position) {
-        if (player.getWorld() != world || !isNext(position)) return;
+        if (player.getEntityWorld() != world || !isNext(position)) return;
 
         next(player);
     }
@@ -184,7 +184,7 @@ public class JumpAndRun {
         shulkerEntity.setNoGravity(true);
         shulkerEntity.setInvulnerable(true);
         shulkerEntity.setInvisible(true);
-        shulkerEntity.getWorld().getScoreboard().addScoreHolderToTeam(shulkerEntity.getNameForScoreboard(), team);
+        shulkerEntity.getEntityWorld().getScoreboard().addScoreHolderToTeam(shulkerEntity.getNameForScoreboard(), team);
 
         ((ShulkerEntityAccessor) shulkerEntity).invokeSetColor(dyeColor(block));
 

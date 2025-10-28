@@ -67,7 +67,7 @@ public class LobbyManagerImpl implements LobbyManager {
 
     @Override
     public Vec3d getLobbySpawn() {
-        BlockPos spawnPos = getLobbyWorld().getSpawnPos();
+        BlockPos spawnPos = getLobbyWorld().getSpawnPoint().getPos();
 
         return new Vec3d(
                 spawnPos.getX() + 0.5,

@@ -51,7 +51,7 @@ public class TicTacToeDisplay {
                 pos.getZ() + pixel + (pixel + d) * (y + 1)
         );
 
-        display.getWorld().playSound(null, display.getX(), display.getY(), display.getZ(),
+        display.getEntityWorld().playSound(null, display.getX(), display.getY(), display.getZ(),
                 SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 0.15f, 1f);
 
         addEntity(table, display);

@@ -156,7 +156,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
         PlayerInventory inventory = player.getInventory();
         PlayerState state = getState(player);
 
-        if (GameConstants.DEVELOPMENT && context.getServer().getPermissionLevel(player.getGameProfile()) >= 2) {
+        if (GameConstants.DEVELOPMENT && context.getServer().getPermissionLevel(player.getPlayerConfigEntry()) >= 2) {
             Interactable startAction = p -> startGame();
 
             int slot = state.getFirstFreeSlot();

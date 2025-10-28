@@ -50,7 +50,7 @@ public class KingOfLadder {
     }
 
     public void update(ServerPlayerEntity player, Position position) {
-        if (player.getWorld() != world) return;
+        if (player.getEntityWorld() != world) return;
 
         if (isGoal(position)) {
             contesting.add(player.getUuid());

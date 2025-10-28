@@ -157,7 +157,7 @@ public class Geyser {
         final double rangeSquared = Math.pow(PARTICLE_RANGE, 2);
 
         for (ServerPlayerEntity player : world.getPlayers()) {
-            if (player.getPos().squaredDistanceTo(x, y, z) > rangeSquared) continue;
+            if (player.getEntityPos().squaredDistanceTo(x, y, z) > rangeSquared) continue;
 
             player.networkHandler.sendPacket(packet);
         }

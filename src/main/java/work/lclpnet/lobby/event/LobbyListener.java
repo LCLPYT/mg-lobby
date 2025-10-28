@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.DragonBreathParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -78,7 +79,7 @@ public class LobbyListener implements HookListenerModule {
     }
 
     private boolean onMove(ServerPlayerEntity player, PositionRotation from, PositionRotation to) {
-        ServerWorld world = player.getWorld();
+        ServerWorld world = player.getEntityWorld();
 
         if (isLobby(world)) {
             onLobbyMove(player, to, world);
@@ -131,7 +132,7 @@ public class LobbyListener implements HookListenerModule {
             player.setFireTicks(0);
 
             if (!player.hasStatusEffect(StatusEffects.LEVITATION)) {
-                world.spawnParticles(ParticleTypes.DRAGON_BREATH, x, y, z, 50, 0.1, 0.1, 0.1, 0.05);
+                world.spawnParticles(DragonBreathParticleEffect.of(ParticleTypes.DRAGON_BREATH, 1), x, y, z, 50, 0.1, 0.1, 0.1, 0.05);
                 action.cancel();
                 return;
             }

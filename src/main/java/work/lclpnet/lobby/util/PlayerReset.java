@@ -5,7 +5,6 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
@@ -51,11 +50,7 @@ public class PlayerReset {
     }
 
     public static void resetSpawnPoint(ServerPlayerEntity player) {
-        MinecraftServer server = player.getServer();
-
-        if (server != null) {
-            player.setSpawnPoint(null, false);
-        }
+        player.setSpawnPoint(null, false);
     }
 
     public static void resetAttributes(ServerPlayerEntity player) {

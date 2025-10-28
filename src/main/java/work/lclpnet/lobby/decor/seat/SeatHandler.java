@@ -67,7 +67,7 @@ public class SeatHandler {
         Vec3d prev = positions.remove(uuid);
         if (prev == null) return;
 
-        player.teleport(player.getWorld(), prev.getX(), prev.getY(), prev.getZ(), Set.of(), player.getYaw(), player.getPitch(), true);
+        player.teleport(player.getEntityWorld(), prev.getX(), prev.getY(), prev.getZ(), Set.of(), player.getYaw(), player.getPitch(), true);
     }
 
     protected boolean sit(ServerPlayerEntity player, World world, BlockPos pos) {
@@ -80,13 +80,13 @@ public class SeatHandler {
         worldModifier.spawnEntity(seatEntity);
 
         UUID uuid = player.getUuid();
-        positions.putIfAbsent(uuid, player.getPos());
+        positions.putIfAbsent(uuid, player.getEntityPos());
 
         if (player.getVehicle() != null) {
             changedSeat.add(uuid);
         }
 
-        player.startRiding(seatEntity, true);
+        player.startRiding(seatEntity, true, false);
 
         PlayerSeatCallback.AFTER_SIT.invoker().onSeated(player, pos);
 
