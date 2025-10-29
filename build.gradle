@@ -225,7 +225,7 @@ artifactExtraSourceSets.each { name ->
 // include license file in jar tasks
 licenseJarTasks.each {
     it.from('LICENSE') {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${project.base.archivesName.get()}" }
     }
 }
 
