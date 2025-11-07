@@ -22,6 +22,8 @@ public class PathDataPackSink implements DataPackSink {
     public void offer(Path id, InputStream input) throws IOException {
         Path target = directory.resolve(id.getFileName());
 
+        Files.createDirectories(target.getParent());
+
         Files.copy(input, target);
 
         ids.add(target);
