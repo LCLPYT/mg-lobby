@@ -5,6 +5,8 @@ import net.minecraft.SharedConstants;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
@@ -35,6 +37,8 @@ class LobbyWorldDownloaderTest {
         }
     };
 
+    private static final Logger logger = LoggerFactory.getLogger(LobbyWorldDownloaderTest.class);
+
     @BeforeAll
     public static void setup() {
         SharedConstants.createGameVersion();
@@ -46,7 +50,7 @@ class LobbyWorldDownloaderTest {
         Path lobbyDir = Files.createTempDirectory("mgl_lwr").resolve("lobby");
         assertFalse(Files.exists(lobbyDir));
 
-        LobbyWorldDownloader reset = new LobbyWorldDownloader(lobbyDir, TEST_CONFIG_ACCESS);
+        LobbyWorldDownloader reset = new LobbyWorldDownloader(lobbyDir, TEST_CONFIG_ACCESS, logger);
         reset.renewWorld();
 
         assertTrue(Files.exists(lobbyDir));
@@ -65,7 +69,7 @@ class LobbyWorldDownloaderTest {
         assertTrue(Files.exists(lobbyDir));
 
         // reset the lobby
-        LobbyWorldDownloader reset = new LobbyWorldDownloader(lobbyDir, TEST_CONFIG_ACCESS);
+        LobbyWorldDownloader reset = new LobbyWorldDownloader(lobbyDir, TEST_CONFIG_ACCESS, logger);
         reset.renewWorld();
 
         assertTrue(Files.exists(lobbyDir));
