@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.io;
 
+import org.slf4j.Logger;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.jnbt.NBTConstants;
 import work.lclpnet.kibu.jnbt.Tag;
@@ -18,15 +19,17 @@ public class LobbyWorldDownloader {
 
     private final Path lobbyDir;
     private final ConfigAccess configAccess;
+    private final Logger logger;
 
     @Inject
-    public LobbyWorldDownloader(ConfigAccess configAccess) {
-        this(Path.of(configAccess.getConfig().getSafeLobbyLevelName()), configAccess);
+    public LobbyWorldDownloader(ConfigAccess configAccess, Logger logger) {
+        this(Path.of(configAccess.getConfig().getSafeLobbyLevelName()), configAccess, logger);
     }
 
-    public LobbyWorldDownloader(Path lobbyDir, ConfigAccess configAccess) {
+    public LobbyWorldDownloader(Path lobbyDir, ConfigAccess configAccess, Logger logger) {
         this.lobbyDir = lobbyDir;
         this.configAccess = configAccess;
+        this.logger = logger;
     }
 
     public void renewWorld() {
@@ -42,7 +45,7 @@ public class LobbyWorldDownloader {
         try {
             copier.copyTo(lobbyDir);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to copy lobby", e);
+            logger.error("Failed to copy lobby", e);
         }
 
         try {
