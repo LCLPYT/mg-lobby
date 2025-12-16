@@ -3,7 +3,10 @@ package work.lclpnet.lobby.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -17,6 +20,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -105,7 +109,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
 
             voting.open(player);
 
-            player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.NEUTRAL, 0.5f, 0.5f);
+            ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.NEUTRAL, 0.5f, 0.5f);
         }
     }
 
@@ -156,7 +160,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
         Inventory inventory = player.getInventory();
         PlayerState state = getState(player);
 
-        if (GameConstants.DEVELOPMENT && context.getServer().getProfilePermissions(player.nameAndId()) >= 2) {
+        if (GameConstants.DEVELOPMENT && Commands.LEVEL_GAMEMASTERS.check(context.getServer().getProfilePermissions(player.nameAndId()))) {
             Interactable startAction = p -> startGame();
 
             int slot = state.getFirstFreeSlot();

@@ -39,7 +39,7 @@ public class SetGameCommand implements KibuCommand {
 
     private LiteralArgumentBuilder<CommandSourceStack> commands() {
         return Commands.literal("setgame")
-                .requires(s -> s.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("game", StringArgumentType.string())
                         .suggests(new GameSuggestionProvider(gameManager))
                         .executes(this::setGame));

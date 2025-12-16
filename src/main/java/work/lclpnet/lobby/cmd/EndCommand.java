@@ -25,7 +25,7 @@ public class EndCommand implements KibuCommand {
 
     private LiteralArgumentBuilder<CommandSourceStack> command() {
         return Commands.literal("end")
-                .requires(s -> s.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(this::end);
     }
 

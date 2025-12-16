@@ -23,6 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.Position;
 import net.minecraft.world.phys.Vec3;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.text.FormatWrapper;
@@ -155,7 +156,7 @@ public class JumpAndRun {
                 .sendTo(players);
 
         for (ServerPlayer p : players) {
-            p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.RECORDS, 100f, 1f);
+            ServerPlayerAccess.playSoundToPlayer(p, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.RECORDS, 100f, 1f);
         }
     }
 

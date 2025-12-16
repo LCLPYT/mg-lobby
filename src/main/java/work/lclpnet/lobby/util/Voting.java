@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.prompt.OptionPrompt;
 import work.lclpnet.kibu.translate.Translations;
@@ -111,7 +112,7 @@ public class Voting<T> {
             votes.put(player.getUUID(), option);
         }
 
-        player.playNotifySound(SoundEvents.ENDER_DRAGON_HURT, SoundSource.RECORDS, 0.4f, 1f);
+        ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.ENDER_DRAGON_HURT, SoundSource.RECORDS, 0.4f, 1f);
 
         Component name = data.optionName().apply(player, option);
 

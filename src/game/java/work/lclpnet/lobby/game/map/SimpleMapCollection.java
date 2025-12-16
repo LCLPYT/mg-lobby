@@ -1,16 +1,16 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 
 public class SimpleMapCollection implements MapCollection {
 
-    private final Map<ResourceLocation, GameMap> maps = new HashMap<>();
+    private final Map<Identifier, GameMap> maps = new HashMap<>();
 
     @Override
     public void add(GameMap map) {
-        ResourceLocation id = map.getDescriptor().getIdentifier();
+        Identifier id = map.getDescriptor().getIdentifier();
         maps.put(id, map);
     }
 
@@ -20,7 +20,7 @@ public class SimpleMapCollection implements MapCollection {
     }
 
     @Override
-    public Optional<GameMap> getMap(ResourceLocation id) {
+    public Optional<GameMap> getMap(Identifier id) {
         return Optional.ofNullable(maps.get(id));
     }
 }

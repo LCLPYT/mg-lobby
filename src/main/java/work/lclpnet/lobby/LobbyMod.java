@@ -2,7 +2,7 @@ package work.lclpnet.lobby;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -102,7 +102,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         return ret;
     }
 
-    public static ResourceLocation identifier(String path) {
-        return ResourceLocation.fromNamespaceAndPath(ID, path);
+    public static Identifier identifier(String path) {
+        return Identifier.fromNamespaceAndPath(ID, path);
     }
 }

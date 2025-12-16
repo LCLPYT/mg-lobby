@@ -6,7 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -62,7 +62,7 @@ public class WorldFacadeImpl implements WorldFacade {
         ServerLevel world = this.server.getLevel(mapKey);
 
         if (world == null) {
-            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.location()));
+            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.identifier()));
         }
 
         data.setWorld(world);
@@ -77,14 +77,14 @@ public class WorldFacadeImpl implements WorldFacade {
         ServerLevel world = this.server.getLevel(mapKey);
 
         if (world == null) {
-            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.location()));
+            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.identifier()));
         }
 
         player.teleportTo(world, spawn.x(), spawn.y(), spawn.z(), Set.of(), yaw, 0F, true);
     }
 
     @Override
-    public CompletableFuture<ServerLevel> changeMap(ResourceLocation identifier, MapOptions options) {
+    public CompletableFuture<ServerLevel> changeMap(Identifier identifier, MapOptions options) {
         var map = mapManager.getCollection().getMap(identifier);
 
         if (map.isEmpty()) {
@@ -110,7 +110,7 @@ public class WorldFacadeImpl implements WorldFacade {
     }
 
     private CompletableFuture<ServerLevel> changeToYetUnloadedMap(GameMap map, ResourceKey<Level> newKey, MapOptions options) {
-        LevelStorageSource.LevelStorageAccess session = ((MinecraftServerAccessor) server).getSession();
+        LevelStorageSource.LevelStorageAccess session = ((MinecraftServerAccessor) server).getStorageSource();
         Path directory = session.getDimensionPath(newKey);
 
         return CompletableFuture.runAsync(() -> {
@@ -124,7 +124,7 @@ public class WorldFacadeImpl implements WorldFacade {
                 throw new CompletionException(e);
             }
         }).thenComposeAsync(nil -> server.submit(() -> {
-            var optHandle = KibuWorlds.getInstance().getWorldManager(server).openPersistentWorld(newKey.location());
+            var optHandle = KibuWorlds.getInstance().getWorldManager(server).openPersistentWorld(newKey.identifier());
 
             RuntimeWorldHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
 

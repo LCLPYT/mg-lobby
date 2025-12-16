@@ -27,7 +27,7 @@ public class ResumeCommand implements KibuCommand {
 
     private LiteralArgumentBuilder<CommandSourceStack> command() {
         return Commands.literal("resume")
-                .requires(s -> s.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(this::resume);
     }
 

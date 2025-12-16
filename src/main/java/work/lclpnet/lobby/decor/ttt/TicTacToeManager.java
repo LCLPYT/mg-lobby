@@ -14,6 +14,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.Translations;
@@ -138,7 +139,7 @@ public class TicTacToeManager {
 
             Title.get(player).title(title, subtitle, 10, 20, 20);
 
-            player.playNotifySound(SoundEvents.CHICKEN_EGG, SoundSource.PLAYERS, 0.6f, 0f);
+            ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.CHICKEN_EGG, SoundSource.PLAYERS, 0.6f, 0f);
         }
 
         display.indicateTurn(table, 1 - causePlayerId);
@@ -156,21 +157,21 @@ public class TicTacToeManager {
         var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_won").formatted(ChatFormatting.GOLD);
 
         Title.get(player).title(Component.empty(), subtitle, 10, 70, 20);
-        player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1f);
+        ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1f);
     }
 
     private void loose(ServerPlayer player) {
         var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_lost").formatted(ChatFormatting.RED);
 
         Title.get(player).title(Component.empty(), subtitle, 10, 70, 20);
-        player.playNotifySound(SoundEvents.BLAZE_DEATH, SoundSource.PLAYERS, 0.6f, 1f);
+        ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.BLAZE_DEATH, SoundSource.PLAYERS, 0.6f, 1f);
     }
 
     private void draw(ServerPlayer player) {
         var subtitle = translations.translateText(player, "lobby.tic_tac_toe.draw").formatted(ChatFormatting.AQUA);
 
         Title.get(player).title(Component.empty(), subtitle, 10, 70, 20);
-        player.playNotifySound(SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.3f, 0.57f);
+        ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.3f, 0.57f);
     }
 
     public boolean isPlaying(ServerPlayer player) {

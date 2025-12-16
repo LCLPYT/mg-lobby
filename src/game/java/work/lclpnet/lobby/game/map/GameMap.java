@@ -3,7 +3,7 @@ package work.lclpnet.lobby.game.map;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -122,7 +122,7 @@ public class GameMap {
             String iconStr = properties.optString("icon", null);
 
             if (iconStr != null) {
-                ResourceLocation iconId = ResourceLocation.parse(iconStr);
+                Identifier iconId = Identifier.parse(iconStr);
                 icon = BuiltInRegistries.ITEM.getValue(iconId);
             }
 

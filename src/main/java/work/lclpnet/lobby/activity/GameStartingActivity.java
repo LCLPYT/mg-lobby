@@ -12,12 +12,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BossBarComponent;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
@@ -86,7 +87,7 @@ public class GameStartingActivity extends ComponentActivity {
 
         final BossBarComponent bossBars = component(BuiltinComponents.BOSS_BAR);
 
-        final ResourceLocation bossBarId = LobbyMod.identifier("starting");
+        final Identifier bossBarId = LobbyMod.identifier("starting");
         final var titleTranslation = titleTranslation();
 
         bossBar = translations.translateBossBar(bossBarId, titleTranslation.left(), titleTranslation.right())
@@ -178,7 +179,7 @@ public class GameStartingActivity extends ComponentActivity {
 
             if (remaining <= 5) {
                 for (ServerPlayer player : PlayerLookup.all(getServer())) {
-                    player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.BLOCKS, 2f, 1f);
+                    ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.BLOCKS, 2f, 1f);
                 }
             }
         }

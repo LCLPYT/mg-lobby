@@ -3,7 +3,7 @@ package work.lclpnet.lobby.game.map;
 import com.google.common.collect.Iterators;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class RepositoryMapLookupTest {
 
         assertEquals(List.of("test:map_one", "test:nested/map_two"), maps.stream()
                 .map(map -> map.getDescriptor().getIdentifier())
-                .map(ResourceLocation::toString)
+                .map(Identifier::toString)
                 .sorted()
                 .toList());
     }
@@ -54,7 +54,7 @@ public class RepositoryMapLookupTest {
 
         assertEquals(List.of("test:nested/map_two"), maps.stream()
                 .map(map -> map.getDescriptor().getIdentifier())
-                .map(ResourceLocation::toString)
+                .map(Identifier::toString)
                 .sorted()
                 .toList());
     }
@@ -87,7 +87,7 @@ public class RepositoryMapLookupTest {
             AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
-            assertTrue(options.disableCacheRead(), "Expected to fetch with disableCache=true");
+            assertTrue(options.preferUncached(), "Expected to fetch with disableCache=true");
 
             return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });
@@ -114,7 +114,7 @@ public class RepositoryMapLookupTest {
             AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
-            assertTrue(options.disableCacheRead(), "Expected to fetch with disableCache=true");
+            assertTrue(options.preferUncached(), "Expected to fetch with disableCache=true");
 
             return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });
@@ -141,7 +141,7 @@ public class RepositoryMapLookupTest {
             AssetPath path = invocation.getArgument(0);
             AssetRequestOptions options = invocation.getArgument(1);
 
-            assertFalse(options.disableCacheRead(), "Expected to fetch with disableCache=false");
+            assertFalse(options.preferUncached(), "Expected to fetch with disableCache=false");
 
             return (Iterable<URI>) () -> Iterators.singletonIterator(URI.create(path.toString()));
         });

@@ -3,12 +3,12 @@ package work.lclpnet.activity.util;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import work.lclpnet.kibu.translate.bossbar.CustomBossBar;
 
 public interface BossBarHandler {
 
-    CustomBossEvent createBossBar(ResourceLocation id, Component text);
+    CustomBossEvent createBossBar(Identifier id, Component text);
 
     void removeBossBar(CustomBossEvent bossBar);
 

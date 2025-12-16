@@ -4,7 +4,7 @@ import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.ComponentView;
 import work.lclpnet.activity.component.DependentComponent;
@@ -76,7 +76,7 @@ public class BossBarComponent implements work.lclpnet.activity.component.Compone
     }
 
     @Override
-    public CustomBossEvent createBossBar(ResourceLocation id, Component text) {
+    public CustomBossEvent createBossBar(Identifier id, Component text) {
         CustomBossEvent bar = bossBarManager.create(id, text);
 
         TransientBossBars.setTransient(bar, true);

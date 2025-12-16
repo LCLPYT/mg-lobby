@@ -12,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
 import net.minecraft.world.phys.Vec3;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
@@ -119,7 +120,7 @@ public class KingOfLadder {
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
-        player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.NEUTRAL, 2f, 0.0f);
+        ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.NEUTRAL, 2f, 0.0f);
     }
 
     private void notifyFormerKing(ServerPlayer player) {
@@ -128,7 +129,7 @@ public class KingOfLadder {
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
-        player.playNotifySound(SoundEvents.BLAZE_DEATH, SoundSource.NEUTRAL, 2f, 0.75f);
+        ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.BLAZE_DEATH, SoundSource.NEUTRAL, 2f, 0.75f);
     }
 
     private void updateDisplays() {

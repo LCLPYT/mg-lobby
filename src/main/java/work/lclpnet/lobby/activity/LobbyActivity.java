@@ -3,7 +3,7 @@ package work.lclpnet.lobby.activity;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -107,7 +107,7 @@ public class LobbyActivity extends ComponentActivity {
         hooks.registerHooks(component.lobbyListener());
 
         GameRules gameRules = lobbyManager.getLobbyWorld().getGameRules();
-        gameRules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, server);
+        gameRules.set(GameRules.SHOW_ADVANCEMENT_MESSAGES, false, server);
 
         // send every online player to the lobby
         for (ServerPlayer player : PlayerLookup.all(server)) {

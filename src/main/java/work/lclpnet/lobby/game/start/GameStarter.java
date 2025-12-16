@@ -6,9 +6,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
@@ -113,7 +114,7 @@ public class GameStarter implements GameStatusManager {
             Component text = cannotStartMessage.apply(player);
             player.sendSystemMessage(text);
 
-            player.playNotifySound(SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 0.4f, 1f);
+            ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 0.4f, 1f);
         }
     }
 
@@ -210,7 +211,7 @@ public class GameStarter implements GameStatusManager {
     @Override
     public void setCannotStartBossBarValue(Object value) {
         Translations translations = environment.getTranslations();
-        ResourceLocation barId = LobbyMod.identifier("waiting_condition");
+        Identifier barId = LobbyMod.identifier("waiting_condition");
 
         configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",
                         translations.translateText(environment.getGameConfig().titleKey())

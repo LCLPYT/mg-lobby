@@ -6,7 +6,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.kibu.scheduler.api.TaskHandle;
@@ -24,7 +25,7 @@ import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 public class BossBarTimer implements SchedulerAction {
 
     private final Translations translations;
-    private final ResourceLocation id;
+    private final Identifier id;
     private final Object subject;
     private final boolean cycleColor;
     private final boolean alertSound;
@@ -38,7 +39,7 @@ public class BossBarTimer implements SchedulerAction {
     private int colorIndex;
     private int timer;
 
-    private BossBarTimer(Translations translations, ResourceLocation id, Object subject, boolean cycleColor,
+    private BossBarTimer(Translations translations, Identifier id, Object subject, boolean cycleColor,
                          boolean alertSound, int durationTicks, BossEvent.BossBarColor color) {
         this.translations = translations;
         this.id = id;
@@ -170,7 +171,7 @@ public class BossBarTimer implements SchedulerAction {
         if (remaining > 5) return;
 
         for (ServerPlayer player : bossBar.getPlayers()) {
-            player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.BLOCKS, 2f, 1f);
+            ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.BLOCKS, 2f, 1f);
         }
     }
 
@@ -198,7 +199,7 @@ public class BossBarTimer implements SchedulerAction {
     public static class Builder {
         private final Translations translations;
         private final Object subject;
-        private ResourceLocation identifier;
+        private Identifier identifier;
         private boolean cycleColor = false, alertSound = false;
         private int durationTicks = 600;
         private BossEvent.BossBarColor color = BossEvent.BossBarColor.GREEN;
@@ -208,7 +209,7 @@ public class BossBarTimer implements SchedulerAction {
             this.subject = subject;
         }
 
-        public Builder withIdentifier(ResourceLocation identifier) {
+        public Builder withIdentifier(Identifier identifier) {
             this.identifier = identifier;
             return this;
         }
@@ -234,11 +235,11 @@ public class BossBarTimer implements SchedulerAction {
         }
 
         public BossBarTimer build() {
-            ResourceLocation id = identifier;
+            Identifier id = identifier;
 
             if (identifier == null) {
                 String alphabet = "abcdefghijklmnopqrstuvwxyz0123456789/._-";
-                id = ResourceLocation.fromNamespaceAndPath("mgl_bbt", StringUtil.getRandomString(alphabet, 16, new Random()));
+                id = Identifier.fromNamespaceAndPath("mgl_bbt", StringUtil.getRandomString(alphabet, 16, new Random()));
             }
 
             return new BossBarTimer(translations, id, subject, cycleColor, alertSound, durationTicks, color);
