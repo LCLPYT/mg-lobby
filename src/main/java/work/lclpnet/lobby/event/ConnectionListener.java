@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.event;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import work.lclpnet.kibu.hook.HookListenerModule;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -15,13 +15,13 @@ public class ConnectionListener implements HookListenerModule {
         registrar.registerHook(PlayerConnectionHooks.QUIT_MESSAGE, this::onQuitMessage);
     }
 
-    private Text onJoinMessage(ServerPlayerEntity player, Text joinMessage) {
-        return Text.literal("Join> ").formatted(Formatting.DARK_GRAY)
-                .append(Text.literal(player.getNameForScoreboard()).formatted(Formatting.GRAY));
+    private Component onJoinMessage(ServerPlayer player, Component joinMessage) {
+        return Component.literal("Join> ").withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(player.getScoreboardName()).withStyle(ChatFormatting.GRAY));
     }
 
-    private Text onQuitMessage(ServerPlayerEntity player, Text joinMessage) {
-        return Text.literal("Quit> ").formatted(Formatting.DARK_GRAY)
-                .append(Text.literal(player.getNameForScoreboard()).formatted(Formatting.GRAY));
+    private Component onQuitMessage(ServerPlayer player, Component joinMessage) {
+        return Component.literal("Quit> ").withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(player.getScoreboardName()).withStyle(ChatFormatting.GRAY));
     }
 }

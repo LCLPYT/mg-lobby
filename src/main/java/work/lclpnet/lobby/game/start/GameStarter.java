@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.game.start;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
 import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
 import work.lclpnet.kibu.hook.HookStack;
@@ -40,7 +40,7 @@ public class GameStarter implements GameStatusManager {
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
     private final int conditionCheckInterval = Ticks.seconds(20);
     private boolean paused = false;
-    private Function<ServerPlayerEntity, Text> cannotStartMessage = null;
+    private Function<ServerPlayer, Component> cannotStartMessage = null;
     private TranslatedBossBar bossBar = null;
 
     public GameStarter(BooleanSupplier condition, Args args, Consumer<GameOptions> onStart, GameEnvironment environment) {
@@ -109,11 +109,11 @@ public class GameStarter implements GameStatusManager {
 
         if (cannotStartMessage == null || gameStarting.get() || gameStarted.get()) return;
 
-        for (ServerPlayerEntity player : PlayerLookup.all(environment.getServer())) {
-            Text text = cannotStartMessage.apply(player);
-            player.sendMessage(text);
+        for (ServerPlayer player : PlayerLookup.all(environment.getServer())) {
+            Component text = cannotStartMessage.apply(player);
+            player.sendSystemMessage(text);
 
-            player.playSoundToPlayer(SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.NEUTRAL, 0.4f, 1f);
+            player.playNotifySound(SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 0.4f, 1f);
         }
     }
 
@@ -174,7 +174,7 @@ public class GameStarter implements GameStatusManager {
         updateGameStatus();
     }
 
-    private void onQuit(ServerPlayerEntity player) {
+    private void onQuit(ServerPlayer player) {
         updateGameStatus();
     }
 
@@ -203,21 +203,21 @@ public class GameStarter implements GameStatusManager {
     }
 
     @Override
-    public void setCannotStartMessage(Function<ServerPlayerEntity, Text> messageFunction) {
+    public void setCannotStartMessage(Function<ServerPlayer, Component> messageFunction) {
         this.cannotStartMessage = messageFunction;
     }
 
     @Override
     public void setCannotStartBossBarValue(Object value) {
         Translations translations = environment.getTranslations();
-        Identifier barId = LobbyMod.identifier("waiting_condition");
+        ResourceLocation barId = LobbyMod.identifier("waiting_condition");
 
         configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",
                         translations.translateText(environment.getGameConfig().titleKey())
-                                .formatted(Formatting.AQUA, Formatting.BOLD)
+                                .formatted(ChatFormatting.AQUA, ChatFormatting.BOLD)
                                 .styled(style -> style.withItalic(false)),
                         value),
-                bar -> bar.formatted(Formatting.YELLOW, Formatting.ITALIC));
+                bar -> bar.formatted(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
     }
 
     public interface Args {

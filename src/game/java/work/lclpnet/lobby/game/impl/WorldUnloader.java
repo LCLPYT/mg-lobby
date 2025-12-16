@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.game.impl;
 
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.ServerTickHooks;
 
@@ -32,7 +32,7 @@ public class WorldUnloader {
     }
 
     private boolean taskIsDone(Task task) {
-        if (server.getWorld(task.world()) != null) {
+        if (server.getLevel(task.world()) != null) {
             return false;
         }
 
@@ -40,11 +40,11 @@ public class WorldUnloader {
         return true;
     }
 
-    public CompletableFuture<Void> unloadMap(RegistryKey<World> key) {
+    public CompletableFuture<Void> unloadMap(ResourceKey<Level> key) {
         var handle = worldContainer.getHandle(key);
 
         if (handle.isEmpty()) {
-            var error = new IllegalStateException("World %s is not managed by this container".formatted(key.getValue()));
+            var error = new IllegalStateException("World %s is not managed by this container".formatted(key.location()));
             return CompletableFuture.failedFuture(error);
         }
 
@@ -59,5 +59,5 @@ public class WorldUnloader {
         return future;
     }
 
-    private record Task(RegistryKey<World> world, CompletableFuture<Void> future) {}
+    private record Task(ResourceKey<Level> world, CompletableFuture<Void> future) {}
 }

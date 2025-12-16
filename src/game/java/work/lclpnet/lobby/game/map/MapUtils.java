@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.game.map;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,7 +17,7 @@ public class MapUtils {
     private MapUtils() {}
 
     @NotNull
-    public static Vec3d getSpawnPosition(GameMap gameMap) {
+    public static Vec3 getSpawnPosition(GameMap gameMap) {
         if (gameMap.getProperty("spawn") instanceof JSONArray array) {
             return getSpawnVec3d(array);
         }
@@ -32,12 +32,12 @@ public class MapUtils {
     }
 
     @NotNull
-    public static List<Vec3d> getSpawnPositions(GameMap gameMap) {
+    public static List<Vec3> getSpawnPositions(GameMap gameMap) {
         if (!(gameMap.getProperty("spawns") instanceof JSONArray array)) {
             throw missingProperty("spawns");
         }
 
-        List<Vec3d> spawns = new ArrayList<>();
+        List<Vec3> spawns = new ArrayList<>();
 
         for (Object element : array) {
             if (element instanceof JSONArray elemArray) {
@@ -68,12 +68,12 @@ public class MapUtils {
     }
 
     @NotNull
-    public static Map<String, Vec3d> getNamedSpawnPositions(GameMap gameMap) {
+    public static Map<String, Vec3> getNamedSpawnPositions(GameMap gameMap) {
         if (!(gameMap.getProperty("spawns") instanceof JSONObject object)) {
             throw missingProperty("spawns");
         }
 
-        Map<String, Vec3d> spawns = new Object2ObjectOpenHashMap<>();
+        Map<String, Vec3> spawns = new Object2ObjectOpenHashMap<>();
 
         for (String key : object.keySet()) {
             Object value = object.get(key);
@@ -119,7 +119,7 @@ public class MapUtils {
         if (!(value instanceof JSONObject elemObj) || !elemObj.has("spawn")) return null;
 
         JSONArray array = elemObj.getJSONArray("spawn");
-        Vec3d spawn = getSpawnVec3d(array);
+        Vec3 spawn = getSpawnVec3d(array);
 
         float yaw = 0, pitch = 0;
 
@@ -135,12 +135,12 @@ public class MapUtils {
     }
 
     @NotNull
-    private static Vec3d getSpawnVec3d(JSONArray json) {
+    private static Vec3 getSpawnVec3d(JSONArray json) {
         if (json.length() < 3) {
             throw new IllegalArgumentException("JSONArray must have at least 3 elements");
         }
 
-        return new Vec3d(
+        return new Vec3(
                 getSpawnDouble(json, 0),
                 json.getDouble(1),  // do not center y
                 getSpawnDouble(json, 2)
@@ -160,7 +160,7 @@ public class MapUtils {
     }
 
     private static float getAngle(Number number) {
-        return MathHelper.wrapDegrees(number.floatValue());
+        return Mth.wrapDegrees(number.floatValue());
     }
 
     private static IllegalStateException missingProperty(String property) {

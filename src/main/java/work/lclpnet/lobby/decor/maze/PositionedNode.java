@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.decor.maze;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import work.lclpnet.maze.graph.BasicNode;
 
 public class PositionedNode extends BasicNode {

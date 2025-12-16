@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.game.util;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.entity.boss.BossBar;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.BossEvent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
 import work.lclpnet.kibu.scheduler.api.TaskHandle;
@@ -24,13 +24,13 @@ import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 public class BossBarTimer implements SchedulerAction {
 
     private final Translations translations;
-    private final Identifier id;
+    private final ResourceLocation id;
     private final Object subject;
     private final boolean cycleColor;
     private final boolean alertSound;
     private final int durationTicks;
     private final List<Runnable> whenDone = new ArrayList<>();
-    private volatile List<ServerPlayerEntity> players = null;
+    private volatile List<ServerPlayer> players = null;
     private volatile TranslatedBossBar bossBar;
     private TaskHandle taskHandle;
     private boolean paused = false;
@@ -38,8 +38,8 @@ public class BossBarTimer implements SchedulerAction {
     private int colorIndex;
     private int timer;
 
-    private BossBarTimer(Translations translations, Identifier id, Object subject, boolean cycleColor,
-                         boolean alertSound, int durationTicks, BossBar.Color color) {
+    private BossBarTimer(Translations translations, ResourceLocation id, Object subject, boolean cycleColor,
+                         boolean alertSound, int durationTicks, BossEvent.BossBarColor color) {
         this.translations = translations;
         this.id = id;
         this.subject = subject;
@@ -83,10 +83,10 @@ public class BossBarTimer implements SchedulerAction {
             var translation = titleTranslation();
 
             bossBar = translations.translateBossBar(id, translation.left(), translation.right())
-                    .with(bossBarProvider).formatted(Formatting.YELLOW);
+                    .with(bossBarProvider).formatted(ChatFormatting.YELLOW);
 
-            bossBar.setColor(BossBar.Color.values()[colorIndex]);
-            bossBar.setPercent(1f);
+            bossBar.setColor(BossEvent.BossBarColor.values()[colorIndex]);
+            bossBar.setProgress(1f);
 
             if (this.players != null) {
                 bossBar.addPlayers(this.players);
@@ -103,7 +103,7 @@ public class BossBarTimer implements SchedulerAction {
     private Pair<String, Object[]> titleTranslation() {
         if (paused) {
             return Pair.of("lobby.countdown.title.paused", new Object[] {
-                    styled(subject, Formatting.AQUA, Formatting.BOLD)
+                    styled(subject, ChatFormatting.AQUA, ChatFormatting.BOLD)
             });
         }
 
@@ -113,28 +113,28 @@ public class BossBarTimer implements SchedulerAction {
 
         if (minutes > 0) {
             return Pair.of("lobby.countdown.title.minutes", new Object[] {
-                    styled(subject, Formatting.AQUA, Formatting.BOLD),
+                    styled(subject, ChatFormatting.AQUA, ChatFormatting.BOLD),
                     minutes,
                     seconds
             });
         }
 
         return Pair.of("lobby.countdown.title.seconds", new Object[] {
-                styled(subject, Formatting.AQUA, Formatting.BOLD),
+                styled(subject, ChatFormatting.AQUA, ChatFormatting.BOLD),
                 seconds
         });
     }
 
     private void updateBossBar() {
         if (cycleColor) {
-            colorIndex = (colorIndex + 1) % BossBar.Color.values().length;
+            colorIndex = (colorIndex + 1) % BossEvent.BossBarColor.values().length;
         }
 
         var titleTranslation = titleTranslation();
 
         bossBar.setTitle(titleTranslation.left(), titleTranslation.right());
-        bossBar.setColor(BossBar.Color.values()[colorIndex]);
-        bossBar.setPercent(timer / (float) (durationTicks));
+        bossBar.setColor(BossEvent.BossBarColor.values()[colorIndex]);
+        bossBar.setProgress(timer / (float) (durationTicks));
     }
 
     @Override
@@ -169,12 +169,12 @@ public class BossBarTimer implements SchedulerAction {
 
         if (remaining > 5) return;
 
-        for (ServerPlayerEntity player : bossBar.getPlayers()) {
-            player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.BLOCKS, 2f, 1f);
+        for (ServerPlayer player : bossBar.getPlayers()) {
+            player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.BLOCKS, 2f, 1f);
         }
     }
 
-    public void addPlayers(Iterable<? extends ServerPlayerEntity> players) {
+    public void addPlayers(Iterable<? extends ServerPlayer> players) {
         synchronized (this) {
             if (bossBar != null) {
                 bossBar.addPlayers(players);
@@ -185,7 +185,7 @@ public class BossBarTimer implements SchedulerAction {
                 this.players = new ArrayList<>();
             }
 
-            for (ServerPlayerEntity player : players) {
+            for (ServerPlayer player : players) {
                 this.players.add(player);
             }
         }
@@ -198,17 +198,17 @@ public class BossBarTimer implements SchedulerAction {
     public static class Builder {
         private final Translations translations;
         private final Object subject;
-        private Identifier identifier;
+        private ResourceLocation identifier;
         private boolean cycleColor = false, alertSound = false;
         private int durationTicks = 600;
-        private BossBar.Color color = BossBar.Color.GREEN;
+        private BossEvent.BossBarColor color = BossEvent.BossBarColor.GREEN;
 
         private Builder(Translations translations, Object subject) {
             this.translations = translations;
             this.subject = subject;
         }
 
-        public Builder withIdentifier(Identifier identifier) {
+        public Builder withIdentifier(ResourceLocation identifier) {
             this.identifier = identifier;
             return this;
         }
@@ -228,17 +228,17 @@ public class BossBarTimer implements SchedulerAction {
             return this;
         }
 
-        public Builder withColor(BossBar.Color color) {
+        public Builder withColor(BossEvent.BossBarColor color) {
             this.color = color;
             return this;
         }
 
         public BossBarTimer build() {
-            Identifier id = identifier;
+            ResourceLocation id = identifier;
 
             if (identifier == null) {
                 String alphabet = "abcdefghijklmnopqrstuvwxyz0123456789/._-";
-                id = Identifier.of("mgl_bbt", StringUtil.getRandomString(alphabet, 16, new Random()));
+                id = ResourceLocation.fromNamespaceAndPath("mgl_bbt", StringUtil.getRandomString(alphabet, 16, new Random()));
             }
 
             return new BossBarTimer(translations, id, subject, cycleColor, alertSound, durationTicks, color);

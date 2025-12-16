@@ -2,10 +2,10 @@ package work.lclpnet.lobby;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
@@ -61,15 +61,15 @@ public class LobbyManagerImpl implements LobbyManager {
 
     @SuppressWarnings("resource")
     @Override
-    public ServerWorld getLobbyWorld() {
-        return this.server.resultNow().getOverworld();
+    public ServerLevel getLobbyWorld() {
+        return this.server.resultNow().overworld();
     }
 
     @Override
-    public Vec3d getLobbySpawn() {
-        BlockPos spawnPos = getLobbyWorld().getSpawnPoint().getPos();
+    public Vec3 getLobbySpawn() {
+        BlockPos spawnPos = getLobbyWorld().getRespawnData().pos();
 
-        return new Vec3d(
+        return new Vec3(
                 spawnPos.getX() + 0.5,
                 spawnPos.getY(),
                 spawnPos.getZ() + 0.5
@@ -77,13 +77,13 @@ public class LobbyManagerImpl implements LobbyManager {
     }
 
     @Override
-    public void sendToLobby(ServerPlayerEntity player) {
-        final ServerWorld world = getLobbyWorld();
-        final Vec3d spawn = getLobbySpawn();
+    public void sendToLobby(ServerPlayer player) {
+        final ServerLevel world = getLobbyWorld();
+        final Vec3 spawn = getLobbySpawn();
 
         PlayerReset.reset(player);
 
-        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), 0F, 0F, true);
+        player.teleportTo(world, spawn.x(), spawn.y(), spawn.z(), Set.of(), 0F, 0F, true);
     }
 
     @Override
@@ -119,8 +119,8 @@ public class LobbyManagerImpl implements LobbyManager {
     }
 
     public void onWorldReady() {
-        ServerWorld world = getLobbyWorld();
-        var serializer = new ExtendedConfigSerializer<>(LobbyWorldConfig.factory(world.getRegistryManager()), logger);
+        ServerLevel world = getLobbyWorld();
+        var serializer = new ExtendedConfigSerializer<>(LobbyWorldConfig.factory(world.registryAccess()), logger);
         Path path = Path.of("config", "lobby.json");
 
         worldConfigHandler = new WorldConfigHandler<>(world, path, serializer, logger);

@@ -1,11 +1,10 @@
 package work.lclpnet.activity.component.builtin;
 
-import net.minecraft.entity.boss.BossBarManager;
-import net.minecraft.entity.boss.CommandBossBar;
-import net.minecraft.entity.boss.ServerBossBar;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import work.lclpnet.activity.component.Component;
+import net.minecraft.server.bossevents.CustomBossEvents;
+import net.minecraft.server.bossevents.CustomBossEvent;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.ComponentView;
 import work.lclpnet.activity.component.DependentComponent;
@@ -20,15 +19,15 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class BossBarComponent implements Component, DependentComponent, BossBarHandler, BossBarProvider {
+public class BossBarComponent implements work.lclpnet.activity.component.Component, DependentComponent, BossBarHandler, BossBarProvider {
 
-    private final BossBarManager bossBarManager;
-    private final Set<CommandBossBar> bars = new HashSet<>();
-    private final Set<ServerBossBar> showOnJoin = new HashSet<>();
+    private final CustomBossEvents bossBarManager;
+    private final Set<CustomBossEvent> bars = new HashSet<>();
+    private final Set<ServerBossEvent> showOnJoin = new HashSet<>();
     private final Set<CustomBossBar> removeOnQuit = new HashSet<>();
     private HookRegistrar hookRegistrar;
 
-    public BossBarComponent(BossBarManager bossBarManager) {
+    public BossBarComponent(CustomBossEvents bossBarManager) {
         this.bossBarManager = bossBarManager;
     }
 
@@ -45,17 +44,17 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
     @Override
     public void mount() {
         hookRegistrar.registerHook(PlayerConnectionHooks.JOIN, player -> {
-            for (ServerBossBar bossBar : showOnJoin) {
+            for (ServerBossEvent bossBar : showOnJoin) {
                 bossBar.addPlayer(player);
             }
         });
 
         hookRegistrar.registerHook(PlayerConnectionHooks.QUIT, player -> {
-            for (CommandBossBar bossBar : bars) {
+            for (CustomBossEvent bossBar : bars) {
                 bossBar.removePlayer(player);
             }
 
-            for (ServerBossBar bossBar : showOnJoin) {
+            for (ServerBossEvent bossBar : showOnJoin) {
                 bossBar.removePlayer(player);
             }
 
@@ -70,15 +69,15 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
         bars.forEach(this::removeBossBarInternal);
         bars.clear();
 
-        showOnJoin.forEach(ServerBossBar::clearPlayers);
+        showOnJoin.forEach(ServerBossEvent::removeAllPlayers);
         showOnJoin.clear();
 
         removeOnQuit.clear();
     }
 
     @Override
-    public CommandBossBar createBossBar(Identifier id, Text text) {
-        CommandBossBar bar = bossBarManager.add(id, text);
+    public CustomBossEvent createBossBar(ResourceLocation id, Component text) {
+        CustomBossEvent bar = bossBarManager.create(id, text);
 
         TransientBossBars.setTransient(bar, true);
 
@@ -88,19 +87,19 @@ public class BossBarComponent implements Component, DependentComponent, BossBarH
     }
 
     @Override
-    public void removeBossBar(CommandBossBar bossBar) {
+    public void removeBossBar(CustomBossEvent bossBar) {
         removeBossBarInternal(bossBar);
         bars.remove(bossBar);
     }
 
-    private void removeBossBarInternal(CommandBossBar bossBar) {
-        bossBar.clearPlayers();
+    private void removeBossBarInternal(CustomBossEvent bossBar) {
+        bossBar.removeAllPlayers();
         bossBarManager.remove(bossBar);
         showOnJoin.remove(bossBar);
     }
 
     @Override
-    public void showOnJoin(ServerBossBar bossBar) {
+    public void showOnJoin(ServerBossEvent bossBar) {
         Objects.requireNonNull(bossBar);
         showOnJoin.add(bossBar);
     }

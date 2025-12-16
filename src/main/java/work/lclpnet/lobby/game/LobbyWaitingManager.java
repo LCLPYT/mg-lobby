@@ -3,19 +3,19 @@ package work.lclpnet.lobby.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
@@ -31,14 +31,14 @@ import java.util.*;
 
 public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
 
-    private final ServerWorld world;
+    private final ServerLevel world;
     private final GameContext context;
     private final GameStarter starter;
     private final List<Voting<?>> votings = new ArrayList<>();
     private final Map<UUID, PlayerState> states = new HashMap<>();
     private final Map<Integer, Set<Runnable>> timedActions = new HashMap<>();
 
-    public LobbyWaitingManager(ServerWorld world, GameContext context, GameStarter starter) {
+    public LobbyWaitingManager(ServerLevel world, GameContext context, GameStarter starter) {
         this.world = world;
         this.context = context;
         this.starter = starter;
@@ -99,13 +99,13 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
     private <T> void openVotingIfNotYetVoted(Voting<T> voting) {
         Set<UUID> voted = voting.getVoters();
 
-        for (ServerPlayerEntity player : world.getPlayers()) {
+        for (ServerPlayer player : world.players()) {
             // check if the player has another screen open or has already voted
-            if (player.currentScreenHandler != player.playerScreenHandler || voted.contains(player.getUuid())) continue;
+            if (player.containerMenu != player.inventoryMenu || voted.contains(player.getUUID())) continue;
 
             voting.open(player);
 
-            player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.NEUTRAL, 0.5f, 0.5f);
+            player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.NEUTRAL, 0.5f, 0.5f);
         }
     }
 
@@ -132,35 +132,35 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
         PlayerLookup.world(world).forEach(this::giveItems);
     }
 
-    private void onQuit(ServerPlayerEntity player) {
-        states.remove(player.getUuid());
+    private void onQuit(ServerPlayer player) {
+        states.remove(player.getUUID());
 
         removeVotesOf(player);
     }
 
-    private void removeVotesOf(ServerPlayerEntity player) {
+    private void removeVotesOf(ServerPlayer player) {
         for (var voting : votings) {
             voting.removeVote(player);
         }
     }
 
-    private ActionResult useItem(PlayerEntity _player, World world, Hand hand) {
-        if (hand != Hand.MAIN_HAND || !(_player instanceof ServerPlayerEntity player)) {
-            return ActionResult.PASS;
+    private InteractionResult useItem(Player _player, Level world, InteractionHand hand) {
+        if (hand != InteractionHand.MAIN_HAND || !(_player instanceof ServerPlayer player)) {
+            return InteractionResult.PASS;
         }
 
-        return getState(player).onInteract(player) ? ActionResult.SUCCESS : ActionResult.PASS;
+        return getState(player).onInteract(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
-    private void giveItems(ServerPlayerEntity player) {
-        PlayerInventory inventory = player.getInventory();
+    private void giveItems(ServerPlayer player) {
+        Inventory inventory = player.getInventory();
         PlayerState state = getState(player);
 
-        if (GameConstants.DEVELOPMENT && context.getServer().getPermissionLevel(player.getPlayerConfigEntry()) >= 2) {
+        if (GameConstants.DEVELOPMENT && context.getServer().getProfilePermissions(player.nameAndId()) >= 2) {
             Interactable startAction = p -> startGame();
 
             int slot = state.getFirstFreeSlot();
-            inventory.setStack(slot, getStartStack(player));
+            inventory.setItem(slot, getStartStack(player));
             state.setInteractable(slot, startAction);
         }
 
@@ -168,12 +168,12 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
             Voting<?> voting = votings.getFirst();
 
             int slot = state.getFreeSlot(4);
-            inventory.setStack(slot, getStack(player, voting));
+            inventory.setItem(slot, getStack(player, voting));
             state.setInteractable(slot, voting::open);
         } else {
             for (Voting<?> voting : votings) {
                 int slot = state.getFirstFreeSlot();
-                inventory.setStack(slot, getStack(player, voting));
+                inventory.setItem(slot, getStack(player, voting));
                 state.setInteractable(slot, voting::open);
             }
         }
@@ -183,21 +183,21 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
         starter.finish(this);
     }
 
-    private ItemStack getStack(ServerPlayerEntity player, Voting<?> voting) {
+    private ItemStack getStack(ServerPlayer player, Voting<?> voting) {
         return voting.getData().icon().apply(player);
     }
 
-    private ItemStack getStartStack(ServerPlayerEntity player) {
+    private ItemStack getStartStack(ServerPlayer player) {
         var stack = new ItemStack(Items.EMERALD_BLOCK);
 
-        stack.set(DataComponentTypes.ITEM_NAME, context.getTranslations().translateText(player, "lobby.item.start_game")
-                .formatted(Formatting.GREEN));
+        stack.set(DataComponents.ITEM_NAME, context.getTranslations().translateText(player, "lobby.item.start_game")
+                .formatted(ChatFormatting.GREEN));
 
         return stack;
     }
 
-    private PlayerState getState(ServerPlayerEntity player) {
-        return states.computeIfAbsent(player.getUuid(), uuid -> new PlayerState());
+    private PlayerState getState(ServerPlayer player) {
+        return states.computeIfAbsent(player.getUUID(), uuid -> new PlayerState());
     }
 
     private static class PlayerState {
@@ -208,7 +208,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
             interactables.put(slot, interactable);
         }
 
-        public boolean onInteract(ServerPlayerEntity player) {
+        public boolean onInteract(ServerPlayer player) {
             int slot = player.getInventory().getSelectedSlot();
             Interactable interactable = interactables.getOrDefault(slot, null);
 

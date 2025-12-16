@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.game.api.prot.scope;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 public interface PlayerGenericScope<T> {
 
-    PlayerGenericScope<?> CREATIVE_OP = (player, obj) -> player.isCreativeLevelTwoOp();
+    PlayerGenericScope<?> CREATIVE_OP = (player, obj) -> player.canUseGameMasterBlocks();
 
-    boolean isWithinScope(PlayerEntity player, T obj);
+    boolean isWithinScope(Player player, T obj);
 
     @SuppressWarnings("unchecked")
     static <T> PlayerGenericScope<T> creativeOp() {

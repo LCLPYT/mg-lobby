@@ -4,17 +4,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import work.lclpnet.lobby.config.ConfigUtil;
 
-public record GreetingConfig(Vec3d pos, float scale, float rotationY, Text text) {
+public record GreetingConfig(Vec3 pos, float scale, float rotationY, Component text) {
 
-    public JSONObject asJson(RegistryWrapper.WrapperLookup registries) {
+    public JSONObject asJson(HolderLookup.Provider registries) {
         JSONObject json = new JSONObject();
 
         json.put("position", ConfigUtil.writeVec3d(pos));
@@ -26,18 +26,18 @@ public record GreetingConfig(Vec3d pos, float scale, float rotationY, Text text)
         return json;
     }
 
-    public static GreetingConfig parse(JSONObject json, RegistryWrapper.WrapperLookup registries) {
-        Vec3d position = ConfigUtil.readVec3d(json.getJSONArray("position"));
+    public static GreetingConfig parse(JSONObject json, HolderLookup.Provider registries) {
+        Vec3 position = ConfigUtil.readVec3d(json.getJSONArray("position"));
         float scale = ConfigUtil.readFloat(json.getNumber("scale"));
         float rotationY = ConfigUtil.readAngle(json.getNumber("rotation_y"));
 
-        Text text = decodeText(json, registries);
+        Component text = decodeText(json, registries);
 
         return new GreetingConfig(position, scale, rotationY, text);
     }
 
-    private void encodeText(RegistryWrapper.WrapperLookup registries, JSONObject json) {
-        String textJson = TextCodecs.CODEC.encodeStart(registries.getOps(JsonOps.INSTANCE), text)
+    private void encodeText(HolderLookup.Provider registries, JSONObject json) {
+        String textJson = ComponentSerialization.CODEC.encodeStart(registries.createSerializationContext(JsonOps.INSTANCE), text)
                 .resultOrPartial()
                 .map(JsonElement::toString)
                 .orElse("");
@@ -45,7 +45,7 @@ public record GreetingConfig(Vec3d pos, float scale, float rotationY, Text text)
         json.put("text", new JSONObject(textJson));
     }
 
-    private static @NotNull Text decodeText(JSONObject json, RegistryWrapper.WrapperLookup registries) {
+    private static @NotNull Component decodeText(JSONObject json, HolderLookup.Provider registries) {
         String str = json.optString("text", null);
 
         if (str == null) {
@@ -57,14 +57,14 @@ public record GreetingConfig(Vec3d pos, float scale, float rotationY, Text text)
         }
 
         if (str == null) {
-            return Text.empty();
+            return Component.empty();
         }
 
         JsonElement src = JsonParser.parseString(str);
 
-        return TextCodecs.CODEC.decode(registries.getOps(JsonOps.INSTANCE), src)
+        return ComponentSerialization.CODEC.decode(registries.createSerializationContext(JsonOps.INSTANCE), src)
                 .resultOrPartial()
                 .map(Pair::getFirst)
-                .orElse(Text.empty());
+                .orElse(Component.empty());
     }
 }

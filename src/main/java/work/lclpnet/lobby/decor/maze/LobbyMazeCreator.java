@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.decor.maze;
 
-import net.minecraft.world.BlockView;
+import net.minecraft.world.level.BlockGetter;
 import org.slf4j.Logger;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.di.ActivityScope;
@@ -18,10 +18,10 @@ public class LobbyMazeCreator {
     private final ConfigAccess configAccess;
     private final Logger logger;
     private final WorldModifier writer;
-    private final BlockView blockView;
+    private final BlockGetter blockView;
 
     @Inject
-    public LobbyMazeCreator(ConfigAccess configAccess, Logger logger, WorldModifier writer, BlockView blockView) {
+    public LobbyMazeCreator(ConfigAccess configAccess, Logger logger, WorldModifier writer, BlockGetter blockView) {
         this.configAccess = configAccess;
         this.logger = logger;
         this.writer = writer;

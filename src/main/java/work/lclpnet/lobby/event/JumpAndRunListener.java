@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.event;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import work.lclpnet.kibu.hook.HookListenerModule;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerMoveCallback;
@@ -23,7 +23,7 @@ public class JumpAndRunListener implements HookListenerModule {
         registrar.registerHook(PlayerMoveCallback.HOOK, this::onPlayerMove);
     }
 
-    private boolean onPlayerMove(ServerPlayerEntity player, PositionRotation from, PositionRotation to) {
+    private boolean onPlayerMove(ServerPlayer player, PositionRotation from, PositionRotation to) {
         jumpAndRun.update(player, to);
         return false;
     }

@@ -5,7 +5,7 @@ import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 
 public interface ClickEventScope {
 
-    ClickEventScope CREATIVE_OP = (event) -> event.player().isCreativeLevelTwoOp();
+    ClickEventScope CREATIVE_OP = (event) -> event.player().canUseGameMasterBlocks();
 
     boolean isWithinScope(PlayerInventoryHooks.ClickEvent event);
 }

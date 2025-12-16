@@ -1,10 +1,10 @@
 package work.lclpnet.lobby.game.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import work.lclpnet.kibu.hook.world.ServerWorldHooks;
 import xyz.nucleoid.fantasy.Fantasy;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
@@ -16,7 +16,7 @@ import java.util.Optional;
 public class WorldContainer {
 
     private final MinecraftServer server;
-    private final Map<RegistryKey<World>, RuntimeWorldHandle> worlds = new Object2ObjectOpenHashMap<>();
+    private final Map<ResourceKey<Level>, RuntimeWorldHandle> worlds = new Object2ObjectOpenHashMap<>();
 
     public WorldContainer(MinecraftServer server) {
         this.server = server;
@@ -42,22 +42,22 @@ public class WorldContainer {
         }
     }
 
-    private void stopTracking(RegistryKey<World> key) {
+    private void stopTracking(ResourceKey<Level> key) {
         synchronized (this) {
             worlds.remove(key);
         }
     }
 
-    public Optional<RuntimeWorldHandle> getHandle(RegistryKey<World> key) {
+    public Optional<RuntimeWorldHandle> getHandle(ResourceKey<Level> key) {
         synchronized (this) {
             return Optional.ofNullable(worlds.get(key));
         }
     }
 
-    private void onWorldUnload(MinecraftServer server, ServerWorld world) {
+    private void onWorldUnload(MinecraftServer server, ServerLevel world) {
         if (world == null) return;
 
-        stopTracking(world.getRegistryKey());
+        stopTracking(world.dimension());
     }
 
     public synchronized void unload() {

@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
@@ -11,7 +11,7 @@ public class MapDescriptor {
     private final String namespace;
     private final String path;
 
-    public MapDescriptor(Identifier identifier) {
+    public MapDescriptor(ResourceLocation identifier) {
         this(identifier.getNamespace(), identifier.getPath());
     }
 
@@ -28,8 +28,8 @@ public class MapDescriptor {
         }
     }
 
-    public Identifier getIdentifier() {
-        return Identifier.of(namespace, path);
+    public ResourceLocation getIdentifier() {
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
     }
 
     public String getMapPath() {

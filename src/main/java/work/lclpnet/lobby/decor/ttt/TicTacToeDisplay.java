@@ -1,16 +1,16 @@
 package work.lclpnet.lobby.decor.ttt;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.AffineTransformation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Display;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import com.mojang.math.Transformation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import work.lclpnet.kibu.access.entity.DisplayEntityAccess;
@@ -23,21 +23,21 @@ import java.util.Map;
 
 public class TicTacToeDisplay {
 
-    private final ServerWorld world;
+    private final ServerLevel world;
     private final WorldModifier worldModifier;
     private final Map<TicTacToeTable, List<Entity>> entitiesByTable = new HashMap<>();
-    private final Map<TicTacToeTable, DisplayEntity.BlockDisplayEntity> turnIndicators = new HashMap<>();
+    private final Map<TicTacToeTable, Display.BlockDisplay> turnIndicators = new HashMap<>();
 
-    public TicTacToeDisplay(ServerWorld world, WorldModifier worldModifier) {
+    public TicTacToeDisplay(ServerLevel world, WorldModifier worldModifier) {
         this.world = world;
         this.worldModifier = worldModifier;
     }
 
     public void displayMarker(TicTacToeTable table, int x, int y, BlockState state) {
-        var display = new DisplayEntity.BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world);
+        var display = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, world);
         DisplayEntityAccess.setBlockState(display, state);
 
-        var transformation = new AffineTransformation(null, null, new Vector3f(0.125f), null);
+        var transformation = new Transformation(null, null, new Vector3f(0.125f), null);
         DisplayEntityAccess.setTransformation(display, transformation);
 
         final float pixel = 1 / 16f;
@@ -45,78 +45,78 @@ public class TicTacToeDisplay {
 
         BlockPos pos = table.center();
 
-        display.setPos(
+        display.setPosRaw(
                 pos.getX() + pixel + (pixel + d) * (x + 1),
                 pos.getY() + 1 - pixel,
                 pos.getZ() + pixel + (pixel + d) * (y + 1)
         );
 
-        display.getEntityWorld().playSound(null, display.getX(), display.getY(), display.getZ(),
-                SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 0.15f, 1f);
+        display.level().playSound(null, display.getX(), display.getY(), display.getZ(),
+                SoundEvents.CHICKEN_EGG, SoundSource.PLAYERS, 0.15f, 1f);
 
         addEntity(table, display);
         worldModifier.spawnEntity(display);
     }
 
     public void indicateTurn(TicTacToeTable table, int player) {
-        DisplayEntity.BlockDisplayEntity indicator = turnIndicators.get(table);
+        Display.BlockDisplay indicator = turnIndicators.get(table);
         boolean spawn = false;
 
         if (indicator == null) {
-            indicator = new DisplayEntity.BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world);
+            indicator = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, world);
             spawn = true;
 
-            DisplayEntityAccess.setBlockState(indicator, Blocks.MAGENTA_GLAZED_TERRACOTTA.getDefaultState());
+            DisplayEntityAccess.setBlockState(indicator, Blocks.MAGENTA_GLAZED_TERRACOTTA.defaultBlockState());
             DisplayEntityAccess.setInterpolationDuration(indicator, 4);
 
             turnIndicators.put(table, indicator);
         }
 
-        Vec3d direction = table.direction();
+        Vec3 direction = table.direction();
 
-        direction = new Vec3d(
-                Math.abs(direction.getX()),
-                Math.abs(direction.getY()),
-                Math.abs(direction.getZ())
+        direction = new Vec3(
+                Math.abs(direction.x()),
+                Math.abs(direction.y()),
+                Math.abs(direction.z())
         );
 
-        Vec3d normal = direction.crossProduct(new Vec3d(0, 1, 0)).normalize();
+        Vec3 normal = direction.cross(new Vec3(0, 1, 0)).normalize();
 
-        normal = new Vec3d(
-                Math.abs(normal.getX()),
-                Math.abs(normal.getY()),
-                Math.abs(normal.getZ())
+        normal = new Vec3(
+                Math.abs(normal.x()),
+                Math.abs(normal.y()),
+                Math.abs(normal.z())
         );
 
         final float pixel = 1 / 16f;
         final float distance = 5 * pixel;
 
         BlockPos pos = table.center();
-        indicator.setPos(
-                pos.getX() + 0.5 + normal.getX() * distance - direction.getX() * pixel,
+        indicator.setPosRaw(
+                pos.getX() + 0.5 + normal.x() * distance - direction.x() * pixel,
                 pos.getY() + 1 - pixel,
-                pos.getZ() + 0.5 + normal.getZ() * distance - direction.getZ() * pixel
+                pos.getZ() + 0.5 + normal.z() * distance - direction.z() * pixel
         );
 
         Vector3f offset;
 
         if (player == 0) {
             offset = new Vector3f(
-                    (float) (-direction.getX() * pixel * 4 + normal.getX() * pixel * 2),
+                    (float) (-direction.x() * pixel * 4 + normal.x() * pixel * 2),
                     0,
-                    (float) (-direction.getZ() * pixel * 4)
+                    (float) (-direction.z() * pixel * 4)
             );
         } else {
             offset = new Vector3f(
-                    (float) (direction.getX() * pixel * 6),
+                    (float) (direction.x() * pixel * 6),
                     0,
-                    (float) (direction.getZ() * pixel * 6 + normal.getZ() * pixel * 2)
+                    (float) (direction.z() * pixel * 6 + normal.z() * pixel * 2)
             );
         }
 
-        float angle = (float) Math.atan2(direction.getX(), direction.getZ()) + (float) Math.PI * (1 - player);
+        float angle = (float) Math.atan2(direction.x(), direction.z()) + (float) Math.PI * (1 - player);
 
-        AffineTransformation transformation = new AffineTransformation(
+        Transformation transformation = new Transformation(
                 offset,
                 new Quaternionf().rotateY(angle),
                 new Vector3f(0.125f),

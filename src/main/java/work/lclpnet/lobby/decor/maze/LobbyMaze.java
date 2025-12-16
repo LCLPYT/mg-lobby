@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.decor.maze;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import work.lclpnet.maze.graph.Graphs;
 import work.lclpnet.maze.impl.SimpleMaze;
 

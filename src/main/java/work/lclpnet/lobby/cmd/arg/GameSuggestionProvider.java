@@ -4,13 +4,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
 import work.lclpnet.lobby.game.GameManager;
 
 import java.util.concurrent.CompletableFuture;
 
-public class GameSuggestionProvider implements SuggestionProvider<ServerCommandSource> {
+public class GameSuggestionProvider implements SuggestionProvider<CommandSourceStack> {
 
     private final GameManager gameManager;
 
@@ -19,10 +19,10 @@ public class GameSuggestionProvider implements SuggestionProvider<ServerCommandS
     }
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
         var candidates = gameManager.getGames().stream().map(game -> game.getConfig().identifier());
 
-        CommandSource.suggestMatching(candidates, builder);
+        SharedSuggestionProvider.suggest(candidates, builder);
         builder.suggest(GameManager.EMPTY_GAME_ID);
 
         return builder.buildFuture();

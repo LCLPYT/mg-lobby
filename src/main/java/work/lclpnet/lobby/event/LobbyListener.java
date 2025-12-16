@@ -1,26 +1,26 @@
 package work.lclpnet.lobby.event;
 
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.DragonBreathParticleEffect;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.particles.PowerParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.access.VelocityModifier;
 import work.lclpnet.kibu.hook.HookListenerModule;
@@ -63,23 +63,23 @@ public class LobbyListener implements HookListenerModule {
     }
 
     @SuppressWarnings("SameReturnValue")
-    private ActionResult onAttack(PlayerEntity player, World world, Hand hand, Entity entity,
-                                  @Nullable EntityHitResult hitResult) {
+    private InteractionResult onAttack(Player player, Level world, InteractionHand hand, Entity entity,
+                                       @Nullable EntityHitResult hitResult) {
 
-        if (!isLobby(world) || !(entity instanceof ServerPlayerEntity target) || !(world instanceof ServerWorld serverWorld)) {
-            return ActionResult.PASS;
+        if (!isLobby(world) || !(entity instanceof ServerPlayer target) || !(world instanceof ServerLevel serverWorld)) {
+            return InteractionResult.PASS;
         }
 
-        VelocityModifier.setVelocity(target, player.getRotationVector().multiply(0.25));
+        VelocityModifier.setVelocity(target, player.getLookAngle().scale(0.25));
 
-        serverWorld.spawnParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY(), target.getZ(),
+        serverWorld.sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY(), target.getZ(),
                 1, 0.1, 0, 0.1, 0.1);
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    private boolean onMove(ServerPlayerEntity player, PositionRotation from, PositionRotation to) {
-        ServerWorld world = player.getEntityWorld();
+    private boolean onMove(ServerPlayer player, PositionRotation from, PositionRotation to) {
+        ServerLevel world = player.level();
 
         if (isLobby(world)) {
             onLobbyMove(player, to, world);
@@ -88,64 +88,64 @@ public class LobbyListener implements HookListenerModule {
         return false;  // false = allow movement
     }
 
-    private void onLobbyMove(ServerPlayerEntity player, PositionRotation to, ServerWorld world) {
-        if (to.getY() < world.getBottomY()) {
+    private void onLobbyMove(ServerPlayer player, PositionRotation to, ServerLevel world) {
+        if (to.y() < world.getMinY()) {
             // teleport player back to spawn location
-            Vec3d spawn = lobbyManager.getLobbySpawn();
+            Vec3 spawn = lobbyManager.getLobbySpawn();
 
-            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), 0, 0, true);
+            player.teleportTo(world, spawn.x(), spawn.y(), spawn.z(), Set.of(), 0, 0, true);
             return;
         }
 
         handleLavaLevitation(player, to, world);
     }
 
-    private void handleLavaLevitation(ServerPlayerEntity player, PositionRotation to, ServerWorld world) {
+    private void handleLavaLevitation(ServerPlayer player, PositionRotation to, ServerLevel world) {
         if (config.lavaLevitation == null) return;
 
-        BlockPos pos = player.getBlockPos();
+        BlockPos pos = player.blockPosition();
         BlockState state = world.getBlockState(pos);
 
-        if (player.isSpectator() || !state.isOf(Blocks.LAVA) || player.hasStatusEffect(StatusEffects.LEVITATION)) return;
+        if (player.isSpectator() || !state.is(Blocks.LAVA) || player.hasEffect(MobEffects.LEVITATION)) return;
 
         if (!config.lavaLevitation.isWithinBounds(pos.getX(), pos.getY(), pos.getZ())) return;
 
         int durationTicks = config.lavaLevitation.durationTicks();
 
-        StatusEffectInstance effect = new StatusEffectInstance(StatusEffects.LEVITATION, durationTicks, 8,
+        MobEffectInstance effect = new MobEffectInstance(MobEffects.LEVITATION, durationTicks, 8,
                 false, false);
 
-        player.addStatusEffect(effect);
+        player.addEffect(effect);
 
-        VelocityModifier.setVelocity(player, new Vec3d(0, 1, 0));
+        VelocityModifier.setVelocity(player, new Vec3(0, 1, 0));
 
         world.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.ENTITY_ILLUSIONER_PREPARE_BLINDNESS, SoundCategory.PLAYERS, 0.2f, 1f);
+                SoundEvents.ILLUSIONER_PREPARE_BLINDNESS, SoundSource.PLAYERS, 0.2f, 1f);
 
         startLevitationTask(player, world);
     }
 
-    private void startLevitationTask(ServerPlayerEntity player, ServerWorld world) {
+    private void startLevitationTask(ServerPlayer player, ServerLevel world) {
         scheduler.interval(action -> {
             double x = player.getX(), y = player.getY(), z = player.getZ();
 
-            player.setFireTicks(0);
+            player.setRemainingFireTicks(0);
 
-            if (!player.hasStatusEffect(StatusEffects.LEVITATION)) {
-                world.spawnParticles(DragonBreathParticleEffect.of(ParticleTypes.DRAGON_BREATH, 1), x, y, z, 50, 0.1, 0.1, 0.1, 0.05);
+            if (!player.hasEffect(MobEffects.LEVITATION)) {
+                world.sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1), x, y, z, 50, 0.1, 0.1, 0.1, 0.05);
                 action.cancel();
                 return;
             }
 
-            world.spawnParticles(ParticleTypes.END_ROD, x, y, z, 1, 0, 0, 0, 0);
+            world.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0, 0, 0, 0);
         }, 1);
     }
 
-    private void onJoin(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) {
+    private void onJoin(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server) {
         lobbyManager.sendToLobby(handler.player);
     }
 
-    private boolean isLobby(World world) {
+    private boolean isLobby(Level world) {
         return lobbyManager.getLobbyWorld() == world;
     }
 }

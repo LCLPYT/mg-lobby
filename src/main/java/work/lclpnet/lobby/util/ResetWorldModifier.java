@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.EntityRemovedCallback;
 import work.lclpnet.lobby.di.ActivityScope;
@@ -16,13 +16,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @ActivityScope
 public class ResetWorldModifier implements WorldModifier {
 
-    private final ServerWorld world;
+    private final ServerLevel world;
     private final Map<BlockPos, BlockState> states = new HashMap<>();
     private final Set<UUID> entities = new HashSet<>();
     private final AtomicBoolean enabled = new AtomicBoolean(true);
 
     @Inject
-    public ResetWorldModifier(@Named("lobbyWorld") ServerWorld world, HookRegistrar hookRegistrar) {
+    public ResetWorldModifier(@Named("lobbyWorld") ServerLevel world, HookRegistrar hookRegistrar) {
         this.world = world;
 
         hookRegistrar.registerHook(EntityRemovedCallback.HOOK, this::onEntityRemoved);
@@ -40,15 +40,15 @@ public class ResetWorldModifier implements WorldModifier {
             }
         }
 
-        world.setBlockState(pos, state, flags);
+        world.setBlock(pos, state, flags);
     }
 
     public void spawnEntity(Entity entity) {
         synchronized (this) {
-            entities.add(entity.getUuid());
+            entities.add(entity.getUUID());
         }
 
-        world.spawnEntity(entity);
+        world.addFreshEntity(entity);
     }
 
     public void undo() {
@@ -56,7 +56,7 @@ public class ResetWorldModifier implements WorldModifier {
             enabled.set(false);
 
             for (var entry : states.entrySet()) {
-                world.setBlockState(entry.getKey(), entry.getValue());
+                world.setBlockAndUpdate(entry.getKey(), entry.getValue());
             }
 
             states.clear();
@@ -77,6 +77,6 @@ public class ResetWorldModifier implements WorldModifier {
     private void onEntityRemoved(Entity e, Entity.RemovalReason reason) {
         if (!enabled.get()) return;  // prevent co-modification
 
-        entities.remove(e.getUuid());
+        entities.remove(e.getUUID());
     }
 }

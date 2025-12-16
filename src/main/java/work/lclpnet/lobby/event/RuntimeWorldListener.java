@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.event;
 
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.item.map.MapState;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.hook.HookListenerModule;
 import work.lclpnet.kibu.hook.HookRegistrar;
@@ -17,9 +17,9 @@ public class RuntimeWorldListener implements HookListenerModule {
     }
 
     @Nullable
-    private MapState getRuntimeMapState(ServerWorld world, MapIdComponent id) {
+    private MapItemSavedData getRuntimeMapState(ServerLevel world, MapId id) {
         if (!(world instanceof RuntimeWorld runtimeWorld)) return null;
 
-        return runtimeWorld.getPersistentStateManager().get(MapState.createStateType(id));
+        return runtimeWorld.getDataStorage().get(MapItemSavedData.type(id));
     }
 }

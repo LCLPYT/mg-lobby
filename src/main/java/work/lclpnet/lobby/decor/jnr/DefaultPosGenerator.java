@@ -1,14 +1,14 @@
 package work.lclpnet.lobby.decor.jnr;
 
 import it.unimi.dsi.fastutil.ints.IntFloatPair;
-import net.minecraft.block.BlockState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.ClipContext;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.util.RayCaster;
 
@@ -19,7 +19,7 @@ public class DefaultPosGenerator implements PosGenerator {
 
     private final Random random = new Random();
     private final List<Vec3i> moves = new ArrayList<>();
-    private final ServerWorld world;
+    private final ServerLevel world;
     private final List<IntFloatPair> stagnation;
     private final Stack<BlockPos> history;
     private final int stagnationY;
@@ -27,7 +27,7 @@ public class DefaultPosGenerator implements PosGenerator {
     private BlockPos from;
     private boolean lastMoveUp = false;
 
-    public DefaultPosGenerator(ServerWorld world, Stack<BlockPos> history, Config config) {
+    public DefaultPosGenerator(ServerLevel world, Stack<BlockPos> history, Config config) {
         initPossibleMoves();
 
         if (history.isEmpty()) {
@@ -210,7 +210,7 @@ public class DefaultPosGenerator implements PosGenerator {
         for (Vec3i move : moves) {
             if (bias(move)) continue;
 
-            BlockPos next = from.add(move);
+            BlockPos next = from.offset(move);
 
             if (!isMovePossible(next)) continue;
 
@@ -263,7 +263,7 @@ public class DefaultPosGenerator implements PosGenerator {
             // check if placing a block at pos would block the way from prev to next
 
             for (int i = 1; i <= 3; i++) {
-                if (isBetween(from.up(i), next.up(i), pos)) {
+                if (isBetween(from.above(i), next.above(i), pos)) {
                     return true;
                 }
             }
@@ -274,7 +274,7 @@ public class DefaultPosGenerator implements PosGenerator {
 
     private boolean isWayBlocked(BlockPos next) {
         for (int i = 1; i <= 3; i++) {
-            if (blocksBetween(from.up(i), next.up(i))) {
+            if (blocksBetween(from.above(i), next.above(i))) {
                 return true;
             }
         }
@@ -290,27 +290,27 @@ public class DefaultPosGenerator implements PosGenerator {
         return shootRay(a, b, (from, to) -> isBetween(from, to, c));
     }
 
-    private boolean shootRay(BlockPos from, BlockPos to, BiFunction<Vec3d, Vec3d, Boolean> rayShooter) {
-        Vec3d start = from.toCenterPos();
-        Vec3d end = to.toCenterPos();
+    private boolean shootRay(BlockPos from, BlockPos to, BiFunction<Vec3, Vec3, Boolean> rayShooter) {
+        Vec3 start = from.getCenter();
+        Vec3 end = to.getCenter();
 
         // shoot ray at the block center
         if (rayShooter.apply(start, end)) return true;
 
         // now, shoot two rays offset a little to the sides
-        Vec3d dir = end.subtract(start).normalize().multiply(0.4);
-        Vec3d normal = new Vec3d(-dir.getZ(), 0, dir.getX());  // 2d normal on y-axis
+        Vec3 dir = end.subtract(start).normalize().scale(0.4);
+        Vec3 normal = new Vec3(-dir.z(), 0, dir.x());  // 2d normal on y-axis
 
         return rayShooter.apply(start.add(normal), end.add(normal)) || rayShooter.apply(start.subtract(normal), end.subtract(normal));
     }
 
-    private static boolean isBetween(Vec3d start, Vec3d end, BlockPos position) {
+    private static boolean isBetween(Vec3 start, Vec3 end, BlockPos position) {
         BlockHitResult result = RayCaster.rayCast(start, end, pos -> pos.equals(position));
         return result.getType() == HitResult.Type.BLOCK;
     }
 
-    private boolean blocksBetween(Vec3d start, Vec3d end) {
-        var ctx = new RayCaster.GenericRaycastContext(start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.ANY);
+    private boolean blocksBetween(Vec3 start, Vec3 end) {
+        var ctx = new RayCaster.GenericRaycastContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY);
 
         BlockHitResult result = RayCaster.rayCastBlockCollision(world, ctx);
 
@@ -343,7 +343,7 @@ public class DefaultPosGenerator implements PosGenerator {
 
     private boolean spaceAbove(BlockPos pos) {
         for (int i = 1; i < 3; i++) {
-            BlockPos check = pos.up(i);
+            BlockPos check = pos.above(i);
             BlockState state = world.getBlockState(check);
 
             if (!state.getCollisionShape(world, check).isEmpty()) {

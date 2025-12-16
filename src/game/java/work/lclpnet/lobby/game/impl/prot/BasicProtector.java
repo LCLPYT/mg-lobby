@@ -1,17 +1,17 @@
 package work.lclpnet.lobby.game.impl.prot;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.entity.*;
@@ -66,7 +66,7 @@ public class BasicProtector implements Protector {
 
         protect(USE_ITEM_ON_BLOCK, BlockModificationHooks.USE_ITEM_ON_BLOCK, scope
                 -> (ctx)
-                -> scope.isWithinScope(ctx.getPlayer(), ctx) ? ActionResult.FAIL : null);
+                -> scope.isWithinScope(ctx.getPlayer(), ctx) ? InteractionResult.FAIL : null);
 
         protect(TRAMPLE_FARMLAND, BlockModificationHooks.TRAMPLE_FARMLAND, BasicProtector::onModify);
 
@@ -125,16 +125,16 @@ public class BasicProtector implements Protector {
         protect(ALLOW_DAMAGE, scope -> {
             // allow damage - true means allow
             hooks.registerHook(ServerLivingEntityHooks.ALLOW_DAMAGE, (entity, source, amount)
-                    -> source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) || !scope.isWithinScope(entity, source));
+                    -> source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !scope.isWithinScope(entity, source));
 
             // non-living damage - true means cancel (no damage)
             hooks.registerHook(NonLivingDamageCallback.HOOK, (entity, source, amount)
-                    -> !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) && scope.isWithinScope(entity, source));
+                    -> !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && scope.isWithinScope(entity, source));
         });
 
         protect(ALLOW_DAMAGE, ServerLivingEntityHooks.ALLOW_DAMAGE, scope
                 -> (entity, source, amount)
-                -> source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) || !scope.isWithinScope(entity, source));  // allow damage is inverted
+                -> source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !scope.isWithinScope(entity, source));  // allow damage is inverted
 
         protect(PICKUP_ITEM, PlayerInventoryHooks.PLAYER_PICKUP, scope
                 -> scope::isWithinScope);
@@ -155,7 +155,7 @@ public class BasicProtector implements Protector {
 
         protect(ITEM_FRAME_REMOVE_ITEM, ItemFrameRemoveItemCallback.HOOK, scope
                 -> (itemFrame, attacker)
-                -> attacker instanceof ServerPlayerEntity player && scope.isWithinScope(player, itemFrame));
+                -> attacker instanceof ServerPlayer player && scope.isWithinScope(player, itemFrame));
 
         protect(ITEM_FRAME_ROTATE_ITEM, ItemFrameRotateCallback.HOOK, scope
                 -> (itemFrame, player, hand)
@@ -206,10 +206,10 @@ public class BasicProtector implements Protector {
                     PlayerUtils.syncPlayerItems(player);
                 }
 
-                return ActionResult.FAIL;
+                return InteractionResult.FAIL;
             }
 
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
 
         protect(DECORATED_POT_STORE, BlockModificationHooks.DECORATIVE_POT_STORE, scope
@@ -232,17 +232,17 @@ public class BasicProtector implements Protector {
 
         protect(MOUNT, EntityMountCallback.HOOK, scope
                 -> (entity, vehicle, force)
-                -> !force && entity instanceof ServerPlayerEntity player &&
+                -> !force && entity instanceof ServerPlayer player &&
                    scope.isWithinScope(player, vehicle));
 
         protect(CONSUME_FOOD, PlayerInteractionHooks.USE_ITEM, scope -> (player, world, hand) -> {
-            ItemStack stack = player.getStackInHand(hand);
+            ItemStack stack = player.getItemInHand(hand);
 
-            if (!stack.contains(DataComponentTypes.FOOD) || !scope.isWithinScope(player, stack)) {
-                return ActionResult.PASS;
+            if (!stack.has(DataComponents.FOOD) || !scope.isWithinScope(player, stack)) {
+                return InteractionResult.PASS;
             }
 
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         });
     }
 
@@ -302,7 +302,7 @@ public class BasicProtector implements Protector {
     }
 
     private void addBlocks(Set<Block> blocks, TagKey<Block> tag) {
-        for (var entry : Registries.BLOCK.iterateEntries(tag)) {
+        for (var entry : BuiltInRegistries.BLOCK.getTagOrEmpty(tag)) {
             Block block = entry.value();
             blocks.add(block);
         }

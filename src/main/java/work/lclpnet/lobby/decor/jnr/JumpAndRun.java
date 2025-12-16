@@ -2,33 +2,33 @@ package work.lclpnet.lobby.decor.jnr;
 
 import it.unimi.dsi.fastutil.ints.IntFloatPair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.ShulkerEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.scoreboard.ServerScoreboard;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Position;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.Position;
+import net.minecraft.world.phys.Vec3;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.text.FormatWrapper;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.di.ActivityScope;
-import work.lclpnet.lobby.mixin.ShulkerEntityAccessor;
+import work.lclpnet.lobby.mixin.ShulkerAccessor;
 import work.lclpnet.lobby.util.WorldModifier;
 
 import javax.inject.Inject;
@@ -61,34 +61,34 @@ public class JumpAndRun {
     );
     private final Block[] blockPalette = palette.keySet().toArray(Block[]::new);
 
-    private final ServerWorld world;
+    private final ServerLevel world;
     private final BlockPos start;
     private final Stack<BlockPos> nodes;
     private final PosGenerator generator;
     private final WorldModifier modifier;
     private final Translations translations;
-    private Team redTeam, greenTeam;
+    private PlayerTeam redTeam, greenTeam;
     private BlockPos next;
-    private ShulkerEntity shulkerEntity;
+    private Shulker shulkerEntity;
     private int destroyerTimeout = DESTROYER_TIMEOUT_TICKS;
     private int destroyerDelay = 0;
 
     @Inject
-    public JumpAndRun(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config, WorldModifier modifier,
+    public JumpAndRun(@Named("lobbyWorld") ServerLevel world, LobbyWorldConfig config, WorldModifier modifier,
                       Scheduler scheduler, Translations translations) {
         this(world, config.jumpAndRunStart, modifier, scheduler, translations);
     }
 
-    public JumpAndRun(ServerWorld world, BlockPos start, WorldModifier modifier, Scheduler scheduler,
+    public JumpAndRun(ServerLevel world, BlockPos start, WorldModifier modifier, Scheduler scheduler,
                       Translations translations) {
         this.world = world;
         this.start = start;
         this.modifier = modifier;
         this.translations = translations;
         this.nodes = new Stack<>();
-        this.nodes.push(start.down());
+        this.nodes.push(start.below());
 
-        final int maxY = world.getTopYInclusive() + 1 - start.getY();  // max offset
+        final int maxY = world.getMaxY() + 1 - start.getY();  // max offset
 
         @SuppressWarnings("SuspiciousNameCombination")
         var config = new DefaultPosGenerator.Config(25, maxY - 25, List.of(
@@ -107,18 +107,18 @@ public class JumpAndRun {
         reset();
     }
 
-    public void update(ServerPlayerEntity player, Position position) {
-        if (player.getEntityWorld() != world || !isNext(position)) return;
+    public void update(ServerPlayer player, Position position) {
+        if (player.level() != world || !isNext(position)) return;
 
         next(player);
     }
 
     private boolean isNext(Position pos) {
-        return (int) Math.floor(pos.getX()) == next.getX() && (int) Math.floor(pos.getY()) == next.getY() && (int) Math.floor(pos.getZ()) == next.getZ();
+        return (int) Math.floor(pos.x()) == next.getX() && (int) Math.floor(pos.y()) == next.getY() && (int) Math.floor(pos.z()) == next.getZ();
     }
 
-    private void next(ServerPlayerEntity player) {
-        if (this.next.getY() >= world.getTopYInclusive()) {
+    private void next(ServerPlayer player) {
+        if (this.next.getY() >= world.getMaxY()) {
             this.collapse();
             this.win(player);
             return;
@@ -137,30 +137,30 @@ public class JumpAndRun {
 
         final Block block = randomBlock();
 
-        modifier.setBlockState(next, block.getDefaultState());
+        modifier.setBlockState(next, block.defaultBlockState());
 
-        world.playSound(null, next, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, 1f, 1f);
+        world.playSound(null, next, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 1f);
 
         spawnShulker(block, next, greenTeam);
 
-        this.next = next.up();
+        this.next = next.above();
     }
 
-    private void win(ServerPlayerEntity player) {
+    private void win(ServerPlayer player) {
         var players = PlayerLookup.all(world.getServer());
 
-        translations.translateText("lobby.jump_n_run.completed", FormatWrapper.styled(player.getNameForScoreboard(), Formatting.YELLOW, Formatting.BOLD))
-                .formatted(Formatting.GOLD, Formatting.BOLD)
-                .prefixed(Text.literal("Lobby> ").formatted(Formatting.BLUE))
+        translations.translateText("lobby.jump_n_run.completed", FormatWrapper.styled(player.getScoreboardName(), ChatFormatting.YELLOW, ChatFormatting.BOLD))
+                .formatted(ChatFormatting.GOLD, ChatFormatting.BOLD)
+                .prefixed(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE))
                 .sendTo(players);
 
-        for (ServerPlayerEntity p : players) {
-            p.playSoundToPlayer(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.RECORDS, 100f, 1f);
+        for (ServerPlayer p : players) {
+            p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.RECORDS, 100f, 1f);
         }
     }
 
     private void collapse() {
-        final BlockState air = Blocks.AIR.getDefaultState();
+        final BlockState air = Blocks.AIR.defaultBlockState();
 
         while (nodes.size() > 1) {
             BlockPos pos = nodes.pop();
@@ -170,23 +170,23 @@ public class JumpAndRun {
         reset();
     }
 
-    private void spawnShulker(Block block, BlockPos pos, Team team) {
+    private void spawnShulker(Block block, BlockPos pos, PlayerTeam team) {
         if (shulkerEntity != null) {
             shulkerEntity.discard();
         }
 
-        shulkerEntity = new ShulkerEntity(EntityType.SHULKER, world);
-        shulkerEntity.setPosition(Vec3d.of(pos));
-        shulkerEntity.setAiDisabled(true);
-        shulkerEntity.setGlowing(true);
-        shulkerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, Integer.MAX_VALUE, 255, false, false, false));
+        shulkerEntity = new Shulker(EntityType.SHULKER, world);
+        shulkerEntity.setPos(Vec3.atLowerCornerOf(pos));
+        shulkerEntity.setNoAi(true);
+        shulkerEntity.setGlowingTag(true);
+        shulkerEntity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, Integer.MAX_VALUE, 255, false, false, false));
         shulkerEntity.setSilent(true);
         shulkerEntity.setNoGravity(true);
         shulkerEntity.setInvulnerable(true);
         shulkerEntity.setInvisible(true);
-        shulkerEntity.getEntityWorld().getScoreboard().addScoreHolderToTeam(shulkerEntity.getNameForScoreboard(), team);
+        shulkerEntity.level().getScoreboard().addPlayerToTeam(shulkerEntity.getScoreboardName(), team);
 
-        ((ShulkerEntityAccessor) shulkerEntity).invokeSetColor(dyeColor(block));
+        ((ShulkerAccessor) shulkerEntity).invokeSetVariant(dyeColor(block));
 
         modifier.spawnEntity(shulkerEntity);
     }
@@ -202,16 +202,16 @@ public class JumpAndRun {
     private void setupTeams() {
         ServerScoreboard scoreboard = world.getScoreboard();
 
-        greenTeam = scoreboard.getTeam("jnr_green");
+        greenTeam = scoreboard.getPlayerTeam("jnr_green");
         if (greenTeam == null) {
-            greenTeam = scoreboard.addTeam("jnr_green");
-            greenTeam.setColor(Formatting.GREEN);
+            greenTeam = scoreboard.addPlayerTeam("jnr_green");
+            greenTeam.setColor(ChatFormatting.GREEN);
         }
 
-        redTeam = scoreboard.getTeam("jnr_red");
+        redTeam = scoreboard.getPlayerTeam("jnr_red");
         if (redTeam == null) {
-            redTeam = scoreboard.addTeam("jnr_red");
-            redTeam.setColor(Formatting.RED);
+            redTeam = scoreboard.addPlayerTeam("jnr_red");
+            redTeam.setColor(ChatFormatting.RED);
         }
     }
 
@@ -228,9 +228,9 @@ public class JumpAndRun {
             int y = next.getY();
             int z = next.getZ();
 
-            Box box = new Box(x - 1, y, z - 1, x + 2, y + 2, z + 2);
+            AABB box = new AABB(x - 1, y, z - 1, x + 2, y + 2, z + 2);
 
-            List<ServerPlayerEntity> nearbyPlayers = world.getEntitiesByClass(ServerPlayerEntity.class, box, p -> !p.isSpectator());
+            List<ServerPlayer> nearbyPlayers = world.getEntitiesOfClass(ServerPlayer.class, box, p -> !p.isSpectator());
 
             if (!nearbyPlayers.isEmpty()) {
                 next(nearbyPlayers.getFirst());
@@ -246,15 +246,15 @@ public class JumpAndRun {
 
             BlockPos pos = nodes.pop();
             BlockPos last = nodes.peek();
-            next = last.up();
+            next = last.above();
 
             double centerX = x + 0.5;
             double centerY = y - 0.5;
             double centerZ = z + 0.5;
 
-            modifier.setBlockState(pos, Blocks.AIR.getDefaultState());
-            world.spawnParticles(ParticleTypes.FLAME, centerX, centerY, centerZ, 50, 0.25d, 0.25d, 0.25d, 0.1d);
-            world.playSound(null, centerX, centerY, centerZ, SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.BLOCKS, 1f, 0f);
+            modifier.setBlockState(pos, Blocks.AIR.defaultBlockState());
+            world.sendParticles(ParticleTypes.FLAME, centerX, centerY, centerZ, 50, 0.25d, 0.25d, 0.25d, 0.1d);
+            world.playSound(null, centerX, centerY, centerZ, SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 1f, 0f);
 
             if (nodes.size() > 1) {
                 spawnShulker(world.getBlockState(last).getBlock(), last, redTeam);
@@ -267,7 +267,7 @@ public class JumpAndRun {
     private void reset() {
         nodes.clear();
         next = start;
-        nodes.push(next.down());
+        nodes.push(next.below());
         generator.reset();
         destroyerDelay = 0;
         destroyerTimeout = DESTROYER_TIMEOUT_TICKS;

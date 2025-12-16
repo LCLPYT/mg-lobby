@@ -5,14 +5,14 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.entity.boss.BossBar;
+import net.minecraft.world.BossEvent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
@@ -48,7 +48,7 @@ public class GameStartingActivity extends ComponentActivity {
     private boolean wasPaused = false;
 
     @AssistedInject
-    public GameStartingActivity(MinecraftServer server, Logger logger, @Named("lobbyWorld") ServerWorld world,
+    public GameStartingActivity(MinecraftServer server, Logger logger, @Named("lobbyWorld") ServerLevel world,
                                 @Assisted Game game, @Assisted GameStarter starter, @Assisted Translations translations) {
         super(server, logger);
         this.game = game;
@@ -86,15 +86,15 @@ public class GameStartingActivity extends ComponentActivity {
 
         final BossBarComponent bossBars = component(BuiltinComponents.BOSS_BAR);
 
-        final Identifier bossBarId = LobbyMod.identifier("starting");
+        final ResourceLocation bossBarId = LobbyMod.identifier("starting");
         final var titleTranslation = titleTranslation();
 
         bossBar = translations.translateBossBar(bossBarId, titleTranslation.left(), titleTranslation.right())
-                .with(bossBars).formatted(Formatting.YELLOW);
+                .with(bossBars).formatted(ChatFormatting.YELLOW);
 
-        bossBar.setColor(BossBar.Color.values()[colorIndex]);
+        bossBar.setColor(BossEvent.BossBarColor.values()[colorIndex]);
         bossBar.addPlayers(PlayerLookup.all(getServer()));
-        bossBar.setPercent(1f);
+        bossBar.setProgress(1f);
 
         bossBars.showOnJoin(bossBar);
 
@@ -115,7 +115,7 @@ public class GameStartingActivity extends ComponentActivity {
     private Pair<String, Object[]> titleTranslation() {
         if (wasPaused) {
             return Pair.of("lobby.countdown.title.paused", new Object[] {
-                    translations.translateText(config.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD)
+                    translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD)
             });
         }
 
@@ -125,26 +125,26 @@ public class GameStartingActivity extends ComponentActivity {
 
         if (minutes > 0) {
             return Pair.of("lobby.countdown.title.minutes", new Object[] {
-                    translations.translateText(config.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
+                    translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD),
                     minutes,
                     seconds
             });
         }
 
         return Pair.of("lobby.countdown.title.seconds", new Object[] {
-                translations.translateText(config.titleKey()).formatted(Formatting.AQUA, Formatting.BOLD),
+                translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD),
                 seconds
         });
     }
 
     private void updateBossBar() {
-        colorIndex = (colorIndex + 1) % BossBar.Color.values().length;
+        colorIndex = (colorIndex + 1) % BossEvent.BossBarColor.values().length;
 
         var titleTranslation = titleTranslation();
 
         bossBar.setTitle(titleTranslation.left(), titleTranslation.right());
-        bossBar.setColor(BossBar.Color.values()[colorIndex]);
-        bossBar.setPercent(timer / (float) (config.lobbyDurationSeconds() * 20));
+        bossBar.setColor(BossEvent.BossBarColor.values()[colorIndex]);
+        bossBar.setProgress(timer / (float) (config.lobbyDurationSeconds() * 20));
     }
 
     public void tick(RunningTask task) {
@@ -177,8 +177,8 @@ public class GameStartingActivity extends ComponentActivity {
             int remaining = timer / 20;
 
             if (remaining <= 5) {
-                for (ServerPlayerEntity player : PlayerLookup.all(getServer())) {
-                    player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.BLOCKS, 2f, 1f);
+                for (ServerPlayer player : PlayerLookup.all(getServer())) {
+                    player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.BLOCKS, 2f, 1f);
                 }
             }
         }

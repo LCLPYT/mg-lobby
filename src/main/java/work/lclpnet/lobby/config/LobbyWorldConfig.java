@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.config;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
@@ -17,21 +17,21 @@ import java.util.List;
 
 public class LobbyWorldConfig implements JsonConfig {
 
-    private final RegistryWrapper.WrapperLookup registries;
+    private final HolderLookup.Provider registries;
     public List<MazeConfig> mazeConfigs = new ArrayList<>(List.of(new MazeConfig()));  // one maze by default; mutable
     public BlockPos kingOfLadderGoal = null;
-    public List<Vec3d> kingOfLadderDisplays = new ArrayList<>();
+    public List<Vec3> kingOfLadderDisplays = new ArrayList<>();
     public List<BlockPos> geysers = new ArrayList<>();
     public BlockPos jumpAndRunStart = null;
     public List<Pair<BlockPos, BlockPos>> ticTacToeTables = new ArrayList<>();
     public LavaLevitation lavaLevitation = null;
     public GreetingConfig greetingConfig = null;
 
-    public LobbyWorldConfig(RegistryWrapper.WrapperLookup registries) {
+    public LobbyWorldConfig(HolderLookup.Provider registries) {
         this.registries = registries;
     }
 
-    public LobbyWorldConfig(JSONObject obj, RegistryWrapper.WrapperLookup registries) {
+    public LobbyWorldConfig(JSONObject obj, HolderLookup.Provider registries) {
         this(registries);
 
         if (obj.has("mazes")) {
@@ -64,7 +64,7 @@ public class LobbyWorldConfig implements JsonConfig {
                 for (Object entry : displays) {
                     if (!(entry instanceof JSONArray tuple)) continue;
 
-                    Vec3d pos = ConfigUtil.getVec3d(tuple);
+                    Vec3 pos = ConfigUtil.getVec3d(tuple);
                     kingOfLadderDisplays.add(pos);
                 }
             }
@@ -147,7 +147,7 @@ public class LobbyWorldConfig implements JsonConfig {
             kol.put("goal", kingOfLadderGoal != null ? ConfigUtil.writeBlockPos(kingOfLadderGoal) : JSONObject.NULL);
 
             JSONArray displays = new JSONArray();
-            for (Vec3d pos : kingOfLadderDisplays) {
+            for (Vec3 pos : kingOfLadderDisplays) {
                 displays.put(ConfigUtil.writeVec3d(pos));
             }
 
@@ -206,7 +206,7 @@ public class LobbyWorldConfig implements JsonConfig {
         return json;
     }
 
-    public static JsonConfigFactory<LobbyWorldConfig> factory(RegistryWrapper.WrapperLookup registries) {
+    public static JsonConfigFactory<LobbyWorldConfig> factory(HolderLookup.Provider registries) {
         return new JsonConfigFactory<>() {
             @Override
             public LobbyWorldConfig createDefaultConfig() {

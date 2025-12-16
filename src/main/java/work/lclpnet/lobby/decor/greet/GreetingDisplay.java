@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.decor.greet;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.AffineTransformation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Display;
+import net.minecraft.server.level.ServerLevel;
+import com.mojang.math.Transformation;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import work.lclpnet.kibu.access.entity.DisplayEntityAccess;
@@ -17,10 +17,10 @@ public class GreetingDisplay {
 
     private final LobbyWorldConfig config;
     private final WorldModifier worldModifier;
-    private final ServerWorld world;
+    private final ServerLevel world;
 
     @Inject
-    public GreetingDisplay(LobbyWorldConfig config, WorldModifier worldModifier, @Named("lobbyWorld") ServerWorld world) {
+    public GreetingDisplay(LobbyWorldConfig config, WorldModifier worldModifier, @Named("lobbyWorld") ServerLevel world) {
         this.config = config;
         this.worldModifier = worldModifier;
         this.world = world;
@@ -29,15 +29,15 @@ public class GreetingDisplay {
     public void show() {
         if (config.greetingConfig == null) return;
 
-        DisplayEntity.TextDisplayEntity display = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, world);
+        Display.TextDisplay display = new Display.TextDisplay(EntityType.TEXT_DISPLAY, world);
 
-        display.setPosition(config.greetingConfig.pos());
+        display.setPos(config.greetingConfig.pos());
         DisplayEntityAccess.setText(display, config.greetingConfig.text());
 
         Quaternionf leftRotation = new Quaternionf().rotationY((float) Math.toRadians(config.greetingConfig.rotationY()));
         Vector3f scale = new Vector3f(config.greetingConfig.scale());
 
-        AffineTransformation transform = new AffineTransformation(null, leftRotation, scale, null);
+        Transformation transform = new Transformation(null, leftRotation, scale, null);
         DisplayEntityAccess.setTransformation(display, transform);
 
         DisplayEntityAccess.setBackground(display, 0);

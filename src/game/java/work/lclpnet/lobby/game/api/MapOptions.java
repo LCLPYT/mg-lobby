@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.api;
 
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 import work.lclpnet.lobby.game.map.GameMap;
 
 import java.util.concurrent.CompletableFuture;
@@ -49,7 +49,7 @@ public interface MapOptions {
      */
     boolean isCleanMapRequired();
 
-    default CompletableFuture<Void> bootstrapWorld(ServerWorld world, GameMap map) {
+    default CompletableFuture<Void> bootstrapWorld(ServerLevel world, GameMap map) {
         return CompletableFuture.completedFuture(null);
     }
 }

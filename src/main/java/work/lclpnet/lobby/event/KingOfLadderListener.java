@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.event;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.level.ServerPlayer;
 import work.lclpnet.kibu.hook.HookListenerModule;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.ServerPlayConnectionHooks;
@@ -27,11 +27,11 @@ public class KingOfLadderListener implements HookListenerModule {
         registrar.registerHook(ServerPlayConnectionHooks.DISCONNECT, this::onDisconnect);
     }
 
-    private void onDisconnect(ServerPlayNetworkHandler handler, MinecraftServer server) {
+    private void onDisconnect(ServerGamePacketListenerImpl handler, MinecraftServer server) {
         kingOfLadder.playerQuit(handler.getPlayer());
     }
 
-    private boolean onPlayerMove(ServerPlayerEntity player, PositionRotation from, PositionRotation to) {
+    private boolean onPlayerMove(ServerPlayer player, PositionRotation from, PositionRotation to) {
         kingOfLadder.update(player, to);
         return false;
     }

@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.decor.maze;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
 import org.slf4j.Logger;
 import work.lclpnet.lobby.util.WorldModifier;
 import work.lclpnet.maze.Maze;
@@ -80,9 +80,9 @@ public class LobbyMazeOutput implements MazeOutput {
         int y = pos.getY();
         int z = pos.getZ();
 
-        BlockState air = Blocks.AIR.getDefaultState();
+        BlockState air = Blocks.AIR.defaultBlockState();
 
-        for (BlockPos exitPos : BlockPos.iterate(x, y, z, x, y + 1, z)) {
+        for (BlockPos exitPos : BlockPos.betweenClosed(x, y, z, x, y + 1, z)) {
             writer.setBlockState(exitPos, air);
         }
     }
@@ -108,7 +108,7 @@ public class LobbyMazeOutput implements MazeOutput {
                 int y = pos.getY();
                 int z = pos.getZ() + dz;
 
-                for (BlockPos wallPos : BlockPos.iterate(x, y, z, x, y + config.height - 1, z)) {
+                for (BlockPos wallPos : BlockPos.betweenClosed(x, y, z, x, y + config.height - 1, z)) {
                     writer.setBlockState(wallPos, config.material);
                 }
             }

@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -12,7 +12,7 @@ public interface MapCollection extends Iterable<GameMap> {
 
     Collection<GameMap> getMaps();
 
-    Optional<GameMap> getMap(Identifier id);
+    Optional<GameMap> getMap(ResourceLocation id);
 
     default void add(Collection<GameMap> maps) {
         maps.forEach(this::add);
@@ -24,7 +24,7 @@ public interface MapCollection extends Iterable<GameMap> {
         return getMaps().iterator();
     }
 
-    default Stream<GameMap> mapsWithPrefix(Identifier prefix) {
+    default Stream<GameMap> mapsWithPrefix(ResourceLocation prefix) {
         String str = prefix.toString();
 
         if (!str.endsWith("/") && str.charAt(str.length() - 1) != ':') {
@@ -33,13 +33,13 @@ public interface MapCollection extends Iterable<GameMap> {
 
         String prefixStr = str;
 
-        Set<Identifier> seen = new HashSet<>();
+        Set<ResourceLocation> seen = new HashSet<>();
 
         return getMaps().stream()
                 .filter(map -> map.isFrom(prefixStr) && seen.add(map.getDescriptor().getIdentifier()));
     }
 
-    default Stream<Identifier> mapIdsWithPrefix(Identifier prefix) {
+    default Stream<ResourceLocation> mapIdsWithPrefix(ResourceLocation prefix) {
         return mapsWithPrefix(prefix)
                 .map(GameMap::getDescriptor)
                 .map(MapDescriptor::getIdentifier);

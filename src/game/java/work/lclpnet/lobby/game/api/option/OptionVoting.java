@@ -1,21 +1,21 @@
 package work.lclpnet.lobby.game.api.option;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public record OptionVoting<T>(
-        Function<ServerPlayerEntity, ItemStack> icon,
-        Function<ServerPlayerEntity, Text> title,
+        Function<ServerPlayer, ItemStack> icon,
+        Function<ServerPlayer, Component> title,
         Class<T> optionType,
         Collection<T> options,
-        BiFunction<ServerPlayerEntity, T, ItemStack> optionIcons
+        BiFunction<ServerPlayer, T, ItemStack> optionIcons
 ) {
-    public BiFunction<ServerPlayerEntity, T, Text> optionName() {
-        return optionIcons.andThen(ItemStack::getName);
+    public BiFunction<ServerPlayer, T, Component> optionName() {
+        return optionIcons.andThen(ItemStack::getHoverName);
     }
 }

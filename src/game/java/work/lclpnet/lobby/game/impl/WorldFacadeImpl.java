@@ -1,15 +1,15 @@
 package work.lclpnet.lobby.game.impl;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.hook.HookRegistrar;
@@ -38,8 +38,8 @@ public class WorldFacadeImpl implements WorldFacade {
     private final WorldUnloader worldUnloader;
     private final Logger logger;
     private MapOptions mapOptions = null;
-    private RegistryKey<World> mapKey = null;
-    private Vec3d spawn = null;
+    private ResourceKey<Level> mapKey = null;
+    private Vec3 spawn = null;
     private float yaw = 0f;
 
     public WorldFacadeImpl(MinecraftServer server, MapManager mapManager, WorldContainer worldContainer, Logger logger) {
@@ -59,10 +59,10 @@ public class WorldFacadeImpl implements WorldFacade {
     private void modifySpawnLocation(PlayerSpawnLocationCallback.LocationData data) {
         if (mapKey == null || spawn == null) return;
 
-        ServerWorld world = this.server.getWorld(mapKey);
+        ServerLevel world = this.server.getLevel(mapKey);
 
         if (world == null) {
-            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.getValue()));
+            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.location()));
         }
 
         data.setWorld(world);
@@ -71,29 +71,29 @@ public class WorldFacadeImpl implements WorldFacade {
     }
 
     @Override
-    public void teleport(ServerPlayerEntity player) {
+    public void teleport(ServerPlayer player) {
         if (mapKey == null || spawn == null) return;
 
-        ServerWorld world = this.server.getWorld(mapKey);
+        ServerLevel world = this.server.getLevel(mapKey);
 
         if (world == null) {
-            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.getValue()));
+            throw new IllegalStateException("World %s is not loaded".formatted(mapKey.location()));
         }
 
-        player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), yaw, 0F, true);
+        player.teleportTo(world, spawn.x(), spawn.y(), spawn.z(), Set.of(), yaw, 0F, true);
     }
 
     @Override
-    public CompletableFuture<ServerWorld> changeMap(Identifier identifier, MapOptions options) {
+    public CompletableFuture<ServerLevel> changeMap(ResourceLocation identifier, MapOptions options) {
         var map = mapManager.getCollection().getMap(identifier);
 
         if (map.isEmpty()) {
             return CompletableFuture.failedFuture(new IllegalStateException("Unknown map %s".formatted(identifier)));
         }
 
-        var newKey = RegistryKey.of(RegistryKeys.WORLD, identifier);
+        var newKey = ResourceKey.create(Registries.DIMENSION, identifier);
 
-        ServerWorld existingWorld = server.getWorld(newKey);
+        ServerLevel existingWorld = server.getLevel(newKey);
 
         if (existingWorld != null) {
             if (options.isCleanMapRequired()) {
@@ -109,9 +109,9 @@ public class WorldFacadeImpl implements WorldFacade {
         return changeToYetUnloadedMap(map.get(), newKey, options);
     }
 
-    private CompletableFuture<ServerWorld> changeToYetUnloadedMap(GameMap map, RegistryKey<World> newKey, MapOptions options) {
-        LevelStorage.Session session = ((MinecraftServerAccessor) server).getSession();
-        Path directory = session.getWorldDirectory(newKey);
+    private CompletableFuture<ServerLevel> changeToYetUnloadedMap(GameMap map, ResourceKey<Level> newKey, MapOptions options) {
+        LevelStorageSource.LevelStorageAccess session = ((MinecraftServerAccessor) server).getSession();
+        Path directory = session.getDimensionPath(newKey);
 
         return CompletableFuture.runAsync(() -> {
             try {
@@ -124,19 +124,19 @@ public class WorldFacadeImpl implements WorldFacade {
                 throw new CompletionException(e);
             }
         }).thenComposeAsync(nil -> server.submit(() -> {
-            var optHandle = KibuWorlds.getInstance().getWorldManager(server).openPersistentWorld(newKey.getValue());
+            var optHandle = KibuWorlds.getInstance().getWorldManager(server).openPersistentWorld(newKey.location());
 
             RuntimeWorldHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
 
             worldContainer.trackHandle(handle);  // automatically unload world, if not done manually
 
-            ServerWorld world = handle.asWorld();
+            ServerLevel world = handle.asWorld();
 
             return onWorldLoaded(map, newKey, world, options);
         }).join());
     }
 
-    private CompletableFuture<ServerWorld> onWorldLoaded(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
+    private CompletableFuture<ServerLevel> onWorldLoaded(GameMap map, ResourceKey<Level> newKey, ServerLevel world, MapOptions options) {
         return options.bootstrapWorld(world, map)
                 .exceptionally(throwable -> {
                     logger.error("Failed to bootstrap map. Continuing without bootrap...", throwable);
@@ -145,8 +145,8 @@ public class WorldFacadeImpl implements WorldFacade {
                 .thenCompose(nil -> server.submit(() -> onWorldBootstrapped(map, newKey, world, options)));
     }
 
-    private ServerWorld onWorldBootstrapped(GameMap map, RegistryKey<World> newKey, ServerWorld world, MapOptions options) {
-        RegistryKey<World> oldKey = this.mapKey;
+    private ServerLevel onWorldBootstrapped(GameMap map, ResourceKey<Level> newKey, ServerLevel world, MapOptions options) {
+        ResourceKey<Level> oldKey = this.mapKey;
         MapOptions oldOptions = this.mapOptions;
 
         this.mapKey = newKey;
@@ -154,8 +154,8 @@ public class WorldFacadeImpl implements WorldFacade {
         this.spawn = MapUtils.getSpawnPosition(map);
         this.yaw = MapUtils.getSpawnYaw(map);
 
-        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
-            player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), yaw, 0, true);
+        for (ServerPlayer player : PlayerLookup.all(server)) {
+            player.teleportTo(world, spawn.x(), spawn.y(), spawn.z(), Set.of(), yaw, 0, true);
         }
 
         // cleanup current map if requested

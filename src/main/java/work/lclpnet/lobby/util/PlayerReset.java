@@ -1,59 +1,59 @@
 package work.lclpnet.lobby.util;
 
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameMode;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Abilities;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.GameType;
 import work.lclpnet.kibu.access.VelocityModifier;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 
-import static net.minecraft.entity.attribute.EntityAttributes.*;
+import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
 public class PlayerReset {
 
     private PlayerReset() {}
 
-    public static void reset(ServerPlayerEntity player) {
-        player.changeGameMode(GameMode.ADVENTURE);
-        player.clearStatusEffects();
-        player.getInventory().clear();
+    public static void reset(ServerPlayer player) {
+        player.setGameMode(GameType.ADVENTURE);
+        player.removeAllEffects();
+        player.getInventory().clearContent();
         PlayerUtils.setCursorStack(player, ItemStack.EMPTY);
 
-        player.getHungerManager().setFoodLevel(20);
+        player.getFoodData().setFoodLevel(20);
         player.setAbsorptionAmount(0F);
-        player.setExperienceLevel(0);
+        player.setExperienceLevels(0);
         player.setExperiencePoints(0);
-        player.setFireTicks(0);
-        player.setStuckArrowCount(0);
-        player.setOnFire(false);
-        VelocityModifier.setVelocity(player, Vec3d.ZERO);
+        player.setRemainingFireTicks(0);
+        player.setArrowCount(0);
+        player.setSharedFlagOnFire(false);
+        VelocityModifier.setVelocity(player, Vec3.ZERO);
 
         PlayerReset.resetAttributes(player);
 
         player.setHealth(player.getMaxHealth());
-        player.dismountVehicle();
+        player.removeVehicle();
 
         resetSpawnPoint(player);
 
-        PlayerAbilities abilities = player.getAbilities();
+        Abilities abilities = player.getAbilities();
         abilities.flying = false;
-        abilities.allowFlying = false;
+        abilities.mayfly = false;
         abilities.invulnerable = false;
-        abilities.setFlySpeed(0.05f);
+        abilities.setFlyingSpeed(0.05f);
         modifyWalkSpeed(player, 0.1f, false);
 
-        player.sendAbilitiesUpdate();
+        player.onUpdateAbilities();
     }
 
-    public static void resetSpawnPoint(ServerPlayerEntity player) {
-        player.setSpawnPoint(null, false);
+    public static void resetSpawnPoint(ServerPlayer player) {
+        player.setRespawnPosition(null, false);
     }
 
-    public static void resetAttributes(ServerPlayerEntity player) {
+    public static void resetAttributes(ServerPlayer player) {
         resetAttribute(player, ARMOR);
         resetAttribute(player, ARMOR_TOUGHNESS);
         resetAttribute(player, ATTACK_DAMAGE);
@@ -84,38 +84,38 @@ public class PlayerReset {
         resetAttribute(player, WATER_MOVEMENT_EFFICIENCY);
     }
 
-    public static void resetAttribute(ServerPlayerEntity player, RegistryEntry<EntityAttribute> attribute) {
+    public static void resetAttribute(ServerPlayer player, Holder<Attribute> attribute) {
         if (attribute == MOVEMENT_SPEED) {
-            setAttribute(player, attribute, player.getAbilities().getWalkSpeed());
+            setAttribute(player, attribute, player.getAbilities().getWalkingSpeed());
             return;
         }
 
         setAttribute(player, attribute, attribute.value().getDefaultValue());
     }
 
-    public static void setAttribute(ServerPlayerEntity player, RegistryEntry<EntityAttribute> attribute, double value) {
-        EntityAttributeInstance instance = player.getAttributeInstance(attribute);
+    public static void setAttribute(ServerPlayer player, Holder<Attribute> attribute, double value) {
+        AttributeInstance instance = player.getAttribute(attribute);
 
         if (instance == null) return;
 
         instance.setBaseValue(value);
     }
 
-    public static void modifyWalkSpeed(ServerPlayerEntity player, float value) {
+    public static void modifyWalkSpeed(ServerPlayer player, float value) {
         modifyWalkSpeed(player, value, true);
     }
 
-    public static void modifyWalkSpeed(ServerPlayerEntity player, float value, boolean update) {
-        player.getAbilities().setWalkSpeed(value);
+    public static void modifyWalkSpeed(ServerPlayer player, float value, boolean update) {
+        player.getAbilities().setWalkingSpeed(value);
 
-        EntityAttributeInstance attribute = player.getAttributeInstance(MOVEMENT_SPEED);
+        AttributeInstance attribute = player.getAttribute(MOVEMENT_SPEED);
 
         if (attribute != null) {
             attribute.setBaseValue(value);
         }
 
         if (update) {
-            player.sendAbilitiesUpdate();
+            player.onUpdateAbilities();
         }
     }
 }

@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.util;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface Interactable {
 
-    void onInteract(ServerPlayerEntity player);
+    void onInteract(ServerPlayer player);
 }

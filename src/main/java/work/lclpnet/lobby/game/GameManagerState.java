@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lobby.game.api.Game;
 
@@ -34,8 +34,8 @@ public class GameManagerState {
         return currentGame;
     }
 
-    public NbtCompound toNbt() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag toNbt() {
+        CompoundTag nbt = new CompoundTag();
 
         if (currentGame != null) {
             String gameId = currentGame.getConfig().identifier();
@@ -45,10 +45,10 @@ public class GameManagerState {
         return nbt;
     }
 
-    public void fromNbt(NbtCompound nbt, GameMangerLoader loader) {
+    public void fromNbt(CompoundTag nbt, GameMangerLoader loader) {
         if (!nbt.contains(CURRENT_GAME_KEY)) return;
 
-        String gameId = nbt.getString(CURRENT_GAME_KEY, null);
+        String gameId = nbt.getStringOr(CURRENT_GAME_KEY, null);
 
         if (gameId == null) return;
 

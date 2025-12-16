@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.Bootstrap;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.SharedConstants;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceLocation;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,8 @@ public class GameMapTest {
 
     @BeforeAll
     public static void setup() {
-        SharedConstants.createGameVersion();
-        Bootstrap.initialize();
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
     }
 
     @Test
@@ -46,7 +46,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(json, new MapDescriptor("test", ""));
 
-        assertEquals(Identifier.of("test:my_map"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(ResourceLocation.parse("test:my_map"), gameMap.getDescriptor().getIdentifier());
         assertEquals("minecraft:cobblestone", gameMap.getProperty("icon"));
         assertEquals("LCLP", gameMap.getProperty("author"));
     }
@@ -61,7 +61,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(json, new MapDescriptor("test", ""));
 
-        assertEquals(Identifier.of("test:my_map"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(ResourceLocation.parse("test:my_map"), gameMap.getDescriptor().getIdentifier());
         assertEquals("test/my_map", gameMap.getDescriptor().getMapPath());
         assertNull(gameMap.getProperty("icon"));
     }
@@ -91,7 +91,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(json, new MapDescriptor("test", "nested"));
 
-        assertEquals(Identifier.of("test:nested/my_map"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(ResourceLocation.parse("test:nested/my_map"), gameMap.getDescriptor().getIdentifier());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(json, new MapDescriptor("test", "nested"));
 
-        assertEquals(Identifier.of("test:"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(ResourceLocation.parse("test:"), gameMap.getDescriptor().getIdentifier());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class GameMapTest {
 
         GameMap gameMap = GameMap.parse(json, new MapDescriptor("test", "nested"));
 
-        assertEquals(Identifier.of("test:map_two"), gameMap.getDescriptor().getIdentifier());
+        assertEquals(ResourceLocation.parse("test:map_two"), gameMap.getDescriptor().getIdentifier());
         assertEquals("test/map_two", gameMap.getDescriptor().getMapPath());
     }
 

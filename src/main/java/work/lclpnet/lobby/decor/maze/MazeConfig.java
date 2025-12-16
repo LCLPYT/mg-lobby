@@ -1,10 +1,10 @@
 package work.lclpnet.lobby.decor.maze;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.core.BlockPos;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import work.lclpnet.config.json.JsonConfig;
@@ -18,8 +18,8 @@ import java.util.List;
 public class MazeConfig implements JsonConfig {
 
     public BlockPos start = null;
-    public Bounds bounds = new Bounds(BlockPos.ORIGIN, BlockPos.ORIGIN);
-    public BlockState material = Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.PERSISTENT, true);
+    public Bounds bounds = new Bounds(BlockPos.ZERO, BlockPos.ZERO);
+    public BlockState material = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
     public int height = 4;
     public List<Pair<BlockPos, BlockPos>> forcePassages = new ArrayList<>();
     public List<Pair<BlockPos, BlockPos>> exits = new ArrayList<>();
@@ -105,8 +105,8 @@ public class MazeConfig implements JsonConfig {
         }
 
         JSONArray bounds = new JSONArray();
-        bounds.put(ConfigUtil.writeBlockPos(BlockPos.ofFloored(this.bounds.getMin())));
-        bounds.put(ConfigUtil.writeBlockPos(BlockPos.ofFloored(this.bounds.getMax())));
+        bounds.put(ConfigUtil.writeBlockPos(BlockPos.containing(this.bounds.getMin())));
+        bounds.put(ConfigUtil.writeBlockPos(BlockPos.containing(this.bounds.getMax())));
 
         json.put("bounds", bounds);
         json.put("material", BlockStateUtils.stringify(material));

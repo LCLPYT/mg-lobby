@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.game;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtSizeTracker;
+import net.minecraft.nbt.NbtAccounter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -68,10 +68,10 @@ public class AsyncGameStateIo implements GameStateIo {
         synchronized (this) {
             if (!Files.exists(path)) return;
 
-            NbtCompound nbt;
+            CompoundTag nbt;
 
             try (var in = Files.newInputStream(path)) {
-                nbt = NbtIo.readCompressed(in, NbtSizeTracker.ofUnlimitedBytes());
+                nbt = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
             }
 
             state.fromNbt(nbt, loader);

@@ -1,7 +1,7 @@
 package work.lclpnet.lobby.game.api.prot.scope;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.damagesource.DamageSource;
 
 public interface EntityDamageSourceScope {
 

@@ -1,11 +1,11 @@
 package work.lclpnet.lobby.dev;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.translate.Translations;
@@ -58,11 +58,11 @@ public class TestGame implements Game, GameConfigurator {
         config.registerVoting("map", new OptionVoting<>(
                 player -> {
                     var stack = new ItemStack(Items.PAPER);
-                    stack.set(DataComponentTypes.ITEM_NAME, Text.literal("Map Voting"));
+                    stack.set(DataComponents.ITEM_NAME, Component.literal("Map Voting"));
 
                     return stack;
                 },
-                player -> Text.literal("Map"),
+                player -> Component.literal("Map"),
                 String.class,
                 List.of("Map A", "Map B", "Map C"),
                 (player, map) -> {
@@ -73,7 +73,7 @@ public class TestGame implements Game, GameConfigurator {
                         default -> Items.STRUCTURE_VOID;
                     });
 
-                    stack.set(DataComponentTypes.ITEM_NAME, Text.literal(map).formatted(Formatting.GREEN));
+                    stack.set(DataComponents.ITEM_NAME, Component.literal(map).withStyle(ChatFormatting.GREEN));
 
                     return stack;
                 })
@@ -86,7 +86,7 @@ public class TestGame implements Game, GameConfigurator {
 
         // you can set a periodic condition message that gets sent to everyone, if the game cannot start.
         var notEnoughPlayers = translations.translateText("lobby.game.not_enough_players", getRequiredPlayers())
-                .formatted(Formatting.RED);
+                .formatted(ChatFormatting.RED);
 
         manager.setCannotStartMessage(notEnoughPlayers::translateFor);
 

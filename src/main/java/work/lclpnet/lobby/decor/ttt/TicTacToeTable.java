@@ -1,10 +1,10 @@
 package work.lclpnet.lobby.decor.ttt;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
 
     private final BlockPos left, right;
     private final BlockPos center;
-    private ServerPlayerEntity leftPlayer, rightPlayer;
+    private ServerPlayer leftPlayer, rightPlayer;
 
     public TicTacToeTable(Pair<BlockPos, BlockPos> pair) {
         this(pair.left(), pair.right());
@@ -23,7 +23,7 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
 
     public TicTacToeTable(BlockPos left, BlockPos right) {
         Vec3i dir = right.subtract(left);
-        if (left.add(Math.abs(dir.getX()), Math.abs(dir.getY()), Math.abs(dir.getZ())).equals(right)) {
+        if (left.offset(Math.abs(dir.getX()), Math.abs(dir.getY()), Math.abs(dir.getZ())).equals(right)) {
             this.left = left;
             this.right = right;
         } else {
@@ -38,11 +38,11 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
         BlockPos diff = left.subtract(right);
 
         // check distance is 2
-        if (Math.abs(diff.getSquaredDistance(Vec3i.ZERO) - 4) > 1e-9) {
+        if (Math.abs(diff.distSqr(Vec3i.ZERO) - 4) > 1e-9) {
             throw new IllegalArgumentException("Seats must be exactly 2 blocks apart");
         }
 
-        return right.add(diff.getX() / 2, diff.getY() / 2, diff.getZ() / 2);
+        return right.offset(diff.getX() / 2, diff.getY() / 2, diff.getZ() / 2);
     }
 
     @Override
@@ -56,19 +56,19 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
     }
 
     @Nullable
-    public ServerPlayerEntity player(int i) {
+    public ServerPlayer player(int i) {
         if (i == 0) return leftPlayer;
         if (i == 1) return rightPlayer;
 
         return null;
     }
 
-    public void player(int i, ServerPlayerEntity player) {
+    public void player(int i, ServerPlayer player) {
         if (i == 0) leftPlayer = player;
         else if (i == 1) rightPlayer = player;
     }
 
-    public int playerIndex(ServerPlayerEntity player) {
+    public int playerIndex(ServerPlayer player) {
         if (player == null) return -1;
         if (player == leftPlayer) return 0;
         if (player == rightPlayer) return 1;
@@ -84,7 +84,7 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
         return -1;
     }
 
-    public ServerPlayerEntity opponent(int i) {
+    public ServerPlayer opponent(int i) {
         if (i == -1) return null;
 
         return player(1 - i);
@@ -94,8 +94,8 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
         return leftPlayer != null && rightPlayer != null;
     }
 
-    public Collection<ServerPlayerEntity> players() {
-        var players = new ArrayList<ServerPlayerEntity>();
+    public Collection<ServerPlayer> players() {
+        var players = new ArrayList<ServerPlayer>();
 
         if (leftPlayer != null) players.add(leftPlayer);
         if (rightPlayer != null) players.add(rightPlayer);
@@ -107,8 +107,8 @@ public class TicTacToeTable implements Pair<BlockPos, BlockPos> {
         return center;
     }
 
-    public Vec3d direction() {
-        return Vec3d.of(center.subtract(left));
+    public Vec3 direction() {
+        return Vec3.atLowerCornerOf(center.subtract(left));
     }
 
     public void clear() {

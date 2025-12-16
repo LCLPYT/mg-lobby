@@ -1,19 +1,19 @@
 package work.lclpnet.lobby.decor.seat;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.block.enums.StairShape;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.StairsShape;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.access.entity.ArmorStandAccess;
 
@@ -25,15 +25,15 @@ public class DefaultSeatProvider implements SeatProvider {
 
     @Nullable
     @Override
-    public Entity getSeat(World world, BlockPos pos) {
+    public Entity getSeat(Level world, BlockPos pos) {
         BlockState state = world.getBlockState(pos);
 
-        if (!state.isIn(BlockTags.STAIRS)) {
+        if (!state.is(BlockTags.STAIRS)) {
             // not a seat
             return null;
         }
 
-        if (state.getProperties().contains(Properties.BLOCK_HALF) && state.get(Properties.BLOCK_HALF) != BlockHalf.BOTTOM) {
+        if (state.getProperties().contains(BlockStateProperties.HALF) && state.getValue(BlockStateProperties.HALF) != Half.BOTTOM) {
             // chair is upside down
             return null;
         }
@@ -42,12 +42,12 @@ public class DefaultSeatProvider implements SeatProvider {
             return null;
         }
 
-        final Vec3d seatPos = getSeatPosition(state, pos);
+        final Vec3 seatPos = getSeatPosition(state, pos);
 
-        var blockingEntities = world.getEntitiesByClass(ArmorStandEntity.class, Box.of(seatPos, 1, 1, 1), entity -> {
-            if (!entity.getCommandTags().contains("seat")) return false;
+        var blockingEntities = world.getEntitiesOfClass(ArmorStand.class, AABB.ofSize(seatPos, 1, 1, 1), entity -> {
+            if (!entity.getTags().contains("seat")) return false;
 
-            if (entity.hasPassengers()) return true;
+            if (entity.isVehicle()) return true;
 
             // there somehow is an unused seat, remove it
             entity.discard();
@@ -62,95 +62,95 @@ public class DefaultSeatProvider implements SeatProvider {
 
         final float yaw = getYaw(state);
 
-        ArmorStandEntity stand = new ArmorStandEntity(world, seatPos.getX(), seatPos.getY(), seatPos.getZ());
+        ArmorStand stand = new ArmorStand(world, seatPos.x(), seatPos.y(), seatPos.z());
         stand.setInvisible(true);
         stand.setInvulnerable(true);
         stand.setNoGravity(true);
-        stand.setYaw(yaw);
-        stand.addCommandTag("seat");
+        stand.setYRot(yaw);
+        stand.addTag("seat");
         ArmorStandAccess.setSmall(stand, true);
         ArmorStandAccess.setMarker(stand, true);
 
         return stand;
     }
 
-    private boolean isObstructed(BlockPos pos, BlockView view) {
-        if (hasCollision(view, pos.up())) return true;
+    private boolean isObstructed(BlockPos pos, BlockGetter view) {
+        if (hasCollision(view, pos.above())) return true;
 
         // check if chair is sunken into the ground
         return isFullBlock(view, pos.north()) &&
                 isFullBlock(view, pos.south()) &&
                 isFullBlock(view, pos.west()) &&
                 isFullBlock(view, pos.east()) &&
-                isFullBlock(view, pos.add(1, 0, 1)) &&
-                isFullBlock(view, pos.add(-1, 0, -1)) &&
-                isFullBlock(view, pos.add(1, 0, -1)) &&
-                isFullBlock(view, pos.add(-1, 0, 1));
+                isFullBlock(view, pos.offset(1, 0, 1)) &&
+                isFullBlock(view, pos.offset(-1, 0, -1)) &&
+                isFullBlock(view, pos.offset(1, 0, -1)) &&
+                isFullBlock(view, pos.offset(-1, 0, 1));
     }
 
-    private boolean hasCollision(BlockView view, BlockPos pos) {
+    private boolean hasCollision(BlockGetter view, BlockPos pos) {
         return !view.getBlockState(pos).getCollisionShape(view, pos).isEmpty();
     }
 
-    private boolean isFullBlock(BlockView view, BlockPos pos) {
+    private boolean isFullBlock(BlockGetter view, BlockPos pos) {
         VoxelShape shape = view.getBlockState(pos).getCollisionShape(view, pos);
         if (shape.isEmpty()) return false;
 
-        Box box = shape.getBoundingBox();
-        return box.getLengthY() >= 1 && box.getLengthX() >= 1 && box.getLengthZ() >= 1;
+        AABB box = shape.bounds();
+        return box.getYsize() >= 1 && box.getXsize() >= 1 && box.getZsize() >= 1;
     }
 
-    private Vec3d getSeatPosition(BlockState state, BlockPos pos) {
+    private Vec3 getSeatPosition(BlockState state, BlockPos pos) {
         final int x = pos.getX(), y = pos.getY(), z = pos.getZ();
 
         final var properties = state.getProperties();
 
-        if (!properties.contains(Properties.HORIZONTAL_FACING)) {
-            return new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);
+        if (!properties.contains(BlockStateProperties.HORIZONTAL_FACING)) {
+            return new Vec3(x + 0.5, y + OFFSET_Y, z + 0.5);
         }
 
-        final Direction direction = state.get(Properties.HORIZONTAL_FACING);
-        final StairShape shape;
+        final Direction direction = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        final StairsShape shape;
 
-        if (!properties.contains(Properties.STAIR_SHAPE) || (shape = state.get(Properties.STAIR_SHAPE)) == StairShape.STRAIGHT) {
+        if (!properties.contains(BlockStateProperties.STAIRS_SHAPE) || (shape = state.getValue(BlockStateProperties.STAIRS_SHAPE)) == StairsShape.STRAIGHT) {
             return switch (direction) {
-                case NORTH -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.75);
-                case SOUTH -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.25);
-                case WEST -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.5);
-                case EAST -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.5);
-                default -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
+                case NORTH -> new Vec3(x + 0.5, y + OFFSET_Y, z + 0.75);
+                case SOUTH -> new Vec3(x + 0.5, y + OFFSET_Y, z + 0.25);
+                case WEST -> new Vec3(x + 0.75, y + OFFSET_Y, z + 0.5);
+                case EAST -> new Vec3(x + 0.25, y + OFFSET_Y, z + 0.5);
+                default -> new Vec3(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
             };
         }
 
-        if (shape == StairShape.OUTER_RIGHT || shape == StairShape.INNER_RIGHT) {
+        if (shape == StairsShape.OUTER_RIGHT || shape == StairsShape.INNER_RIGHT) {
             return switch (direction) {
-                case NORTH -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.75);
-                case SOUTH -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.25);
-                case WEST -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.75);
-                case EAST -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.25);
-                default -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
+                case NORTH -> new Vec3(x + 0.25, y + OFFSET_Y, z + 0.75);
+                case SOUTH -> new Vec3(x + 0.75, y + OFFSET_Y, z + 0.25);
+                case WEST -> new Vec3(x + 0.75, y + OFFSET_Y, z + 0.75);
+                case EAST -> new Vec3(x + 0.25, y + OFFSET_Y, z + 0.25);
+                default -> new Vec3(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
             };
         }
 
         // shape is OUTER_LEFT or INNER_LEFT
         return switch (direction) {
-            case NORTH -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.75);
-            case SOUTH -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.25);
-            case WEST -> new Vec3d(x + 0.75, y + OFFSET_Y, z + 0.25);
-            case EAST -> new Vec3d(x + 0.25, y + OFFSET_Y, z + 0.75);
-            default -> new Vec3d(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
+            case NORTH -> new Vec3(x + 0.75, y + OFFSET_Y, z + 0.75);
+            case SOUTH -> new Vec3(x + 0.25, y + OFFSET_Y, z + 0.25);
+            case WEST -> new Vec3(x + 0.75, y + OFFSET_Y, z + 0.25);
+            case EAST -> new Vec3(x + 0.25, y + OFFSET_Y, z + 0.75);
+            default -> new Vec3(x + 0.5, y + OFFSET_Y, z + 0.5);  // unreachable
         };
     }
 
     private float getYaw(BlockState state) {
         final var properties = state.getProperties();
 
-        if (!properties.contains(Properties.HORIZONTAL_FACING)) return 0;
+        if (!properties.contains(BlockStateProperties.HORIZONTAL_FACING)) return 0;
 
-        final Direction direction = state.get(Properties.HORIZONTAL_FACING);
-        final StairShape shape;
+        final Direction direction = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        final StairsShape shape;
 
-        if (!properties.contains(Properties.STAIR_SHAPE) || (shape = state.get(Properties.STAIR_SHAPE)) == StairShape.STRAIGHT) {
+        if (!properties.contains(BlockStateProperties.STAIRS_SHAPE) || (shape = state.getValue(BlockStateProperties.STAIRS_SHAPE)) == StairsShape.STRAIGHT) {
             return switch (direction) {
                 case NORTH -> 0;
                 case SOUTH -> 180;
@@ -160,7 +160,7 @@ public class DefaultSeatProvider implements SeatProvider {
             };
         }
 
-        if (shape == StairShape.OUTER_RIGHT || shape == StairShape.INNER_RIGHT) {
+        if (shape == StairsShape.OUTER_RIGHT || shape == StairsShape.INNER_RIGHT) {
             return switch (direction) {
                 case NORTH -> 45;
                 case SOUTH -> -135;

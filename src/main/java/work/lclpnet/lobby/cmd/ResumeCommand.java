@@ -2,12 +2,12 @@ package work.lclpnet.lobby.cmd;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
 import work.lclpnet.lobby.game.start.GameStarter;
@@ -25,34 +25,34 @@ public class ResumeCommand implements KibuCommand {
         registrar.registerCommand(command());
     }
 
-    private LiteralArgumentBuilder<ServerCommandSource> command() {
-        return CommandManager.literal("resume")
-                .requires(s -> s.hasPermissionLevel(2))
+    private LiteralArgumentBuilder<CommandSourceStack> command() {
+        return Commands.literal("resume")
+                .requires(s -> s.hasPermission(2))
                 .executes(this::resume);
     }
 
-    private int resume(CommandContext<ServerCommandSource> ctx) {
+    private int resume(CommandContext<CommandSourceStack> ctx) {
         if (starter == null) {
-            ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
-                    .append(Text.literal("There is no game starting at the moment").formatted(Formatting.RED)));
+            ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)
+                    .append(Component.literal("There is no game starting at the moment").withStyle(ChatFormatting.RED)));
             return 0;
         }
 
         if (!starter.isPaused()) {
-            ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
-                    .append(Text.literal("The game start is not paused. Use ").formatted(Formatting.RED))
-                    .append(Text.literal("/pause").formatted(Formatting.YELLOW)
-                            .styled(style -> style
+            ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)
+                    .append(Component.literal("The game start is not paused. Use ").withStyle(ChatFormatting.RED))
+                    .append(Component.literal("/pause").withStyle(ChatFormatting.YELLOW)
+                            .withStyle(style -> style
                                     .withClickEvent(new ClickEvent.RunCommand("/pause"))
-                                    .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to pause")))))
-                    .append(Text.literal(" to pause.").formatted(Formatting.RED)));
+                                    .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to pause")))))
+                    .append(Component.literal(" to pause.").withStyle(ChatFormatting.RED)));
             return 0;
         }
 
         starter.setPaused(false);
 
-        ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
-                .append(Text.literal("Resumed the game start").formatted(Formatting.GRAY)));
+        ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)
+                .append(Component.literal("Resumed the game start").withStyle(ChatFormatting.GRAY)));
 
         return 1;
     }

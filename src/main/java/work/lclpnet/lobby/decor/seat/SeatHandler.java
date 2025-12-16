@@ -1,14 +1,14 @@
 package work.lclpnet.lobby.decor.seat;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -24,7 +24,7 @@ public class SeatHandler {
 
     private final WorldModifier worldModifier;
     private final SeatProvider seatProvider;
-    private final Map<UUID, Vec3d> positions = new HashMap<>();
+    private final Map<UUID, Vec3> positions = new HashMap<>();
     private final Set<UUID> changedSeat = new HashSet<>();
     private final HookRegistrar hookRegistrar;
 
@@ -37,41 +37,41 @@ public class SeatHandler {
 
     public void init() {
         hookRegistrar.registerHook(PlayerInteractionHooks.USE_BLOCK, this::onRightClickBlock);
-        hookRegistrar.registerHook(PlayerConnectionHooks.QUIT, ServerPlayerEntity::stopRiding);
+        hookRegistrar.registerHook(PlayerConnectionHooks.QUIT, ServerPlayer::stopRiding);
         hookRegistrar.registerHook(PlayerMountHooks.DISMOUNTED, this::onDismount);
     }
 
-    private ActionResult onRightClickBlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) return ActionResult.PASS;
+    private InteractionResult onRightClickBlock(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+        if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
 
         BlockPos pos = hitResult.getBlockPos();
 
         if (sit(serverPlayer, world, pos)) {
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    private void onDismount(ServerPlayerEntity player, Entity vehicle) {
-        if (!vehicle.getCommandTags().contains("seat")) return;
+    private void onDismount(ServerPlayer player, Entity vehicle) {
+        if (!vehicle.getTags().contains("seat")) return;
 
         PlayerSeatCallback.AFTER_GET_UP.invoker().onGottenUp(player);
 
         vehicle.discard();
 
-        UUID uuid = player.getUuid();
+        UUID uuid = player.getUUID();
 
         if (changedSeat.remove(uuid)) return;
 
-        Vec3d prev = positions.remove(uuid);
+        Vec3 prev = positions.remove(uuid);
         if (prev == null) return;
 
-        player.teleport(player.getEntityWorld(), prev.getX(), prev.getY(), prev.getZ(), Set.of(), player.getYaw(), player.getPitch(), true);
+        player.teleportTo(player.level(), prev.x(), prev.y(), prev.z(), Set.of(), player.getYRot(), player.getXRot(), true);
     }
 
-    protected boolean sit(ServerPlayerEntity player, World world, BlockPos pos) {
-        if (player.isSneaking() || player.isSpectator()) return false;
+    protected boolean sit(ServerPlayer player, Level world, BlockPos pos) {
+        if (player.isShiftKeyDown() || player.isSpectator()) return false;
 
         Entity seatEntity = seatProvider.getSeat(world, pos);
 
@@ -79,8 +79,8 @@ public class SeatHandler {
 
         worldModifier.spawnEntity(seatEntity);
 
-        UUID uuid = player.getUuid();
-        positions.putIfAbsent(uuid, player.getEntityPos());
+        UUID uuid = player.getUUID();
+        positions.putIfAbsent(uuid, player.position());
 
         if (player.getVehicle() != null) {
             changedSeat.add(uuid);

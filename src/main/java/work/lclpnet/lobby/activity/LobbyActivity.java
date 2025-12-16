@@ -2,8 +2,8 @@ package work.lclpnet.lobby.activity;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameRules;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameRules;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -107,10 +107,10 @@ public class LobbyActivity extends ComponentActivity {
         hooks.registerHooks(component.lobbyListener());
 
         GameRules gameRules = lobbyManager.getLobbyWorld().getGameRules();
-        gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(false, server);
+        gameRules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, server);
 
         // send every online player to the lobby
-        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+        for (ServerPlayer player : PlayerLookup.all(server)) {
             lobbyManager.sendToLobby(player);
         }
 
@@ -161,7 +161,7 @@ public class LobbyActivity extends ComponentActivity {
         GreetingDisplay greetingDisplay = component.greetingDisplay();
         greetingDisplay.show();
 
-        lobbyManager.getLobbyWorld().getWaypointHandler().clear();
+        lobbyManager.getLobbyWorld().getWaypointManager().breakAllConnections();
     }
 
     /**
@@ -310,7 +310,7 @@ public class LobbyActivity extends ComponentActivity {
         cfg.disallowAll();
 
         cfg.allow(ProtectionTypes.USE_BLOCK, (entity, pos) ->
-                entity instanceof ServerPlayerEntity player && ticTacToeManager.isTableCenter(pos)
+                entity instanceof ServerPlayer player && ticTacToeManager.isTableCenter(pos)
                         && ticTacToeManager.isPlaying(player));
 
         ProtectorUtils.allowCreativeOperatorBypass(cfg);

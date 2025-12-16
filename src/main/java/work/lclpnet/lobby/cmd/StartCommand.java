@@ -2,10 +2,10 @@ package work.lclpnet.lobby.cmd;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
 import work.lclpnet.lobby.game.api.option.GameOptions;
@@ -26,25 +26,25 @@ public class StartCommand implements KibuCommand {
         registrar.registerCommand(command());
     }
 
-    private LiteralArgumentBuilder<ServerCommandSource> command() {
-        return CommandManager.literal("start")
-                .requires((s) -> s.hasPermissionLevel(2))
+    private LiteralArgumentBuilder<CommandSourceStack> command() {
+        return Commands.literal("start")
+                .requires((s) -> s.hasPermission(2))
                 .executes(this::execute);
     }
 
-    private int execute(CommandContext<ServerCommandSource> ctx) {
+    private int execute(CommandContext<CommandSourceStack> ctx) {
         if (starter == null) {
-            ctx.getSource().sendError(Text.literal("There is no game to start at the moment."));
+            ctx.getSource().sendFailure(Component.literal("There is no game to start at the moment."));
             return -1;
         }
 
         if (starter.isStarted()) {
-            ctx.getSource().sendError(Text.literal("There game was already started."));
+            ctx.getSource().sendFailure(Component.literal("There game was already started."));
             return -1;
         }
 
-        ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
-                .append(Text.literal("Started the game.").formatted(Formatting.GRAY)));
+        ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)
+                .append(Component.literal("Started the game.").withStyle(ChatFormatting.GRAY)));
 
         starter.finish(options);
 

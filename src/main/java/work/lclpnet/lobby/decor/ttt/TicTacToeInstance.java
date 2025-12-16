@@ -1,7 +1,7 @@
 package work.lclpnet.lobby.decor.ttt;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
 
 public class TicTacToeInstance {
 
@@ -35,7 +35,7 @@ public class TicTacToeInstance {
             return;
         }
 
-        BlockState fallback = Blocks.RED_GLAZED_TERRACOTTA.getDefaultState();
+        BlockState fallback = Blocks.RED_GLAZED_TERRACOTTA.defaultBlockState();
 
         if (colors[beginner] != fallback) {
             this.colors[opponent] = fallback;
@@ -43,7 +43,7 @@ public class TicTacToeInstance {
         }
 
         // beginner chose the fallback, assign a second fallback
-        this.colors[opponent] = Blocks.BLUE_GLAZED_TERRACOTTA.getDefaultState();
+        this.colors[opponent] = Blocks.BLUE_GLAZED_TERRACOTTA.defaultBlockState();
     }
 
     public boolean isPlayersTurn(int player) {

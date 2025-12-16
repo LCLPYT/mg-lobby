@@ -1,7 +1,7 @@
 package work.lclpnet.lobby.decor.seat;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.BlockPos;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookFactory;
 
@@ -30,14 +30,14 @@ public class PlayerSeatCallback {
     });
 
     public interface BeforeSit {
-        boolean onSeat(ServerPlayerEntity player, BlockPos pos);
+        boolean onSeat(ServerPlayer player, BlockPos pos);
     }
 
     public interface AfterSit {
-        void onSeated(ServerPlayerEntity player, BlockPos pos);
+        void onSeated(ServerPlayer player, BlockPos pos);
     }
 
     public interface AfterGetUp {
-        void onGottenUp(ServerPlayerEntity player);
+        void onGottenUp(ServerPlayer player);
     }
 }

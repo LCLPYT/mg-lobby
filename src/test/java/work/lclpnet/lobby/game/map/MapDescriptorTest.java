@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,13 +21,13 @@ public class MapDescriptorTest {
     @Test
     void getIdentifier() {
         var desc = new MapDescriptor("foo", "bar");
-        assertEquals(Identifier.of("foo", "bar"), desc.getIdentifier());
+        assertEquals(ResourceLocation.fromNamespaceAndPath("foo", "bar"), desc.getIdentifier());
     }
 
     @Test
     void getIdentifierNoPath() {
         var desc = new MapDescriptor("foo", "");
-        assertEquals(Identifier.of("foo", ""), desc.getIdentifier());
+        assertEquals(ResourceLocation.fromNamespaceAndPath("foo", ""), desc.getIdentifier());
     }
 
     @Test

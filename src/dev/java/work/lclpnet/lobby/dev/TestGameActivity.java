@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.dev;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
@@ -28,8 +28,8 @@ public class TestGameActivity extends ComponentActivity {
         HookRegistrar hooks = component(BuiltinComponents.HOOKS).hooks();
 
         hooks.registerHook(BlockModificationHooks.BREAK_BLOCK, (world, pos, entity) -> {
-            if (entity instanceof ServerPlayerEntity player) {
-                player.sendMessage(Text.literal("You broke ").append(Text.translatable(world.getBlockState(pos).getBlock().getTranslationKey())));
+            if (entity instanceof ServerPlayer player) {
+                player.sendSystemMessage(Component.literal("You broke ").append(Component.translatable(world.getBlockState(pos).getBlock().getDescriptionId())));
             }
             return false;
         });

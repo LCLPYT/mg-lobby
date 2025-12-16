@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.decor.seat;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public interface SeatProvider {
 
     @Nullable
-    Entity getSeat(World world, BlockPos pos);
+    Entity getSeat(Level world, BlockPos pos);
 }

@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.game.map;
 
 import com.google.common.collect.Iterators;
-import net.minecraft.Bootstrap;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.SharedConstants;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,8 @@ public class RepositoryMapLookupTest {
 
     @BeforeAll
     public static void setup() {
-        SharedConstants.createGameVersion();
-        Bootstrap.initialize();
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
     }
 
     @Test
@@ -40,7 +40,7 @@ public class RepositoryMapLookupTest {
 
         assertEquals(List.of("test:map_one", "test:nested/map_two"), maps.stream()
                 .map(map -> map.getDescriptor().getIdentifier())
-                .map(Identifier::toString)
+                .map(ResourceLocation::toString)
                 .sorted()
                 .toList());
     }
@@ -54,7 +54,7 @@ public class RepositoryMapLookupTest {
 
         assertEquals(List.of("test:nested/map_two"), maps.stream()
                 .map(map -> map.getDescriptor().getIdentifier())
-                .map(Identifier::toString)
+                .map(ResourceLocation::toString)
                 .sorted()
                 .toList());
     }

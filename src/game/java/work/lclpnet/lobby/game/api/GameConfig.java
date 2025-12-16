@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.api;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public interface GameConfig {
 

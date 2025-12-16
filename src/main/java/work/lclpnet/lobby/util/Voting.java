@@ -1,13 +1,13 @@
 package work.lclpnet.lobby.util;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.prompt.OptionPrompt;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.summingInt;
-import static net.minecraft.util.Formatting.*;
+import static net.minecraft.ChatFormatting.*;
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class Voting<T> {
@@ -52,35 +52,35 @@ public class Voting<T> {
         return data;
     }
 
-    public void open(ServerPlayerEntity player) {
+    public void open(ServerPlayer player) {
         T currentVote;
         VoteResult<T> current;
 
         synchronized (this) {
             if (!open) return;
 
-            currentVote = votes.getOrDefault(player.getUuid(), null);
+            currentVote = votes.getOrDefault(player.getUUID(), null);
             current = getCurrentResult();
         }
 
-        Text title = data.title().apply(player);
+        Component title = data.title().apply(player);
 
         OptionPrompt.open(player, title, data.options(), opt -> getIcon(player, opt, opt.equals(currentVote), current.votes(opt)))
                 .thenAccept(selected -> selected.ifPresent(opt -> vote(player, opt)));
     }
 
-    private ItemStack getIcon(ServerPlayerEntity player, T option, boolean selected, int votes) {
+    private ItemStack getIcon(ServerPlayer player, T option, boolean selected, int votes) {
         ItemStack icon = data.optionIcons().apply(player, option);
 
-        List<Text> lore = icon.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).lines();
-        List<Text> newLore = new ArrayList<>();
+        List<Component> lore = icon.getOrDefault(DataComponents.LORE, ItemLore.EMPTY).lines();
+        List<Component> newLore = new ArrayList<>();
 
         if (showVoteCount) {
             newLore.add(translations.translateText(player, "lobby.voting.votes", styled(votes, YELLOW)).formatted(GREEN));
         }
 
         if (selected) {
-            icon.set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+            icon.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 
             newLore.add(translations.translateText(player, "lobby.voting.selected").formatted(AQUA));
         }
@@ -88,40 +88,40 @@ public class Voting<T> {
         if (!newLore.isEmpty()) {
             // newline if there is already lore
             if (!lore.isEmpty()) {
-                newLore.addFirst(Text.empty());
+                newLore.addFirst(Component.empty());
                 newLore.addAll(0, lore);
             }
 
             ItemStackUtil.setLore(icon, newLore);
         }
 
-        icon.set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT
-                .with(DataComponentTypes.ATTRIBUTE_MODIFIERS, true)
-                .with(DataComponentTypes.UNBREAKABLE, true)
-                .with(DataComponentTypes.ENCHANTMENTS, true)
-                .with(DataComponentTypes.DAMAGE, true));
+        icon.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT
+                .withHidden(DataComponents.ATTRIBUTE_MODIFIERS, true)
+                .withHidden(DataComponents.UNBREAKABLE, true)
+                .withHidden(DataComponents.ENCHANTMENTS, true)
+                .withHidden(DataComponents.DAMAGE, true));
 
         return icon;
     }
 
-    public void vote(ServerPlayerEntity player, T option) {
+    public void vote(ServerPlayer player, T option) {
         synchronized (this) {
             if (!open) return;
 
-            votes.put(player.getUuid(), option);
+            votes.put(player.getUUID(), option);
         }
 
-        player.playSoundToPlayer(SoundEvents.ENTITY_ENDER_DRAGON_HURT, SoundCategory.RECORDS, 0.4f, 1f);
+        player.playNotifySound(SoundEvents.ENDER_DRAGON_HURT, SoundSource.RECORDS, 0.4f, 1f);
 
-        Text name = data.optionName().apply(player, option);
+        Component name = data.optionName().apply(player, option);
 
-        player.sendMessage(translations.translateText(player, "lobby.voting.voted_for", styled(name, YELLOW)).formatted(GREEN));
+        player.sendSystemMessage(translations.translateText(player, "lobby.voting.voted_for", styled(name, YELLOW)).formatted(GREEN));
     }
 
-    public synchronized void removeVote(ServerPlayerEntity player) {
+    public synchronized void removeVote(ServerPlayer player) {
         if (!open) return;
 
-        votes.remove(player.getUuid());
+        votes.remove(player.getUUID());
     }
 
     public synchronized VoteResult<T> end() {

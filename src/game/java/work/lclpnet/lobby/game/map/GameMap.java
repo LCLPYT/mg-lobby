@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.game.map;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -122,8 +122,8 @@ public class GameMap {
             String iconStr = properties.optString("icon", null);
 
             if (iconStr != null) {
-                Identifier iconId = Identifier.of(iconStr);
-                icon = Registries.ITEM.get(iconId);
+                ResourceLocation iconId = ResourceLocation.parse(iconStr);
+                icon = BuiltInRegistries.ITEM.getValue(iconId);
             }
 
             if (icon == null || icon == Items.AIR) {

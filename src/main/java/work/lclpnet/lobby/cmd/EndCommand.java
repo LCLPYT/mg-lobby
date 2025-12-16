@@ -2,10 +2,10 @@ package work.lclpnet.lobby.cmd;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
 import work.lclpnet.lobby.game.api.GameFinisher;
@@ -23,17 +23,17 @@ public class EndCommand implements KibuCommand {
         registrar.registerCommand(command());
     }
 
-    private LiteralArgumentBuilder<ServerCommandSource> command() {
-        return CommandManager.literal("end")
-                .requires(s -> s.hasPermissionLevel(2))
+    private LiteralArgumentBuilder<CommandSourceStack> command() {
+        return Commands.literal("end")
+                .requires(s -> s.hasPermission(2))
                 .executes(this::end);
     }
 
-    private int end(CommandContext<ServerCommandSource> ctx) {
+    private int end(CommandContext<CommandSourceStack> ctx) {
         finisher.finishGame(GameFinisher.Reason.COMMAND);
 
-        ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
-                .append(Text.literal("The current game has been ended.").formatted(Formatting.GRAY)));
+        ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)
+                .append(Component.literal("The current game has been ended.").withStyle(ChatFormatting.GRAY)));
 
         return 1;
     }

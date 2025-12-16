@@ -1,9 +1,9 @@
 package work.lclpnet.lobby.util;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 
 public interface WorldModifier {
     
@@ -12,6 +12,6 @@ public interface WorldModifier {
     void spawnEntity(Entity entity);
 
     default void setBlockState(BlockPos pos, BlockState state) {
-        setBlockState(pos, state, Block.NOTIFY_ALL);
+        setBlockState(pos, state, Block.UPDATE_ALL);
     }
 }

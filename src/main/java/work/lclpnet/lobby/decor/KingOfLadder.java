@@ -1,17 +1,17 @@
 package work.lclpnet.lobby.decor;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Position;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Position;
+import net.minecraft.world.phys.Vec3;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
@@ -29,33 +29,33 @@ import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 @ActivityScope
 public class KingOfLadder {
 
-    private final ServerWorld world;
+    private final ServerLevel world;
     private final BlockPos goal;
-    private final List<Vec3d> displays;
+    private final List<Vec3> displays;
     private final Translations translations;
     private final Collection<UUID> contesting = new HashSet<>();
     private UUID king = null;
     private String kingName = null;
 
     @Inject
-    public KingOfLadder(@Named("lobbyWorld") ServerWorld world, LobbyWorldConfig config, Translations translations) {
+    public KingOfLadder(@Named("lobbyWorld") ServerLevel world, LobbyWorldConfig config, Translations translations) {
         this(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, translations);
     }
 
-    public KingOfLadder(ServerWorld world, BlockPos goal, List<Vec3d> displays, Translations translations) {
+    public KingOfLadder(ServerLevel world, BlockPos goal, List<Vec3> displays, Translations translations) {
         this.world = world;
         this.goal = goal;
         this.displays = displays;
         this.translations = translations;
     }
 
-    public void update(ServerPlayerEntity player, Position position) {
-        if (player.getEntityWorld() != world) return;
+    public void update(ServerPlayer player, Position position) {
+        if (player.level() != world) return;
 
         if (isGoal(position)) {
-            contesting.add(player.getUuid());
+            contesting.add(player.getUUID());
         } else {
-            contesting.remove(player.getUuid());
+            contesting.remove(player.getUUID());
         }
 
         updateKing();
@@ -68,27 +68,27 @@ public class KingOfLadder {
         if (newKing == king) return;
 
         MinecraftServer server = world.getServer();
-        ServerPlayerEntity newKingPlayer = server.getPlayerManager().getPlayer(newKing);
+        ServerPlayer newKingPlayer = server.getPlayerList().getPlayer(newKing);
 
         if (newKingPlayer != null) {
             makeKing(newKingPlayer);
         }
     }
 
-    public void playerQuit(ServerPlayerEntity player) {
-        contesting.remove(player.getUuid());
+    public void playerQuit(ServerPlayer player) {
+        contesting.remove(player.getUUID());
         // player can still be king, regardless if they left
     }
 
     private boolean isGoal(Position pos) {
-        return (int) Math.floor(pos.getX()) == goal.getX() && (int) Math.floor(pos.getY()) == goal.getY() && (int) Math.floor(pos.getZ()) == goal.getZ();
+        return (int) Math.floor(pos.x()) == goal.getX() && (int) Math.floor(pos.y()) == goal.getY() && (int) Math.floor(pos.z()) == goal.getZ();
     }
 
-    private void makeKing(ServerPlayerEntity player) {
+    private void makeKing(ServerPlayer player) {
         UUID formerKing = king;
 
-        king = player.getUuid();
-        kingName = player.getNameForScoreboard();
+        king = player.getUUID();
+        kingName = player.getScoreboardName();
 
         // announce new king
         announceKing();
@@ -96,7 +96,7 @@ public class KingOfLadder {
 
         if (formerKing != null && !formerKing.equals(king)) {
             MinecraftServer server = world.getServer();
-            ServerPlayerEntity formerKingPlayer = server.getPlayerManager().getPlayer(formerKing);
+            ServerPlayer formerKingPlayer = server.getPlayerList().getPlayer(formerKing);
 
             if (formerKingPlayer != null) {
                 notifyFormerKing(formerKingPlayer);
@@ -107,28 +107,28 @@ public class KingOfLadder {
     }
 
     private void announceKing() {
-        translations.translateText("lobby.king_of_ladder.new_king", styled(kingName, Formatting.YELLOW))
-                .formatted(Formatting.GREEN)
-                .prefixed(Text.literal("Lobby> ").formatted(Formatting.BLUE))
+        translations.translateText("lobby.king_of_ladder.new_king", styled(kingName, ChatFormatting.YELLOW))
+                .formatted(ChatFormatting.GREEN)
+                .prefixed(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE))
                 .sendTo(PlayerLookup.world(world));
     }
 
-    private void notifyKing(ServerPlayerEntity player) {
-        var title = translations.translateText(player, "lobby.king_of_ladder.you_title").formatted(Formatting.GREEN, Formatting.BOLD);
-        var subtitle = translations.translateText(player, "lobby.king_of_ladder.you_subtitle").formatted(Formatting.AQUA);
+    private void notifyKing(ServerPlayer player) {
+        var title = translations.translateText(player, "lobby.king_of_ladder.you_title").formatted(ChatFormatting.GREEN, ChatFormatting.BOLD);
+        var subtitle = translations.translateText(player, "lobby.king_of_ladder.you_subtitle").formatted(ChatFormatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
-        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.NEUTRAL, 2f, 0.0f);
+        player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.NEUTRAL, 2f, 0.0f);
     }
 
-    private void notifyFormerKing(ServerPlayerEntity player) {
-        var title = translations.translateText(player, "lobby.king_of_ladder.not_you_title").formatted(Formatting.RED);
-        var subtitle = translations.translateText(player, "lobby.king_of_ladder.not_you_subtitle").formatted(Formatting.AQUA);
+    private void notifyFormerKing(ServerPlayer player) {
+        var title = translations.translateText(player, "lobby.king_of_ladder.not_you_title").formatted(ChatFormatting.RED);
+        var subtitle = translations.translateText(player, "lobby.king_of_ladder.not_you_subtitle").formatted(ChatFormatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
-        player.playSoundToPlayer(SoundEvents.ENTITY_BLAZE_DEATH, SoundCategory.NEUTRAL, 2f, 0.75f);
+        player.playNotifySound(SoundEvents.BLAZE_DEATH, SoundSource.NEUTRAL, 2f, 0.75f);
     }
 
     private void updateDisplays() {
@@ -141,8 +141,8 @@ public class KingOfLadder {
             double y = goal.getY();
             double z = goal.getZ() + 0.5;
 
-            world.spawnParticles(ParticleTypes.LAVA, x, y, z, 10, 0.25, 0.25, 0.25, 0.1);
-            world.playSound(null, x, y, z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.HOSTILE, 0.1f, 0f);
+            world.sendParticles(ParticleTypes.LAVA, x, y, z, 10, 0.25, 0.25, 0.25, 0.1);
+            world.playSound(null, x, y, z, SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.1f, 0f);
         }
     }
 

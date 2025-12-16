@@ -1,8 +1,8 @@
 package work.lclpnet.lobby.api;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.config.ConfigAccess;
@@ -11,11 +11,11 @@ import work.lclpnet.lobby.game.GameManager;
 
 public interface LobbyManager extends ConfigAccess, LoggerAware {
 
-    ServerWorld getLobbyWorld();
+    ServerLevel getLobbyWorld();
 
-    Vec3d getLobbySpawn();
+    Vec3 getLobbySpawn();
 
-    void sendToLobby(ServerPlayerEntity player);
+    void sendToLobby(ServerPlayer player);
 
     Translations getTranslations();
 

@@ -1,14 +1,14 @@
 package work.lclpnet.lobby.event;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import work.lclpnet.kibu.hook.HookListenerModule;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
@@ -35,35 +35,35 @@ public class TicTacToeListener implements HookListenerModule {
         registrar.registerHook(PlayerInteractionHooks.ATTACK_BLOCK, this::onAttackBlock);
     }
 
-    private boolean onSeat(ServerPlayerEntity player, BlockPos pos) {
+    private boolean onSeat(ServerPlayer player, BlockPos pos) {
         // disallow seating when the player is currently playing tic-tac-toe
         return ticTacToeManager.isPlaying(player);
     }
 
-    private ActionResult onUseBlock(PlayerEntity player, World world, Hand hand, BlockHitResult hitResult) {
-        if (!(player instanceof ServerPlayerEntity serverPlayer) || hand != Hand.MAIN_HAND) return ActionResult.PASS;
+    private InteractionResult onUseBlock(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+        if (!(player instanceof ServerPlayer serverPlayer) || hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
 
         if (ticTacToeManager.tryPlay(serverPlayer, hitResult)) {
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         if (ticTacToeManager.isTableCenter(hitResult.getBlockPos())) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    private ActionResult onAttackBlock(PlayerEntity player, World world, Hand hand, BlockPos pos, Direction direction) {
-        if (!(player instanceof ServerPlayerEntity serverPlayer) || hand != Hand.MAIN_HAND) return ActionResult.PASS;
+    private InteractionResult onAttackBlock(Player player, Level world, InteractionHand hand, BlockPos pos, Direction direction) {
+        if (!(player instanceof ServerPlayer serverPlayer) || hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
 
-        HitResult result = player.raycast(5d, 0f, false);
-        if (result.getType() != HitResult.Type.BLOCK || !(result instanceof BlockHitResult hitResult)) return ActionResult.PASS;
+        HitResult result = player.pick(5d, 0f, false);
+        if (result.getType() != HitResult.Type.BLOCK || !(result instanceof BlockHitResult hitResult)) return InteractionResult.PASS;
 
         if (ticTacToeManager.tryPlay(serverPlayer, hitResult)) {
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 }

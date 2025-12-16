@@ -1,10 +1,10 @@
 package work.lclpnet.lobby.game.api.prot.scope;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public interface WorldBlockItemStackScope {
 
-    boolean isWithinScope(World world, BlockPos pos, ItemStack stack);
+    boolean isWithinScope(Level world, BlockPos pos, ItemStack stack);
 }

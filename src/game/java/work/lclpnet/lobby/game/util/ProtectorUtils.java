@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.util;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import work.lclpnet.lobby.game.api.prot.scope.*;
 import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
 
@@ -43,8 +43,8 @@ public class ProtectorUtils {
         // Entity
         config.allow(PlayerEntityScope.creativeOp(), MOUNT, DESTROY_LEASH, ATTACH_LEASH, DETACH_LEASH);
 
-        config.allow(ALLOW_DAMAGE, (entity, source) -> source.getAttacker() instanceof ServerPlayerEntity player
-                                                       && player.isCreativeLevelTwoOp());
+        config.allow(ALLOW_DAMAGE, (entity, source) -> source.getEntity() instanceof ServerPlayer player
+                                                       && player.canUseGameMasterBlocks());
 
         config.allow(MODIFY_INVENTORY, ClickEventScope.CREATIVE_OP);
 

@@ -3,10 +3,10 @@ package work.lclpnet.lobby.cmd;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
@@ -37,29 +37,29 @@ public class SetGameCommand implements KibuCommand {
         commands.registerCommand(commands());
     }
 
-    private LiteralArgumentBuilder<ServerCommandSource> commands() {
-        return CommandManager.literal("setgame")
-                .requires(s -> s.hasPermissionLevel(2))
-                .then(CommandManager.argument("game", StringArgumentType.string())
+    private LiteralArgumentBuilder<CommandSourceStack> commands() {
+        return Commands.literal("setgame")
+                .requires(s -> s.hasPermission(2))
+                .then(Commands.argument("game", StringArgumentType.string())
                         .suggests(new GameSuggestionProvider(gameManager))
                         .executes(this::setGame));
     }
 
-    private int setGame(CommandContext<ServerCommandSource> ctx) {
+    private int setGame(CommandContext<CommandSourceStack> ctx) {
         String gameId = StringArgumentType.getString(ctx, "game");
         Game game = gameManager.getGame(gameId);
 
-        Text title;
+        Component title;
 
         if (game == null) {
-            title = Text.literal("None").formatted(Formatting.YELLOW);
+            title = Component.literal("None").withStyle(ChatFormatting.YELLOW);
         } else {
             title = translations.translateText("en_us", game.getConfig().titleKey())
-                    .formatted(Formatting.YELLOW);
+                    .formatted(ChatFormatting.YELLOW);
         }
 
-        ctx.getSource().sendMessage(Text.literal("Lobby> ").formatted(Formatting.BLUE)
-                .append(Text.literal("Set the current game to ").formatted(Formatting.GRAY))
+        ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)
+                .append(Component.literal("Set the current game to ").withStyle(ChatFormatting.GRAY))
                 .append(title));
 
         ctx.getSource().getServer()

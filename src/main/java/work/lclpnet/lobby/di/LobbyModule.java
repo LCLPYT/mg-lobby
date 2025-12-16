@@ -5,8 +5,8 @@ import dagger.Module;
 import dagger.Provides;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.BlockView;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockGetter;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
 import work.lclpnet.kibu.translate.Translations;
@@ -41,7 +41,7 @@ public class LobbyModule {
         ConfigAccess bindConfigAccess(LobbyManager impl);
 
         @Binds
-        BlockView bindBlockView(@Named("lobbyWorld") ServerWorld impl);
+        BlockGetter bindBlockView(@Named("lobbyWorld") ServerLevel impl);
 
         @Binds
         GameStateIo bindGameManagerStateManager(AsyncGameStateIo impl);
@@ -107,7 +107,7 @@ public class LobbyModule {
     }
 
     @Provides @Named("lobbyWorld")
-    ServerWorld provideServerWorld(LobbyManager lobbyManager) {
+    ServerLevel provideServerWorld(LobbyManager lobbyManager) {
         return lobbyManager.getLobbyWorld();
     }
 

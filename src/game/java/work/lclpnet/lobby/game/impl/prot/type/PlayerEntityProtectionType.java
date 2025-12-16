@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.impl.prot.type;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
 import work.lclpnet.lobby.game.api.prot.scope.PlayerEntityScope;
 

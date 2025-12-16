@@ -1,10 +1,10 @@
 package work.lclpnet.lobby.decor.maze;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
 import work.lclpnet.maze.MazeGenerator;
 import work.lclpnet.maze.MazeGeneratorProvider;
 import work.lclpnet.maze.graph.Graph;
@@ -12,14 +12,14 @@ import work.lclpnet.maze.impl.BasicMazeGenerator;
 
 import java.util.*;
 
-import static net.minecraft.util.math.Direction.*;
+import static net.minecraft.core.Direction.*;
 
 public class LobbyMazeGeneratorProvider implements MazeGeneratorProvider<PositionedNode> {
 
     private final MazeConfig config;
-    private final BlockView world;
+    private final BlockGetter world;
 
-    public LobbyMazeGeneratorProvider(MazeConfig config, BlockView world) {
+    public LobbyMazeGeneratorProvider(MazeConfig config, BlockGetter world) {
         this.config = config;
         this.world = world;
     }
@@ -44,7 +44,7 @@ public class LobbyMazeGeneratorProvider implements MazeGeneratorProvider<Positio
             BlockPos rel;
 
             for (Direction dir : directions) {
-                rel = pos.offset(dir, 2);
+                rel = pos.relative(dir, 2);
                 if (!config.bounds.contains(rel) || !isReachable(pos, rel)) continue;
 
                 PositionedNode relNode = nodes.computeIfAbsent(rel, PositionedNode::new);
@@ -88,7 +88,7 @@ public class LobbyMazeGeneratorProvider implements MazeGeneratorProvider<Positio
         int maxZ = Math.max(from.getZ(), to.getZ());
 
 
-        for (BlockPos pos : BlockPos.iterate(minX, minY, minZ, maxX, maxY, maxZ)) {
+        for (BlockPos pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
             BlockState state = world.getBlockState(pos);
             VoxelShape collisionShape = state.getCollisionShape(world, pos);
             if (!collisionShape.isEmpty()) return false;
