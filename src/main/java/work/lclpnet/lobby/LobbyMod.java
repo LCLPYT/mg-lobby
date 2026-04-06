@@ -17,6 +17,7 @@ import work.lclpnet.lobby.di.LobbyComponent;
 import work.lclpnet.lobby.di.LobbyModule;
 import work.lclpnet.lobby.event.ConnectionListener;
 import work.lclpnet.lobby.event.RuntimeWorldListener;
+import work.lclpnet.lobby.util.WholesomeChatManager;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -51,16 +52,12 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         // load config etc. (blocking)
         manager.init();
 
-        // adjust the level name in server.properties (blocking)
         component.serverPropertiesAdjuster().adjust();
 
-        // renew world on initial server startup (blocking)
         component.lobbyWorldDownloader().renewWorld();
 
-        // load games
         component.lobbyManager().getGameManager().discoverGames();
 
-        // download required data packs (blocking)
         component.dataPackService().downloadRequired();
 
         ServerWorldReadyCallback.HOOK.register(server -> {
@@ -74,6 +71,9 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
                 if (err != null) {
                     logger.error("Failed to load mg-lobby translations", err);
                 }
+
+                var wholesomeChatManager = new WholesomeChatManager(server, translations);
+                wholesomeChatManager.init(hooks);
 
                 enterLobbyPhase();
             });

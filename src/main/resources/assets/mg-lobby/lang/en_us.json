@@ -20,5 +20,12 @@
   "lobby.voting.selected": "Selected",
   "lobby.voting.voted_for": "You voted for %s",
   "lobby.voting.votes": "Votes: %s",
-  "lobby.item.start_game": "Start game"
+  "lobby.chat.wholesome.1": "Great game, everyone!",
+  "lobby.chat.wholesome.2": "It was an honor to play with you all. Thank you.",
+  "lobby.chat.wholesome.3": "Wishing you all the best.",
+  "lobby.chat.wholesome.4": "Good game! Best of luck to you all!",
+  "lobby.chat.wholesome.5": "Gee whiz! That was fun. Good playing!",
+  "lobby.chat.wholesome.6": "Well played. I salute you all.",
+  "lobby.chat.wholesome.7": "I am trying to be a nicer person. It is hard, but I am trying, guys.",
+  "lobby.chat.wholesome.8": "For glory and honor! Huzzah comrades!"
 }
