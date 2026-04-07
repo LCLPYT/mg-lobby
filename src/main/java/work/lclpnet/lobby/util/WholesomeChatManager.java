@@ -9,30 +9,38 @@ import work.lclpnet.kibu.hook.ServerMessageHooks;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.text.RootText;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class WholesomeChatManager {
 
-    private static final List<String> WHOLESOME_MESSAGE_KEYS = List.of(
-            "lobby.chat.wholesome.1",
-            "lobby.chat.wholesome.2",
-            "lobby.chat.wholesome.3",
-            "lobby.chat.wholesome.4",
-            "lobby.chat.wholesome.5",
-            "lobby.chat.wholesome.6",
-            "lobby.chat.wholesome.7",
-            "lobby.chat.wholesome.8"
+    private static final String KEY_PREFIX = "lobby.chat.wholesome.";
+    private static final Set<String> TOXIC_MESSAGES = Set.of(
+            "ggez", "ggeasy", "bg"
     );
 
     private final MinecraftServer server;
     private final Translations translations;
+    private final List<String> wholesomeMessageKeys;
 
     public WholesomeChatManager(MinecraftServer server, Translations translations) {
         this.server = server;
         this.translations = translations;
+        this.wholesomeMessageKeys = collectWholesomeKeys();
+    }
+
+    private List<String> collectWholesomeKeys() {
+        var translator = translations.getTranslator();
+        var keys = new ArrayList<String>();
+
+        for (int i = 1; translator.hasTranslation("en_us", KEY_PREFIX + i); i++) {
+            keys.add(KEY_PREFIX + i);
+        }
+
+        return List.copyOf(keys);
     }
 
     public void init(HookRegistrar hooks) {
@@ -52,12 +60,12 @@ public class WholesomeChatManager {
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9]", "");
 
-        return Objects.equals(canonical, "ggez") || canonical.equals("bg");
+        return TOXIC_MESSAGES.contains(canonical);
     }
 
     private String randomWholesomeKey() {
-        int index = ThreadLocalRandom.current().nextInt(WHOLESOME_MESSAGE_KEYS.size());
-        return WHOLESOME_MESSAGE_KEYS.get(index);
+        int index = ThreadLocalRandom.current().nextInt(wholesomeMessageKeys.size());
+        return wholesomeMessageKeys.get(index);
     }
 
     private void broadcastWholesomeMessage(String key, ChatType.Bound params) {
