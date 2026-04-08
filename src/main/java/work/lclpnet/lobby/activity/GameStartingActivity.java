@@ -28,10 +28,12 @@ import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.cmd.PauseCommand;
 import work.lclpnet.lobby.cmd.ResumeCommand;
 import work.lclpnet.lobby.cmd.StartCommand;
+import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.LobbyWaitingManager;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameConfig;
 import work.lclpnet.lobby.game.start.GameStarter;
+import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.util.LobbyGameContext;
 
 import javax.inject.Named;
@@ -50,7 +52,8 @@ public class GameStartingActivity extends ComponentActivity {
 
     @AssistedInject
     public GameStartingActivity(MinecraftServer server, Logger logger, @Named("lobbyWorld") ServerLevel world,
-                                @Assisted Game game, @Assisted GameStarter starter, @Assisted Translations translations) {
+                                GameManager gameManager, @Assisted Game game, @Assisted GameStarter starter,
+                                @Assisted Translations translations, @Assisted LobbyArgs lobbyArgs) {
         super(server, logger);
         this.game = game;
         this.config = game.getConfig();
@@ -58,7 +61,7 @@ public class GameStartingActivity extends ComponentActivity {
         this.translations = translations;
 
         var context = new LobbyGameContext(server, game.getConfig(), translations);
-        this.waitingManager = new LobbyWaitingManager(world, context, starter);
+        this.waitingManager = new LobbyWaitingManager(world, context, starter, gameManager, lobbyArgs.getChangeGameConsumer());
     }
 
     @Override
@@ -185,8 +188,17 @@ public class GameStartingActivity extends ComponentActivity {
         }
     }
 
+    @Override
+    public void stop() {
+        super.stop();
+
+        for (ServerPlayer player : PlayerLookup.all(getServer())) {
+            player.getInventory().clearContent();
+        }
+    }
+
     @AssistedFactory
     public interface Builder {
-        GameStartingActivity create(Game game, GameStarter starter, Translations translations);
+        GameStartingActivity create(Game game, GameStarter starter, Translations translations, LobbyArgs lobbyArgs);
     }
 }

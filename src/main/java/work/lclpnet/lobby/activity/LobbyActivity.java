@@ -245,7 +245,7 @@ public class LobbyActivity extends ComponentActivity {
     private void activateGame(Game game, GameFactory factory, Translations translations) {
         var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations);
 
-        var args = new LobbyArgs(childActivity, configurator);
+        var args = new LobbyArgs(childActivity, configurator, this::changeGame);
         var scope = new Scope(getServer());
 
         synchronized (this) {
@@ -259,7 +259,7 @@ public class LobbyActivity extends ComponentActivity {
                 factory.createInstance(environment).start(options);
             }, environment);
 
-            args.injectStartingSupplier(() -> startingBuilder.create(game, gameStarter, translations));
+            args.injectStartingSupplier(() -> startingBuilder.create(game, gameStarter, translations, args));
 
             gameStarter.start();
         }

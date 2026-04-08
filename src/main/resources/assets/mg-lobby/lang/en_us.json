@@ -21,6 +21,7 @@
   "lobby.voting.voted_for": "You voted for %s",
   "lobby.voting.votes": "Votes: %s",
   "lobby.item.start_game": "Start game",
+  "lobby.item.select_game": "Select game",
   "lobby.chat.wholesome.1": "Great game, everyone!",
   "lobby.chat.wholesome.2": "It was an honor to play with you all. Thank you.",
   "lobby.chat.wholesome.3": "Wishing you all the best.",

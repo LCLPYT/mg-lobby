@@ -5,8 +5,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.permissions.Permission;
-import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +22,8 @@ import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
+import work.lclpnet.kibu.inv.prompt.OptionPrompt;
+import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameContext;
 import work.lclpnet.lobby.game.api.option.*;
 import work.lclpnet.lobby.game.start.GameStarter;
@@ -32,6 +32,7 @@ import work.lclpnet.lobby.util.Interactable;
 import work.lclpnet.lobby.util.Voting;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
 
@@ -41,11 +42,16 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
     private final List<Voting<?>> votings = new ArrayList<>();
     private final Map<UUID, PlayerState> states = new HashMap<>();
     private final Map<Integer, Set<Runnable>> timedActions = new HashMap<>();
+    private final GameManager gameManager;
+    private final Consumer<Game> changeGameConsumer;
 
-    public LobbyWaitingManager(ServerLevel world, GameContext context, GameStarter starter) {
+    public LobbyWaitingManager(ServerLevel world, GameContext context, GameStarter starter,
+                               GameManager gameManager, Consumer<Game> changeGameConsumer) {
         this.world = world;
         this.context = context;
         this.starter = starter;
+        this.gameManager = gameManager;
+        this.changeGameConsumer = changeGameConsumer;
     }
 
     @Override
@@ -160,12 +166,16 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
         Inventory inventory = player.getInventory();
         PlayerState state = getState(player);
 
-        if (GameConstants.DEVELOPMENT && Commands.LEVEL_GAMEMASTERS.check(context.getServer().getProfilePermissions(player.nameAndId()))) {
-            Interactable startAction = p -> startGame();
+        if (Commands.LEVEL_GAMEMASTERS.check(context.getServer().getProfilePermissions(player.nameAndId()))) {
+            int gameSlot = state.getFreeSlot(8);
+            inventory.setItem(gameSlot, getGameSelectorStack(player));
+            state.setInteractable(gameSlot, this::openGameSelector);
 
-            int slot = state.getFirstFreeSlot();
-            inventory.setItem(slot, getStartStack(player));
-            state.setInteractable(slot, startAction);
+            if (GameConstants.DEVELOPMENT) {
+                int slot = state.getFirstFreeSlot();
+                inventory.setItem(slot, getStartStack(player));
+                state.setInteractable(slot, p -> startGame());
+            }
         }
 
         if (votings.size() == 1) {
@@ -198,6 +208,29 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
                 .formatted(ChatFormatting.GREEN));
 
         return stack;
+    }
+
+    private ItemStack getGameSelectorStack(ServerPlayer player) {
+        var stack = new ItemStack(Items.COMPASS);
+        stack.set(DataComponents.ITEM_NAME, context.getTranslations().translateText(player, "lobby.item.select_game")
+                .formatted(ChatFormatting.GOLD));
+        return stack;
+    }
+
+    private void openGameSelector(ServerPlayer player) {
+        var games = new ArrayList<>(gameManager.getGames());
+        var title = context.getTranslations().translateText(player, "lobby.item.select_game")
+                .formatted(ChatFormatting.GOLD);
+
+        OptionPrompt.open(player, title, games, game -> {
+            var icon = game.getConfig().icon().copy();
+            icon.set(DataComponents.ITEM_NAME, context.getTranslations()
+                    .translateText(player, game.getConfig().titleKey())
+                    .formatted(ChatFormatting.AQUA));
+            return icon;
+        }).thenAccept(selected -> selected.ifPresent(game -> {
+            context.getServer().execute(() -> changeGameConsumer.accept(game));
+        }));
     }
 
     private PlayerState getState(ServerPlayer player) {
