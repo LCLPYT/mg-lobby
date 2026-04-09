@@ -4,6 +4,7 @@ import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.activity.LobbyActivity;
+import work.lclpnet.lobby.game.api.Game;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -12,11 +13,17 @@ public class LobbyArgs implements GameStarter.Args {
 
     private final ActivityManager childActivity;
     private final LobbyGameConfigurator configurator;
+    private final Consumer<Game> changeGameConsumer;
     private Supplier<GameStartingActivity> startingSupplier = null;
 
-    public LobbyArgs(ActivityManager childActivity, LobbyGameConfigurator configurator) {
+    public LobbyArgs(ActivityManager childActivity, LobbyGameConfigurator configurator, Consumer<Game> changeGameConsumer) {
         this.childActivity = childActivity;
         this.configurator = configurator;
+        this.changeGameConsumer = changeGameConsumer;
+    }
+
+    public Consumer<Game> getChangeGameConsumer() {
+        return changeGameConsumer;
     }
 
     @Override
