@@ -16,7 +16,8 @@
   "environment": "server",
   "entrypoints": {
     "game-entry": [
-      "work.lclpnet.lobby.dev.TestGame"
+      "work.lclpnet.lobby.dev.TestGame",
+      "work.lclpnet.lobby.dev.AnotherGame"
     ]
   },
   "mixins": [],
