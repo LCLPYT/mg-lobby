@@ -3,6 +3,7 @@ package work.lclpnet.lobby.dev;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
@@ -32,7 +33,7 @@ public class TestGame implements Game, GameConfigurator {
 
     @Override
     public GameConfig getConfig() {
-        return new MinecraftGameConfig("test", new ItemStack(Items.STRUCTURE_VOID));
+        return new MinecraftGameConfig("test", new ItemStackTemplate(Items.STRUCTURE_VOID));
     }
 
     @Override

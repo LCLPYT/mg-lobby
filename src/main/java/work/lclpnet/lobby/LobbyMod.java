@@ -67,7 +67,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
 
             manager.onWorldReady();
 
-            loadingTranslations.whenLoaded().whenComplete((nil, err) -> {
+            loadingTranslations.whenLoaded().whenComplete((_, err) -> {
                 if (err != null) {
                     logger.error("Failed to load mg-lobby translations", err);
                 }

@@ -56,9 +56,7 @@ public class LobbyWorldDownloader {
     }
 
     private void patchWorld() throws IOException {
-        removeIfExists(lobbyDir.resolve("advancements"));
-        removeIfExists(lobbyDir.resolve("playerdata"));
-        removeIfExists(lobbyDir.resolve("stats"));
+        removeIfExists(lobbyDir.resolve("players"));
         removeIfExists(lobbyDir.resolve("icon.png"));
         removeIfExists(lobbyDir.resolve("level.dat_old"));
         removeIfExists(lobbyDir.resolve("session.lock"));

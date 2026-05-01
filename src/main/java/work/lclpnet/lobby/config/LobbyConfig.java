@@ -11,7 +11,7 @@ import java.util.Optional;
 public class LobbyConfig implements JsonConfig {
 
     public static final String DEFAULT_LOBBY_LEVEL_NAME = "lobby";
-    public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-1.21.11");
+    public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-26.1.2");
     public String lobbyLevelName = "lobby";
 
     public LobbyConfig() {}

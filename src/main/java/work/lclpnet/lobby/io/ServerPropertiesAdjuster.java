@@ -32,7 +32,7 @@ public class ServerPropertiesAdjuster {
         try {
             load();
 
-            if (properties.contains("level-name") && levelName.equals(properties.get("level-name"))) return;
+            if (properties.containsKey("level-name") && levelName.equals(properties.get("level-name"))) return;
 
             properties.put("level-name", levelName);
 
