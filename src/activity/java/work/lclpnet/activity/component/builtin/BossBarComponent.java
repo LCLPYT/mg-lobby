@@ -5,6 +5,7 @@ import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.ComponentView;
 import work.lclpnet.activity.component.DependentComponent;
@@ -25,6 +26,7 @@ public class BossBarComponent implements work.lclpnet.activity.component.Compone
     private final Set<CustomBossEvent> bars = new HashSet<>();
     private final Set<ServerBossEvent> showOnJoin = new HashSet<>();
     private final Set<CustomBossBar> removeOnQuit = new HashSet<>();
+    private final RandomSource random = RandomSource.createThreadLocalInstance();
     private HookRegistrar hookRegistrar;
 
     public BossBarComponent(CustomBossEvents bossBarManager) {
@@ -77,7 +79,7 @@ public class BossBarComponent implements work.lclpnet.activity.component.Compone
 
     @Override
     public CustomBossEvent createBossBar(Identifier id, Component text) {
-        CustomBossEvent bar = bossBarManager.create(id, text);
+        CustomBossEvent bar = bossBarManager.create(random, id, text);
 
         TransientBossBars.setTransient(bar, true);
 

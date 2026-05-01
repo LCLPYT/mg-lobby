@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.hook.HookListenerModule;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.map.hook.MapStateCallback;
-import xyz.nucleoid.fantasy.RuntimeWorld;
+import xyz.nucleoid.fantasy.RuntimeLevel;
 
 public class RuntimeWorldListener implements HookListenerModule {
 
@@ -17,9 +17,9 @@ public class RuntimeWorldListener implements HookListenerModule {
     }
 
     @Nullable
-    private MapItemSavedData getRuntimeMapState(ServerLevel world, MapId id) {
-        if (!(world instanceof RuntimeWorld runtimeWorld)) return null;
+    private MapItemSavedData getRuntimeMapState(ServerLevel level, MapId id) {
+        if (!(level instanceof RuntimeLevel runtimeLevel)) return null;
 
-        return runtimeWorld.getDataStorage().get(MapItemSavedData.type(id));
+        return runtimeLevel.getDataStorage().get(MapItemSavedData.type(id));
     }
 }

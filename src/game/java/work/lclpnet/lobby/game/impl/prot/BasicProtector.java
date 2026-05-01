@@ -1,29 +1,29 @@
 package work.lclpnet.lobby.game.impl.prot;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.entity.*;
 import work.lclpnet.kibu.hook.entity.leash.*;
+import work.lclpnet.kibu.hook.level.BlockModificationHooks;
+import work.lclpnet.kibu.hook.level.ItemScatterCallback;
+import work.lclpnet.kibu.hook.level.LevelPhysicsHooks;
 import work.lclpnet.kibu.hook.player.CraftingRecipeCallback;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.hook.util.PendingResult;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
-import work.lclpnet.kibu.hook.world.BlockModificationHooks;
-import work.lclpnet.kibu.hook.world.ItemScatterCallback;
-import work.lclpnet.kibu.hook.world.WorldPhysicsHooks;
 import work.lclpnet.lobby.game.api.prot.ProtectionConfig;
 import work.lclpnet.lobby.game.api.prot.ProtectionType;
 import work.lclpnet.lobby.game.api.prot.Protector;
@@ -99,24 +99,24 @@ public class BasicProtector implements Protector {
 
         protect(TRAMPLE_TURTLE_EGG, BlockModificationHooks.TRAMPLE_TURTLE_EGG, BasicProtector::onModify);
 
-        protect(CAULDRON_DRIP_STONE, WorldPhysicsHooks.CAULDRON_DRIP_STONE, scope
-                -> (world, pos, newState)
+        protect(CAULDRON_DRIP_STONE, LevelPhysicsHooks.CAULDRON_DRIP_STONE, scope
+                -> (world, pos, _)
                 -> scope.isWithinScope(world, pos));
 
-        protect(EXPLOSION, WorldPhysicsHooks.EXPLOSION, scope -> scope::isWithinScope);
+        protect(EXPLOSION, LevelPhysicsHooks.EXPLOSION, scope -> scope::isWithinScope);
 
-        protect(MELT, WorldPhysicsHooks.MELT, scope -> scope::isWithinScope);
+        protect(MELT, LevelPhysicsHooks.MELT, scope -> scope::isWithinScope);
 
-        protect(FREEZE, WorldPhysicsHooks.FREEZE, scope -> scope::isWithinScope);
+        protect(FREEZE, LevelPhysicsHooks.FREEZE, scope -> scope::isWithinScope);
 
-        protect(SNOW_FALL, WorldPhysicsHooks.SNOW_FALL, scope -> scope::isWithinScope);
+        protect(SNOW_FALL, LevelPhysicsHooks.SNOW_FALL, scope -> scope::isWithinScope);
 
-        protect(CAULDRON_PRECIPITATION, WorldPhysicsHooks.CAULDRON_PRECIPITATION, scope
-                -> (world, pos, newState)
+        protect(CAULDRON_PRECIPITATION, LevelPhysicsHooks.CAULDRON_PRECIPITATION, scope
+                -> (world, pos, _)
                 -> scope.isWithinScope(world, pos));
 
-        protect(REPLACE_DISK_ENCHANTMENT, WorldPhysicsHooks.REPLACE_DISK_ENCHANTMENT, scope
-                -> (world, pos, entity, state)
+        protect(REPLACE_DISK_ENCHANTMENT, LevelPhysicsHooks.REPLACE_DISK_ENCHANTMENT, scope
+                -> (world, pos, entity, _)
                 -> scope.isWithinScope(entity, pos));
 
         protect(DROP_ITEM, PlayerInventoryHooks.DROP_ITEM, scope
@@ -139,10 +139,10 @@ public class BasicProtector implements Protector {
         protect(PICKUP_ITEM, PlayerInventoryHooks.PLAYER_PICKUP, scope
                 -> scope::isWithinScope);
 
-        protect(BLOCK_ITEM_DROP, WorldPhysicsHooks.BLOCK_ITEM_DROP, scope
+        protect(BLOCK_ITEM_DROP, LevelPhysicsHooks.BLOCK_ITEM_DROP, scope
                 -> scope::isWithinScope);
 
-        protect(BLOCK_XP_DROP, WorldPhysicsHooks.BLOCK_XP_DROP, scope
+        protect(BLOCK_XP_DROP, LevelPhysicsHooks.BLOCK_XP_DROP, scope
                 -> (world, pos, xp)
                 -> scope.isWithinScope(world, pos));
 

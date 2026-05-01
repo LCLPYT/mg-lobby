@@ -14,14 +14,14 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
-import work.lclpnet.kibu.world.KibuWorlds;
+import work.lclpnet.kibu.world.KibuLevels;
 import work.lclpnet.kibu.world.mixin.MinecraftServerAccessor;
 import work.lclpnet.lobby.game.api.MapOptions;
 import work.lclpnet.lobby.game.api.WorldFacade;
 import work.lclpnet.lobby.game.map.GameMap;
 import work.lclpnet.lobby.game.map.MapManager;
 import work.lclpnet.lobby.game.map.MapUtils;
-import xyz.nucleoid.fantasy.RuntimeWorldHandle;
+import xyz.nucleoid.fantasy.RuntimeLevelHandle;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -102,7 +102,7 @@ public class WorldFacadeImpl implements WorldFacade {
             }
 
             return CompletableFuture.completedFuture(null).thenComposeAsync(nil -> server.submit(
-                    () -> onWorldLoaded(map.get(), newKey, existingWorld, options)
+                    () -> onLevelLoaded(map.get(), newKey, existingWorld, options)
             ).join());
         }
 
@@ -123,29 +123,29 @@ public class WorldFacadeImpl implements WorldFacade {
             } catch (IOException e) {
                 throw new CompletionException(e);
             }
-        }).thenComposeAsync(nil -> server.submit(() -> {
-            var optHandle = KibuWorlds.getInstance().getWorldManager(server).openPersistentWorld(newKey.identifier());
+        }).thenComposeAsync(_ -> server.submit(() -> {
+            var optHandle = KibuLevels.getInstance().getWorldManager(server).openPersistentLevel(newKey.identifier());
 
-            RuntimeWorldHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
+            RuntimeLevelHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
 
             worldContainer.trackHandle(handle);  // automatically unload world, if not done manually
 
-            ServerLevel world = handle.asWorld();
+            ServerLevel level = handle.asLevel();
 
-            return onWorldLoaded(map, newKey, world, options);
+            return onLevelLoaded(map, newKey, level, options);
         }).join());
     }
 
-    private CompletableFuture<ServerLevel> onWorldLoaded(GameMap map, ResourceKey<Level> newKey, ServerLevel world, MapOptions options) {
-        return options.bootstrapWorld(world, map)
+    private CompletableFuture<ServerLevel> onLevelLoaded(GameMap map, ResourceKey<Level> newKey, ServerLevel level, MapOptions options) {
+        return options.bootstrapWorld(level, map)
                 .exceptionally(throwable -> {
-                    logger.error("Failed to bootstrap map. Continuing without bootrap...", throwable);
+                    logger.error("Failed to bootstrap map. Continuing without bootstrap...", throwable);
                     return null;
                 })
-                .thenCompose(nil -> server.submit(() -> onWorldBootstrapped(map, newKey, world, options)));
+                .thenCompose(nil -> server.submit(() -> onLevelBootstrapped(map, newKey, level, options)));
     }
 
-    private ServerLevel onWorldBootstrapped(GameMap map, ResourceKey<Level> newKey, ServerLevel world, MapOptions options) {
+    private ServerLevel onLevelBootstrapped(GameMap map, ResourceKey<Level> newKey, ServerLevel level, MapOptions options) {
         ResourceKey<Level> oldKey = this.mapKey;
         MapOptions oldOptions = this.mapOptions;
 
@@ -155,14 +155,14 @@ public class WorldFacadeImpl implements WorldFacade {
         this.yaw = MapUtils.getSpawnYaw(map);
 
         for (ServerPlayer player : PlayerLookup.all(server)) {
-            player.teleportTo(world, spawn.x(), spawn.y(), spawn.z(), Set.of(), yaw, 0, true);
+            player.teleportTo(level, spawn.x(), spawn.y(), spawn.z(), Set.of(), yaw, 0, true);
         }
 
         // cleanup current map if requested
         if (oldKey != null && oldOptions != null && oldOptions.shouldBeDeleted() && !newKey.equals(oldKey)) {
-            worldContainer.getHandle(oldKey).ifPresent(RuntimeWorldHandle::delete);
+            worldContainer.getHandle(oldKey).ifPresent(RuntimeLevelHandle::delete);
         }
 
-        return world;
+        return level;
     }
 }

@@ -1,4 +1,4 @@
-import net.fabricmc.loom.task.RemapJarTask
+import org.apache.tools.ant.filters.ReplaceTokens
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
@@ -80,27 +80,27 @@ dependencies {
     implementation(libs.fabric.loader)
     implementation(libs.fabric.api)
 
-    implementation("work.lclpnet.mods.kibu:kibu:${project.kibu_version}")
-    implementation("work.lclpnet.mods.kibu:kibu-world-api:${project.kibu_world_api_version}")
+    implementation(libs.kibu)
+    implementation(libs.kibu.world.api)
     implementation(libs.fantasy)
-    implementation("maven.modrinth:sqlite-jdbc:3.41.2.1+20230506")
-    implementation("work.lclpnet.mods.gaco:gaco:${project.gaco_version}")
+    implementation(libs.sqlite.jdbc)
+    implementation(libs.gaco)
 
-    localRuntime("work.lclpnet.mods:pal:${project.pal_version}")
-    compileOnly("work.lclpnet.mods:pal:${project.pal_version}")
+    localRuntime(libs.pal)
+    compileOnly(libs.pal)
 
     // optional runtime mods (and their dependencies, because jar-in-jars are not loaded via dependencies)
-    localRuntime("work.lclpnet.mcserver-api:mcserver-api-fabric:${project.mcserver_api_version}")
-    implementation("work.lclpnet:translations4j:${project.translations4j_version}")
-    localRuntime("work.lclpnet:translations4j:${project.translations4j_version}:network")
+    localRuntime(libs.mcserver.api.fabric)
+    implementation(libs.translations4j)
+    localRuntime(variantOf(libs.translations4j) { classifier("network") })
 
-    compileOnly('org.jetbrains:annotations:24.1.0')
-    gameCompileOnly('org.jetbrains:annotations:24.1.0')
-    activityCompileOnly('org.jetbrains:annotations:24.1.0')
+    compileOnly(libs.jetbrains.annotations)
+    gameCompileOnly(libs.jetbrains.annotations)
+    activityCompileOnly(libs.jetbrains.annotations)
 
-    implementation('org.json:json:20231013')
-    implementation('com.google.dagger:dagger:2.46.1')
-    annotationProcessor('com.google.dagger:dagger-compiler:2.46.1')
+    implementation(libs.json)
+    implementation(libs.dagger)
+    annotationProcessor(libs.dagger.compiler)
 
     // include these dependencies
     def includeImpl = { dep ->
@@ -108,16 +108,16 @@ dependencies {
         include(dep)
     }
 
-    includeImpl('org.apache.commons:commons-compress:1.28.0')
-    includeImpl('org.tukaani:xz:1.9')
-    includeImpl('org.apache.tika:tika-core:3.2.2')
-    includeImpl("work.lclpnet:maze-lib:${project.maze_lib_version}")
-    includeImpl('work.lclpnet:json-config4j:1.0.0')
+    includeImpl(libs.commons.compress)
+    includeImpl(libs.xz)
+    includeImpl(libs.tika.core)
+    includeImpl(libs.maze.lib)
+    includeImpl(libs.json.config4j)
 
     // test dependencies
     testImplementation(libs.fabric.loader.junit)
-    testImplementation('org.junit.jupiter:junit-jupiter-params:5.8.1')
-    testImplementation("org.mockito:mockito-core:5.6.0")
+    testImplementation(libs.junit.jupiter.params)
+    testImplementation(libs.mockito.core)
 }
 
 loom {
@@ -216,6 +216,7 @@ artifactExtraSourceSets.each { name ->
     // add extra jar tasks
     def jar = tasks.register("${name}Jar", Jar.class) {
         from(sourceSets.named(name).get().output)
+        archiveClassifier.set(name)
 
         description "Builds the standalone ${name} api jar."
         group 'build'

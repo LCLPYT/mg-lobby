@@ -45,7 +45,7 @@ public class DefaultSeatProvider implements SeatProvider {
         final Vec3 seatPos = getSeatPosition(state, pos);
 
         var blockingEntities = world.getEntitiesOfClass(ArmorStand.class, AABB.ofSize(seatPos, 1, 1, 1), entity -> {
-            if (!entity.getTags().contains("seat")) return false;
+            if (!entity.entityTags().contains("seat")) return false;
 
             if (entity.isVehicle()) return true;
 

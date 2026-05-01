@@ -1,16 +1,16 @@
 package work.lclpnet.lobby.decor;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.title.Title;
@@ -111,7 +111,7 @@ public class KingOfLadder {
         translations.translateText("lobby.king_of_ladder.new_king", styled(kingName, ChatFormatting.YELLOW))
                 .formatted(ChatFormatting.GREEN)
                 .prefixed(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE))
-                .sendTo(PlayerLookup.world(world));
+                .sendTo(PlayerLookup.level(world));
     }
 
     private void notifyKing(ServerPlayer player) {

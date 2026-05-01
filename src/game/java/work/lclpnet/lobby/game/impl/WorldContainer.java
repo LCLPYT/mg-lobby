@@ -5,10 +5,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import work.lclpnet.kibu.hook.world.ServerWorldHooks;
+import work.lclpnet.kibu.hook.level.ServerLevelHooks;
 import xyz.nucleoid.fantasy.Fantasy;
-import xyz.nucleoid.fantasy.RuntimeWorldConfig;
-import xyz.nucleoid.fantasy.RuntimeWorldHandle;
+import xyz.nucleoid.fantasy.RuntimeLevelConfig;
+import xyz.nucleoid.fantasy.RuntimeLevelHandle;
 
 import java.util.Map;
 import java.util.Optional;
@@ -16,56 +16,56 @@ import java.util.Optional;
 public class WorldContainer {
 
     private final MinecraftServer server;
-    private final Map<ResourceKey<Level>, RuntimeWorldHandle> worlds = new Object2ObjectOpenHashMap<>();
+    private final Map<ResourceKey<Level>, RuntimeLevelHandle> levels = new Object2ObjectOpenHashMap<>();
 
     public WorldContainer(MinecraftServer server) {
         this.server = server;
     }
 
     public void init() {
-        ServerWorldHooks.UNLOAD.register(this::onWorldUnload);
+        ServerLevelHooks.UNLOAD.register(this::onLevelUnload);
     }
 
-    public RuntimeWorldHandle createTemporaryWorld(RuntimeWorldConfig config) {
+    public RuntimeLevelHandle createTemporaryLevel(RuntimeLevelConfig config) {
         Fantasy fantasy = Fantasy.get(server);
 
-        RuntimeWorldHandle handle = fantasy.openTemporaryWorld(config);
+        RuntimeLevelHandle handle = fantasy.openTemporaryLevel(config);
 
         trackHandle(handle);
 
         return handle;
     }
 
-    public void trackHandle(RuntimeWorldHandle handle) {
+    public void trackHandle(RuntimeLevelHandle handle) {
         synchronized (this) {
-            worlds.put(handle.getRegistryKey(), handle);
+            levels.put(handle.getRegistryKey(), handle);
         }
     }
 
     private void stopTracking(ResourceKey<Level> key) {
         synchronized (this) {
-            worlds.remove(key);
+            levels.remove(key);
         }
     }
 
-    public Optional<RuntimeWorldHandle> getHandle(ResourceKey<Level> key) {
+    public Optional<RuntimeLevelHandle> getHandle(ResourceKey<Level> key) {
         synchronized (this) {
-            return Optional.ofNullable(worlds.get(key));
+            return Optional.ofNullable(levels.get(key));
         }
     }
 
-    private void onWorldUnload(MinecraftServer server, ServerLevel world) {
-        if (world == null) return;
+    private void onLevelUnload(MinecraftServer server, ServerLevel level) {
+        if (level == null) return;
 
-        stopTracking(world.dimension());
+        stopTracking(level.dimension());
     }
 
     public synchronized void unload() {
-        ServerWorldHooks.UNLOAD.unregister(this::onWorldUnload);
+        ServerLevelHooks.UNLOAD.unregister(this::onLevelUnload);
 
         synchronized (this) {
-            worlds.values().forEach(RuntimeWorldHandle::delete);
-            worlds.clear();
+            levels.values().forEach(RuntimeLevelHandle::delete);
+            levels.clear();
         }
     }
 }

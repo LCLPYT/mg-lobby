@@ -139,7 +139,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
         hooks.registerHook(PlayerConnectionHooks.QUIT, this::onQuit);
         hooks.registerHook(PlayerInteractionHooks.USE_ITEM, this::useItem);
 
-        PlayerLookup.world(world).forEach(this::giveItems);
+        PlayerLookup.level(world).forEach(this::giveItems);
     }
 
     private void onQuit(ServerPlayer player) {

@@ -54,7 +54,7 @@ public class SeatHandler {
     }
 
     private void onDismount(ServerPlayer player, Entity vehicle) {
-        if (!vehicle.getTags().contains("seat")) return;
+        if (!vehicle.entityTags().contains("seat")) return;
 
         PlayerSeatCallback.AFTER_GET_UP.invoker().onGottenUp(player);
 

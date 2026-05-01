@@ -8,7 +8,7 @@ import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
 import work.lclpnet.kibu.hook.HookRegistrar;
-import work.lclpnet.kibu.hook.world.BlockModificationHooks;
+import work.lclpnet.kibu.hook.level.BlockModificationHooks;
 
 public class TestGameActivity extends ComponentActivity {
 

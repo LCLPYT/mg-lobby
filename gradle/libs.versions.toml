@@ -1,11 +1,28 @@
 [versions]
 minecraft = "26.1.2"
-fabric-api = "0.144.3+26.1"
+fabric-api = "0.147.0+26.1.2"
 fabric-loader = "0.19.1"
 fabric-loom = "1.15-SNAPSHOT"
 gradle-build-tools = "1.7.0"
 java = "25"
 fantasy = "0.8.0-beta.1+26.1.1"
+kibu = "0.154.0+26.1"
+kibu-world-api = "0.10.0+26.1.2"
+gaco = "0.16.0+26.1.2"
+pal = "0.16.2+26.1.2"
+mcserver-api = "0.9.1+26.1.2"
+translations4j = "2.9.0"
+maze-lib = "0.3.0"
+sqlite-jdbc = "3.41.2.1+20230506"
+jetbrains-annotations = "24.1.0"
+json = "20231013"
+dagger = "2.46.1"
+commons-compress = "1.28.0"
+xz = "1.9"
+tika-core = "3.2.2"
+json-config4j = "1.0.0"
+junit-jupiter-params = "5.8.1"
+mockito = "5.23.0"
 
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
@@ -19,3 +36,21 @@ fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-loader-junit = { module = "net.fabricmc:fabric-loader-junit", version.ref = "fabric-loader" }
 fantasy = { module = "xyz.nucleoid:fantasy", version.ref = "fantasy" }
+kibu = { module = "work.lclpnet.mods.kibu:kibu", version.ref = "kibu" }
+kibu-world-api = { module = "work.lclpnet.mods.kibu:kibu-world-api", version.ref = "kibu-world-api" }
+gaco = { module = "work.lclpnet.mods.gaco:gaco", version.ref = "gaco" }
+pal = { module = "work.lclpnet.mods:pal", version.ref = "pal" }
+mcserver-api-fabric = { module = "work.lclpnet.mcserver-api:mcserver-api-fabric", version.ref = "mcserver-api" }
+translations4j = { module = "work.lclpnet:translations4j", version.ref = "translations4j" }
+maze-lib = { module = "work.lclpnet:maze-lib", version.ref = "maze-lib" }
+sqlite-jdbc = { module = "maven.modrinth:sqlite-jdbc", version.ref = "sqlite-jdbc" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+json = { module = "org.json:json", version.ref = "json" }
+dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
+xz = { module = "org.tukaani:xz", version.ref = "xz" }
+tika-core = { module = "org.apache.tika:tika-core", version.ref = "tika-core" }
+json-config4j = { module = "work.lclpnet:json-config4j", version.ref = "json-config4j" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter-params" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }

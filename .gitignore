@@ -34,3 +34,4 @@ bin/
 run/
 logs/
 mplugindev.properties
+.fabric/processedMods

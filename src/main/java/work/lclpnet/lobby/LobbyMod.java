@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.hook.HookContainer;
-import work.lclpnet.kibu.hook.world.ServerWorldReadyCallback;
-import work.lclpnet.kibu.hook.world.ServerWorldUnreadyCallback;
+import work.lclpnet.kibu.hook.level.ServerWorldReadyCallback;
+import work.lclpnet.kibu.hook.level.ServerWorldUnreadyCallback;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.lobby.api.LobbyManager;
@@ -79,7 +79,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
             });
         });
 
-        ServerWorldUnreadyCallback.HOOK.register(server -> ActivityManager.getInstance().stop());
+        ServerWorldUnreadyCallback.HOOK.register(_ -> ActivityManager.getInstance().stop());
 
         logger.info("Lobby loaded.");
     }
