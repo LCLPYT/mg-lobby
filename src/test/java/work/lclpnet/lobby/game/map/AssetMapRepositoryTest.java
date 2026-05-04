@@ -1,5 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.SharedConstants;
 import org.junit.jupiter.api.BeforeAll;
@@ -169,6 +171,84 @@ class AssetMapRepositoryTest {
     void testOpenAbsoluteResourceOutsideEmpty() {
         assertThrows(IOException.class, () -> consume(repo.open(AssetPath.of("test/map_two/../../../world.tar"))),
                 "Path outside of repository");
+    }
+
+    @Test
+    void testConstraintsNoDepsAlwaysIncluded() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0"), "other-mod", Version.parse("3.2.0")), logger);
+        var maps = versionedRepo.getMapList(AssetPath.of("constrained"));
+        assertTrue(maps.stream().anyMatch(m -> m.path().equals("map_no_deps")));
+    }
+
+    @Test
+    void testConstraintsSatisfiedIncluded() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0"), "other-mod", Version.parse("3.2.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertTrue(paths.contains("map_satisfied"));
+    }
+
+    @Test
+    void testConstraintsUnsatisfiedExcluded() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0"), "other-mod", Version.parse("3.2.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertFalse(paths.contains("map_unsatisfied"));
+    }
+
+    @Test
+    void testConstraintsMissingModuleExcluded() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0"), "other-mod", Version.parse("3.2.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertFalse(paths.contains("map_missing_module"));
+    }
+
+    @Test
+    void testConstraintsMultiDepAllSatisfiedIncluded() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0"), "other-mod", Version.parse("3.2.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertTrue(paths.contains("map_multi_dep_satisfied"));
+    }
+
+    @Test
+    void testConstraintsMultiDepOneUnsatisfiedExcluded() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0"), "other-mod", Version.parse("3.2.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertFalse(paths.contains("map_multi_dep_one_unsatisfied"));
+    }
+
+    @Test
+    void testConstraintsNoModulesExcludesAllWithDeps() throws IOException {
+        var paths = repo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertEquals(Set.of("map_no_deps"), paths);
+    }
+
+    @Test
+    void testLegacyConstraintIncludedOnOlderVersion() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertTrue(paths.contains("map_legacy"));
+    }
+
+    @Test
+    void testLegacyConstraintExcludedOnNewerVersion() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("2.0.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("constrained")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertFalse(paths.contains("map_legacy"));
     }
 
     private void consume(InputStream in) throws IOException {

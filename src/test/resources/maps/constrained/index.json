@@ -1,0 +1,45 @@
+{
+  "maps": [
+    {
+      "path": "map_no_deps"
+    },
+    {
+      "path": "map_satisfied",
+      "depends": {
+        "test-mod": ">=1.0.0"
+      }
+    },
+    {
+      "path": "map_unsatisfied",
+      "depends": {
+        "test-mod": ">=2.0.0"
+      }
+    },
+    {
+      "path": "map_missing_module",
+      "depends": {
+        "nonexistent-mod": "*"
+      }
+    },
+    {
+      "path": "map_multi_dep_satisfied",
+      "depends": {
+        "test-mod": ">=1.0.0",
+        "other-mod": "^3.0.0"
+      }
+    },
+    {
+      "path": "map_multi_dep_one_unsatisfied",
+      "depends": {
+        "test-mod": ">=1.0.0",
+        "other-mod": "^4.0.0"
+      }
+    },
+    {
+      "path": "map_legacy",
+      "depends": {
+        "test-mod": "<2.0.0"
+      }
+    }
+  ]
+}
