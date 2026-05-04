@@ -1,0 +1,52 @@
+{
+  "maps": [
+    {
+      "path": "plain_map",
+      "icon": "minecraft:stone"
+    },
+    {
+      "icon": "minecraft:grass_block",
+      "authors": ["TemplateAuthor"],
+      "settings": {
+        "time": 6000,
+        "pvp": false
+      },
+      "variants": [
+        {
+          "path": "variant_day",
+          "settings": {
+            "pvp": true
+          }
+        },
+        {
+          "path": "variant_night",
+          "icon": "minecraft:coal",
+          "authors": ["ExtraAuthor"],
+          "settings!": {
+            "time": 18000
+          }
+        }
+      ]
+    },
+    {
+      "icon": "minecraft:diamond",
+      "depends": {
+        "test-mod": ">=1.0.0"
+      },
+      "variants": [
+        {
+          "path": "variant_constrained_ok",
+          "depends": {
+            "test-mod": ">=1.0.0"
+          }
+        },
+        {
+          "path": "variant_constrained_fail",
+          "depends!": {
+            "test-mod": ">=99.0.0"
+          }
+        }
+      ]
+    }
+  ]
+}

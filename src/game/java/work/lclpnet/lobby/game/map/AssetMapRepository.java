@@ -9,15 +9,13 @@ import work.lclpnet.gaco.asset.AssetPath;
 import work.lclpnet.gaco.asset.AssetRepository;
 import work.lclpnet.gaco.asset.AssetRequestOptions;
 import work.lclpnet.gaco.asset.AssetStreamResource;
+import work.lclpnet.lobby.game.util.JsonUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class AssetMapRepository implements MapRepository {
@@ -39,7 +37,8 @@ public class AssetMapRepository implements MapRepository {
         var index = fetchJsonObject(path.resolve("index.json"));
         JSONArray mapsArray = index.value().getJSONArray("maps");
 
-        Set<MapRef> maps = new HashSet<>();
+        // expand and flatten map entries and collect json entries
+        List<JSONObject> mapEntries = new ArrayList<>();
 
         for (Object obj : mapsArray) {
             if (!(obj instanceof JSONObject json)) {
@@ -47,6 +46,33 @@ public class AssetMapRepository implements MapRepository {
                 continue;
             }
 
+            JSONArray variants = json.optJSONArray("variants", null);
+
+            if (variants == null) {
+                mapEntries.add(json);
+                continue;
+            }
+
+            // entries with "variants" are expanded
+            JSONObject template = JsonUtil.copy(json);
+            template.remove("variants");
+
+            for (Object variantObj : variants) {
+                if (!(variantObj instanceof JSONObject variantJson)) {
+                    logger.warn("Invalid variant entry in map index");
+                    continue;
+                }
+
+                JSONObject merged = JsonUtil.mergeJson(template, variantJson);
+
+                mapEntries.add(merged);
+            }
+        }
+
+        // parse, filter and collect map refs
+        Set<MapRef> maps = new LinkedHashSet<>();
+
+        for (JSONObject json : mapEntries) {
             MapRef mapRef = MapRef.create(json, logger).orElse(null);
 
             if (mapRef == null) continue;

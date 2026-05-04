@@ -251,6 +251,74 @@ class AssetMapRepositoryTest {
         assertFalse(paths.contains("map_legacy"));
     }
 
+    @Test
+    void testVariantsNoVariantsUnchanged() throws IOException {
+        var maps = repo.getMapList(AssetPath.of("variants"));
+        assertTrue(maps.stream().anyMatch(m -> m.path().equals("plain_map")));
+    }
+
+    @Test
+    void testVariantsTemplateNotIncluded() throws IOException {
+        var paths = repo.getMapList(AssetPath.of("variants")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertFalse(paths.stream().anyMatch(p -> p.isBlank() || !paths.contains("variant_day") && !paths.contains("variant_night")));
+        assertTrue(paths.contains("variant_day"));
+        assertTrue(paths.contains("variant_night"));
+    }
+
+    @Test
+    void testVariantsScalarOverridden() throws IOException {
+        var maps = repo.getMapList(AssetPath.of("variants"));
+        var night = maps.stream().filter(m -> m.path().equals("variant_night")).findFirst().orElseThrow();
+        assertEquals("minecraft:coal", night.properties().getString("icon"));
+    }
+
+    @Test
+    void testVariantsScalarInherited() throws IOException {
+        var maps = repo.getMapList(AssetPath.of("variants"));
+        var day = maps.stream().filter(m -> m.path().equals("variant_day")).findFirst().orElseThrow();
+        assertEquals("minecraft:grass_block", day.properties().getString("icon"));
+    }
+
+    @Test
+    void testVariantsObjectMerged() throws IOException {
+        var maps = repo.getMapList(AssetPath.of("variants"));
+        var day = maps.stream().filter(m -> m.path().equals("variant_day")).findFirst().orElseThrow();
+        var settings = day.properties().getJSONObject("settings");
+        assertEquals(6000, settings.getInt("time"));
+        assertEquals(true, settings.getBoolean("pvp"));
+    }
+
+    @Test
+    void testVariantsArrayConcatenated() throws IOException {
+        var maps = repo.getMapList(AssetPath.of("variants"));
+        var night = maps.stream().filter(m -> m.path().equals("variant_night")).findFirst().orElseThrow();
+        var authors = night.properties().getJSONArray("authors");
+        assertEquals(2, authors.length());
+        assertEquals("TemplateAuthor", authors.getString(0));
+        assertEquals("ExtraAuthor", authors.getString(1));
+    }
+
+    @Test
+    void testVariantsBangReplacesObject() throws IOException {
+        var maps = repo.getMapList(AssetPath.of("variants"));
+        var night = maps.stream().filter(m -> m.path().equals("variant_night")).findFirst().orElseThrow();
+        var settings = night.properties().getJSONObject("settings");
+        assertEquals(18000, settings.getInt("time"));
+        assertEquals(false, settings.has("pvp"));  // verify overwrite instead of merge
+        assertFalse(settings.has("time") && settings.getInt("time") == 6000);
+    }
+
+    @Test
+    void testVariantsConstraintFiltered() throws IOException, VersionParsingException {
+        var versionedRepo = new AssetMapRepository(assetRepository,
+                Map.of("test-mod", Version.parse("1.5.0")), logger);
+        var paths = versionedRepo.getMapList(AssetPath.of("variants")).stream()
+                .map(MapRef::path).collect(Collectors.toSet());
+        assertTrue(paths.contains("variant_constrained_ok"));
+        assertFalse(paths.contains("variant_constrained_fail"));
+    }
+
     private void consume(InputStream in) throws IOException {
         try (in) {
             assertTrue(in.readAllBytes().length > 0);
