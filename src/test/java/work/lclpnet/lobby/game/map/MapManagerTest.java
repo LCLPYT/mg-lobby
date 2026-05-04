@@ -13,6 +13,7 @@ import work.lclpnet.gaco.asset.UriAssetRepository;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +36,7 @@ class MapManagerTest {
     void loadAll_loadedIntoCollection(String namespace, String path, Set<MapDescriptor> expected) throws IOException {
         URI uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        var repository = new AssetMapRepository(new UriAssetRepository(uri, logger), logger);
+        var repository = new AssetMapRepository(new UriAssetRepository(uri, logger), Map.of(), logger);
         var lookup = new RepositoryMapLookup(repository);
         var fetcher = new DirectMapFetcher(lookup, logger);
         var maps = new SimpleMapCollection();

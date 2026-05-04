@@ -1,12 +1,15 @@
 package work.lclpnet.lobby.game.map;
 
 import com.google.common.collect.Iterators;
-import net.minecraft.server.Bootstrap;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.Bootstrap;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import work.lclpnet.gaco.asset.AssetPath;
 import work.lclpnet.gaco.asset.AssetRequestOptions;
 
@@ -24,6 +27,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class RepositoryMapLookupTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryMapLookupTest.class);
 
     @BeforeAll
     public static void setup() {
@@ -158,14 +163,14 @@ public class RepositoryMapLookupTest {
             public Collection<MapRef> getMapList(AssetPath path) throws IOException {
                 if ("test".equals(path.toString())) {
                     return Set.of(
-                            new MapRef(Map.of("path", "map_one")),
-                            new MapRef(Map.of("path", "nested/map_two", "author", "LCLP"))
+                            ref(Map.of("path", "map_one")),
+                            ref(Map.of("path", "nested/map_two", "author", "LCLP"))
                     );
                 }
 
                 if ("test/nested".equals(path.toString())) {
                     return Set.of(
-                            new MapRef(Map.of("path", "map_two", "author", "LCLP"))
+                            ref(Map.of("path", "map_two", "author", "LCLP"))
                     );
                 }
 
@@ -191,5 +196,9 @@ public class RepositoryMapLookupTest {
                 return () -> Iterators.singletonIterator(URI.create(path.toString()));
             }
         };
+    }
+
+    private static MapRef ref(Map<String, Object> props) {
+        return MapRef.create(new JSONObject(props), logger).orElseThrow();
     }
 }

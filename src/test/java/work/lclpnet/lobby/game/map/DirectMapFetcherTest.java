@@ -14,6 +14,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,7 +33,7 @@ class DirectMapFetcherTest {
     public void setUp() {
         URI uri = Path.of("src", "test", "resources", "maps").toUri();
 
-        var repository = new AssetMapRepository(new UriAssetRepository(uri, logger), logger);
+        var repository = new AssetMapRepository(new UriAssetRepository(uri, logger), Map.of(), logger);
 
         RepositoryMapLookup lookup = new RepositoryMapLookup(repository);
 

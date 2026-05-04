@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ class AssetMapRepositoryTest {
         uri = Path.of("src", "test", "resources", "maps").toUri();
 
         assetRepository = new UriAssetRepository(uri, logger);
-        repo = new AssetMapRepository(assetRepository, logger);
+        repo = new AssetMapRepository(assetRepository, Map.of(), logger);
     }
 
     @Test
@@ -45,7 +46,7 @@ class AssetMapRepositoryTest {
         var maps = repo.getMapList(AssetPath.of("test"));
 
         assertEquals(Set.of("map_one", "map_two", "map_three"), maps.stream()
-                .map(MapRef::getPath)
+                .map(MapRef::path)
                 .collect(Collectors.toSet()));
     }
 
@@ -54,7 +55,7 @@ class AssetMapRepositoryTest {
         var maps = repo.getMapList(AssetPath.of("foo"));
 
         assertEquals(Set.of("bar/baz", "bar/hi"), maps.stream()
-                .map(MapRef::getPath)
+                .map(MapRef::path)
                 .collect(Collectors.toSet()));
     }
 
@@ -63,7 +64,7 @@ class AssetMapRepositoryTest {
         var maps = repo.getMapList(AssetPath.of("my_collection"));
 
         assertEquals(Set.of("/test/map_two"), maps.stream()
-                .map(MapRef::getPath)
+                .map(MapRef::path)
                 .collect(Collectors.toSet()));
     }
 

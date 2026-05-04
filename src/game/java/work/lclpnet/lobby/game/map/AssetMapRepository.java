@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game.map;
 
 import com.google.common.collect.Iterables;
+import net.fabricmc.loader.api.Version;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -15,17 +16,21 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class AssetMapRepository implements MapRepository {
 
     public static final String CACHED_PROPERTY = "__cached";
 
     private final AssetRepository assetRepository;
+    private final Map<String, Version> moduleVersions;
     private final Logger logger;
 
-    public AssetMapRepository(AssetRepository assetRepository, Logger logger) {
+    public AssetMapRepository(AssetRepository assetRepository, Map<String, Version> moduleVersions, Logger logger) {
         this.assetRepository = assetRepository;
+        this.moduleVersions = moduleVersions;
         this.logger = logger;
     }
 
@@ -42,7 +47,16 @@ public class AssetMapRepository implements MapRepository {
                 continue;
             }
 
-            maps.add(new MapRef(json));
+            MapRef mapRef = MapRef.create(json, logger).orElse(null);
+
+            if (mapRef == null) continue;
+
+            Consumer<String> reporter = error ->
+                    logger.debug("Ignoring map {}: Version constraint mismatch: {}", mapRef.path(), error);
+
+            if (mapRef.dependencies().matches(moduleVersions, reporter)) {
+                maps.add(mapRef);
+            }
         }
 
         return maps;

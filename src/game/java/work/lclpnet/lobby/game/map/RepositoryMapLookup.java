@@ -21,7 +21,7 @@ public class RepositoryMapLookup implements MapLookup {
         var refs = mapRepository.getMapList(AssetPath.of(descriptor.getMapPath()));
 
         return refs.stream()
-                .map(ref -> GameMap.parse(ref.getProperties(), descriptor))
+                .map(ref -> GameMap.parse(ref.properties(), descriptor))
                 .toList();
     }
 
