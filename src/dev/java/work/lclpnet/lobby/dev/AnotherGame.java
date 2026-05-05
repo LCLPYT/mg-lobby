@@ -1,6 +1,5 @@
 package work.lclpnet.lobby.dev;
 
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import work.lclpnet.lobby.game.api.Game;
@@ -19,7 +18,7 @@ public class AnotherGame implements Game {
 
     @Override
     public boolean canBePlayed(GameScope scope) {
-        return true;
+        return scope.playerCount() >= 2;
     }
 
     @Override

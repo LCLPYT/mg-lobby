@@ -261,6 +261,8 @@ public class LobbyActivity extends ComponentActivity {
 
             args.injectStartingSupplier(() -> startingBuilder.create(game, gameStarter, translations, args));
 
+            game.configureStatusManager(gameStarter);
+
             gameStarter.start();
         }
     }
@@ -283,7 +285,7 @@ public class LobbyActivity extends ComponentActivity {
         var translator = new DefaultLanguageTranslator(loader);
 
         // make sure the translations are loaded
-        return translator.reload().thenApply(nil -> new Translations(translator));
+        return translator.reload().thenApply(_ -> new Translations(translator));
     }
 
     @Override

@@ -77,8 +77,6 @@ public class GameStartingActivity extends ComponentActivity {
     public void start() {
         super.start();
 
-        game.configureStatusManager(starter);
-
         CommandRegistrar commands = component(BuiltinComponents.COMMANDS).commands();
 
         new StartCommand(starter, waitingManager).register(commands);

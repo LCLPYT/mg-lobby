@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.dev;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.translate.Translations;
@@ -57,16 +57,16 @@ public class TestGame implements Game, GameConfigurator {
     @Override
     public void configureOptions(GameOptionConfig config) {
         config.registerVoting("map", new OptionVoting<>(
-                player -> {
+                _ -> {
                     var stack = new ItemStack(Items.PAPER);
                     stack.set(DataComponents.ITEM_NAME, Component.literal("Map Voting"));
 
                     return stack;
                 },
-                player -> Component.literal("Map"),
+                _ -> Component.literal("Map"),
                 String.class,
                 List.of("Map A", "Map B", "Map C"),
-                (player, map) -> {
+                (_, map) -> {
                     var stack = new ItemStack(switch (map) {
                         case "Map A" -> Items.DIAMOND;
                         case "Map B" -> Items.EMERALD;

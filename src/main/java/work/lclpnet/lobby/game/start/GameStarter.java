@@ -26,6 +26,7 @@ import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.option.GameOptions;
 import work.lclpnet.lobby.game.api.start.GameStatusManager;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -58,13 +59,19 @@ public class GameStarter implements GameStatusManager {
         hookStack.registerHook(PlayerSpawnLocationCallback.HOOK, this::onJoin);
         hookStack.registerHook(PlayerConnectionHooks.QUIT, this::onQuit);
 
-        updateGameStatus();
+        updateGameStatus().thenRun(this::afterStatusUpdated);
 
         SchedulerStack schedulerStack = environment.getSchedulerStack();
         schedulerStack.push();
 
-        schedulerStack.interval(new PeriodicConditionBroadcast(gameStarting, gameStarted, conditionCheckInterval,
-                this::periodicCheck), 1);
+        PeriodicConditionBroadcast action = new PeriodicConditionBroadcast(
+                gameStarting,
+                gameStarted,
+                conditionCheckInterval,
+                this::periodicCheck
+        );
+
+        schedulerStack.interval(action, 1);
     }
 
     public void finish(GameOptions options) {
@@ -106,8 +113,10 @@ public class GameStarter implements GameStatusManager {
     }
 
     private void periodicCheck() {
-        updateGameStatus();
+        updateGameStatus().thenRun(this::afterStatusUpdated);
+    }
 
+    private void afterStatusUpdated() {
         if (cannotStartMessage == null || gameStarting.get() || gameStarted.get()) return;
 
         for (ServerPlayer player : PlayerLookup.all(environment.getServer())) {
@@ -118,8 +127,8 @@ public class GameStarter implements GameStatusManager {
         }
     }
 
-    private void updateGameStatus() {
-        environment.getServer().execute(() -> {
+    private CompletableFuture<Void> updateGameStatus() {
+        return environment.getServer().submit(() -> {
             if (condition.getAsBoolean()) {
                 initGameStart();
             } else {
