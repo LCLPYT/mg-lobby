@@ -11,15 +11,27 @@ import work.lclpnet.kibu.hook.level.ServerWorldReadyCallback;
 import work.lclpnet.kibu.hook.level.ServerWorldUnreadyCallback;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
+import work.lclpnet.lobby.activity.GameStartingActivity;
+import work.lclpnet.lobby.activity.LobbyActivity;
 import work.lclpnet.lobby.api.LobbyManager;
-import work.lclpnet.lobby.di.DaggerLobbyComponent;
-import work.lclpnet.lobby.di.LobbyComponent;
-import work.lclpnet.lobby.di.LobbyModule;
+import work.lclpnet.lobby.config.ExtendedConfigSerializer;
+import work.lclpnet.lobby.config.LobbyConfig;
 import work.lclpnet.lobby.event.ConnectionListener;
+import work.lclpnet.lobby.game.AsyncGameStateIo;
+import work.lclpnet.lobby.game.GameManager;
+import work.lclpnet.lobby.game.impl.data.PathDataPackSink;
+import work.lclpnet.lobby.io.LobbyWorldDownloader;
+import work.lclpnet.lobby.io.ServerPropertiesAdjuster;
+import work.lclpnet.lobby.service.DataPackService;
 import work.lclpnet.lobby.event.RuntimeWorldListener;
 import work.lclpnet.lobby.util.WholesomeChatManager;
 
+import net.fabricmc.loader.api.FabricLoader;
+import work.lclpnet.config.json.ConfigHandler;
+
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
 
@@ -27,7 +39,9 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
     public static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyMod instance = null;
     private LobbyManagerImpl manager = null;
-    private LobbyComponent component = null;
+    private GameManager gameManager = null;
+    private Translations translations = null;
+    private CompletableFuture<MinecraftServer> serverFuture = null;
 
     @Override
     public void onInitializeServer() {
@@ -35,15 +49,15 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
 
         var loadingTranslations = ModTranslations.fromAssets(ID, logger);
 
-        Translations translations = loadingTranslations.translations();
+        translations = loadingTranslations.translations();
+        serverFuture = new CompletableFuture<>();
 
-        var serverFuture = new CompletableFuture<MinecraftServer>();
+        var configDir = FabricLoader.getInstance().getConfigDir().resolve(ID);
+        var configSerializer = new ExtendedConfigSerializer<>(LobbyConfig.FACTORY, logger);
+        var configHandler = new ConfigHandler<>(configDir.resolve("config.json"), configSerializer, logger);
 
-        component = DaggerLobbyComponent.builder()
-                .lobbyModule(new LobbyModule(logger, translations, serverFuture))
-                .build();
-
-        manager = component.lobbyManager();
+        gameManager = new GameManager(logger, new AsyncGameStateIo(configDir.resolve("gameManagerState.dat")));
+        manager = new LobbyManagerImpl(translations, logger, gameManager, configHandler, serverFuture);
 
         var hooks = new HookContainer();
         hooks.registerHooks(new ConnectionListener());
@@ -52,13 +66,14 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         // load config etc. (blocking)
         manager.init();
 
-        component.serverPropertiesAdjuster().adjust();
+        new ServerPropertiesAdjuster(Path.of("server.properties"), manager, logger).adjust();
+        new LobbyWorldDownloader(manager, logger).renewWorld();
 
-        component.lobbyWorldDownloader().renewWorld();
+        gameManager.discoverGames();
 
-        component.lobbyManager().getGameManager().discoverGames();
-
-        component.dataPackService().downloadRequired();
+        var dataPacksPath = Path.of(manager.getConfig().getSafeLobbyLevelName()).resolve("datapacks");
+        var executor = Executors.newVirtualThreadPerTaskExecutor();
+        new DataPackService(gameManager, manager, new PathDataPackSink(dataPacksPath), executor, logger).downloadRequired();
 
         ServerWorldReadyCallback.HOOK.register(server -> {
             logger.info("Lobby world is ready");
@@ -93,7 +108,12 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
     public void enterLobbyPhase() {
         logger.info("Entering lobby...");
 
-        ActivityManager.getInstance().startActivity(component.lobbyActivity());
+        MinecraftServer server = serverFuture.resultNow();
+
+        GameStartingActivity.Builder startingBuilder = (game, starter, trans, lobbyArgs) ->
+                new GameStartingActivity(server, logger, manager.getLobbyWorld(), gameManager, game, starter, trans, lobbyArgs);
+
+        ActivityManager.getInstance().startActivity(new LobbyActivity(server, logger, manager, startingBuilder, translations));
     }
 
     public static LobbyMod getInstance() {

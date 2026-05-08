@@ -16,10 +16,6 @@ import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
-import work.lclpnet.lobby.di.ActivityScope;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +23,6 @@ import java.util.UUID;
 
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
-@ActivityScope
 public class KingOfLadder {
 
     private final ServerLevel world;
@@ -38,8 +33,7 @@ public class KingOfLadder {
     private UUID king = null;
     private String kingName = null;
 
-    @Inject
-    public KingOfLadder(@Named("lobbyWorld") ServerLevel world, LobbyWorldConfig config, Translations translations) {
+    public KingOfLadder(ServerLevel world, LobbyWorldConfig config, Translations translations) {
         this(world, config.kingOfLadderGoal, config.kingOfLadderDisplays, translations);
     }
 

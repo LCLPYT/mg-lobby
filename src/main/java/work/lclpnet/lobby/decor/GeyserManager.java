@@ -3,19 +3,13 @@ package work.lclpnet.lobby.decor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
-import work.lclpnet.lobby.di.ActivityScope;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.List;
 
-@ActivityScope
 public class GeyserManager {
 
     private final Geyser[] geysers;
 
-    @Inject
-    public GeyserManager(@Named("lobbyWorld") ServerLevel world, LobbyWorldConfig config) {
+    public GeyserManager(ServerLevel world, LobbyWorldConfig config) {
         this(world, config.geysers);
     }
 

@@ -13,13 +13,10 @@ import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerMountHooks;
-import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
-import javax.inject.Inject;
 import java.util.*;
 
-@ActivityScope
 public class SeatHandler {
 
     private final WorldModifier worldModifier;
@@ -28,7 +25,6 @@ public class SeatHandler {
     private final Set<UUID> changedSeat = new HashSet<>();
     private final HookRegistrar hookRegistrar;
 
-    @Inject
     public SeatHandler(WorldModifier worldModifier, SeatProvider seatProvider, HookRegistrar hookRegistrar) {
         this.seatProvider = seatProvider;
         this.worldModifier = worldModifier;

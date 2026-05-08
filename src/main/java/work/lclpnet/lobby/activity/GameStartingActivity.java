@@ -1,8 +1,5 @@
 package work.lclpnet.lobby.activity;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.world.BossEvent;
@@ -36,8 +33,6 @@ import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.util.LobbyGameContext;
 
-import javax.inject.Named;
-
 public class GameStartingActivity extends ComponentActivity {
 
     private final Game game;
@@ -50,10 +45,9 @@ public class GameStartingActivity extends ComponentActivity {
     private int colorIndex;
     private boolean wasPaused = false;
 
-    @AssistedInject
-    public GameStartingActivity(MinecraftServer server, Logger logger, @Named("lobbyWorld") ServerLevel world,
-                                GameManager gameManager, @Assisted Game game, @Assisted GameStarter starter,
-                                @Assisted Translations translations, @Assisted LobbyArgs lobbyArgs) {
+    public GameStartingActivity(MinecraftServer server, Logger logger, ServerLevel world,
+                                GameManager gameManager, Game game, GameStarter starter,
+                                Translations translations, LobbyArgs lobbyArgs) {
         super(server, logger);
         this.game = game;
         this.config = game.getConfig();
@@ -195,7 +189,6 @@ public class GameStartingActivity extends ComponentActivity {
         }
     }
 
-    @AssistedFactory
     public interface Builder {
         GameStartingActivity create(Game game, GameStarter starter, Translations translations, LobbyArgs lobbyArgs);
     }

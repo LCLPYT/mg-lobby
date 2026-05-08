@@ -19,13 +19,10 @@ import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.service.PalService;
 import work.lclpnet.lobby.util.PlayerReset;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-@Singleton
 public class LobbyManagerImpl implements LobbyManager {
 
     private final ConfigHandler<LobbyConfig> configHandler;
@@ -35,7 +32,6 @@ public class LobbyManagerImpl implements LobbyManager {
     private final Future<MinecraftServer> server;
     private volatile WorldConfigHandler<LobbyWorldConfig> worldConfigHandler = null;
 
-    @Inject
     public LobbyManagerImpl(Translations translations, Logger logger,
                             GameManager gameManager, ConfigHandler<LobbyConfig> configHandler, Future<MinecraftServer> server) {
         this.logger = logger;

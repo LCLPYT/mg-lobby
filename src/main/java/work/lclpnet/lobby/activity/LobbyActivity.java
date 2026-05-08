@@ -23,9 +23,15 @@ import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
 import work.lclpnet.lobby.decor.greet.GreetingDisplay;
+import work.lclpnet.lobby.decor.jnr.JumpAndRun;
+import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
+import work.lclpnet.lobby.decor.seat.DefaultSeatProvider;
+import work.lclpnet.lobby.decor.seat.SeatHandler;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
-import work.lclpnet.lobby.di.ActivityComponent;
-import work.lclpnet.lobby.di.ActivityModule;
+import work.lclpnet.lobby.event.JumpAndRunListener;
+import work.lclpnet.lobby.event.KingOfLadderListener;
+import work.lclpnet.lobby.event.LobbyListener;
+import work.lclpnet.lobby.event.TicTacToeListener;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.api.Game;
@@ -44,7 +50,6 @@ import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
 import work.lclpnet.translations.loader.TranslationLoader;
 
-import javax.inject.Inject;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
@@ -55,7 +60,6 @@ public class LobbyActivity extends ComponentActivity {
 
     private final LobbyManager lobbyManager;
     private final ActivityManager childActivity;
-    private final ActivityComponent.Builder componentBuilder;
     private final GameStartingActivity.Builder startingBuilder;
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
     private final Translations translations;
@@ -67,13 +71,11 @@ public class LobbyActivity extends ComponentActivity {
     private volatile boolean changeInProgress = false;
     private volatile Game changingToGame = null;
 
-    @Inject
-    public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
+    public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager,
                          GameStartingActivity.Builder startingBuilder, Translations translations) {
         super(server, logger);
         this.lobbyManager = lobbyManager;
         this.childActivity = new SyncActivityManager();
-        this.componentBuilder = componentBuilder;
         this.startingBuilder = startingBuilder;
         this.translations = translations;
     }
@@ -99,14 +101,10 @@ public class LobbyActivity extends ComponentActivity {
         CommandRegistrar commands = component(COMMANDS).commands();
 
         MinecraftServer server = getServer();
+        var lobbyWorld = lobbyManager.getLobbyWorld();
+        LobbyWorldConfig config = lobbyManager.getWorldConfig();
 
-        ActivityComponent component = componentBuilder
-                .activityModule(new ActivityModule(hooks, scheduler, server))
-                .build();
-
-        hooks.registerHooks(component.lobbyListener());
-
-        GameRules gameRules = lobbyManager.getLobbyWorld().getGameRules();
+        GameRules gameRules = lobbyWorld.getGameRules();
         gameRules.set(GameRules.SHOW_ADVANCEMENT_MESSAGES, false, server);
 
         // send every online player to the lobby
@@ -114,37 +112,39 @@ public class LobbyActivity extends ComponentActivity {
             lobbyManager.sendToLobby(player);
         }
 
-        worldModifier = component.worldModifier();
+        ResetWorldModifier resetWorldModifier = new ResetWorldModifier(lobbyWorld, hooks);
+        worldModifier = resetWorldModifier;
+
+        hooks.registerHooks(new LobbyListener(lobbyManager, scheduler, config));
 
         // generate maze
-        component.mazeGenerator().create();
+        new LobbyMazeCreator(lobbyManager, getLogger(), resetWorldModifier, lobbyWorld).create();
 
         // init king of the ladder
-        LobbyWorldConfig config = lobbyManager.getWorldConfig();
-
         if (config.kingOfLadderGoal != null) {
-            kingOfLadder = component.kingOfLadder();
-            hooks.registerHooks(component.kingOfLadderListener());
+            kingOfLadder = new KingOfLadder(lobbyWorld, config, translations);
+            hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
             scheduler.interval(kingOfLadder::tick, 6);
         }
 
         // init geysers
         if (config.geysers != null) {
-            GeyserManager geyserManager = component.geyserManager();
+            GeyserManager geyserManager = new GeyserManager(lobbyWorld, config);
             scheduler.interval(geyserManager::tick, 1);
         }
 
         // jump and run
         if (config.jumpAndRunStart != null) {
-            hooks.registerHooks(component.jumpAndRunListener());
+            JumpAndRun jumpAndRun = new JumpAndRun(lobbyWorld, config, resetWorldModifier, scheduler, translations);
+            hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
         }
 
         // init seat handler
-        component.seatHandler().init();
+        new SeatHandler(resetWorldModifier, DefaultSeatProvider.getInstance(), hooks).init();
 
         // tic tac toe
-        ticTacToeManager = component.ticTacToeManager();
-        hooks.registerHooks(component.ticTacToeListener());
+        ticTacToeManager = new TicTacToeManager(config, translations, scheduler, lobbyWorld, resetWorldModifier);
+        hooks.registerHooks(new TicTacToeListener(ticTacToeManager));
 
         // protector
         component(ProtectorComponent.KEY).configure(this::configureProtection);
@@ -158,10 +158,9 @@ public class LobbyActivity extends ComponentActivity {
 
         gameManager.addStateChangeListener(this::onGameRestored);
 
-        GreetingDisplay greetingDisplay = component.greetingDisplay();
-        greetingDisplay.show();
+        new GreetingDisplay(config, resetWorldModifier, lobbyWorld).show();
 
-        lobbyManager.getLobbyWorld().getWaypointManager().breakAllConnections();
+        lobbyWorld.getWaypointManager().breakAllConnections();
     }
 
     /**

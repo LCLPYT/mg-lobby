@@ -36,7 +36,6 @@ import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 
-import javax.inject.Inject;
 import java.util.Set;
 
 public class LobbyListener implements HookListenerModule {
@@ -45,7 +44,6 @@ public class LobbyListener implements HookListenerModule {
     private final Scheduler scheduler;
     private final LobbyWorldConfig config;
 
-    @Inject
     public LobbyListener(LobbyManager lobbyManager, Scheduler scheduler, LobbyWorldConfig config) {
         this.lobbyManager = lobbyManager;
         this.scheduler = scheduler;

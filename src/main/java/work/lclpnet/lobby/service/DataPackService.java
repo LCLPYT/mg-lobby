@@ -1,6 +1,5 @@
 package work.lclpnet.lobby.service;
 
-import dagger.Lazy;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.jnbt.ListTag;
@@ -12,7 +11,6 @@ import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.data.DataPackSink;
 
-import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,12 +24,11 @@ public class DataPackService {
 
     private final GameManager gameManager;
     private final ConfigAccess configAccess;
-    private final Lazy<DataPackSink> sink;
+    private final DataPackSink sink;
     private final Executor executor;
     private final Logger logger;
 
-    @Inject
-    public DataPackService(GameManager gameManager, ConfigAccess configAccess, Lazy<DataPackSink> sink, Executor executor, Logger logger) {
+    public DataPackService(GameManager gameManager, ConfigAccess configAccess, DataPackSink sink, Executor executor, Logger logger) {
         this.gameManager = gameManager;
         this.configAccess = configAccess;
         this.sink = sink;
@@ -40,11 +37,9 @@ public class DataPackService {
     }
 
     public void downloadRequired() {
-        DataPackSink packSink = sink.get();
-
         gameManager.getGames().stream()
                 .map(Game::getBootstrapDataPacks)
-                .map(packs -> packs.downloadPacks(packSink, executor).exceptionally(err -> {
+                .map(packs -> packs.downloadPacks(sink, executor).exceptionally(err -> {
                     logger.error("Failed to download data packs", err);
                     return null;
                 }))
@@ -52,7 +47,7 @@ public class DataPackService {
                 .forEach(CompletableFuture::join);
 
         // data packs must be enabled in order to be loaded
-        Set<String> packs = packSink.getIds().stream()
+        Set<String> packs = sink.getIds().stream()
                 .map(path -> "file/" + path.getFileName())
                 .collect(Collectors.toSet());
 

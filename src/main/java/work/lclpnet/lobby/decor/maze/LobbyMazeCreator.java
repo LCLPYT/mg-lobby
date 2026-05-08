@@ -3,16 +3,13 @@ package work.lclpnet.lobby.decor.maze;
 import net.minecraft.world.level.BlockGetter;
 import org.slf4j.Logger;
 import work.lclpnet.lobby.config.ConfigAccess;
-import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 import work.lclpnet.maze.MazeCreator;
 import work.lclpnet.maze.algorithm.MazeGenerationAlgorithm;
 import work.lclpnet.maze.algorithm.RecursiveBacktrackingMazeGenerationAlgorithm;
 
-import javax.inject.Inject;
 import java.util.Random;
 
-@ActivityScope
 public class LobbyMazeCreator {
 
     private final ConfigAccess configAccess;
@@ -20,7 +17,6 @@ public class LobbyMazeCreator {
     private final WorldModifier writer;
     private final BlockGetter blockView;
 
-    @Inject
     public LobbyMazeCreator(ConfigAccess configAccess, Logger logger, WorldModifier writer, BlockGetter blockView) {
         this.configAccess = configAccess;
         this.logger = logger;
