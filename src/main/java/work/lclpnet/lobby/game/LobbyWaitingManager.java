@@ -216,8 +216,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
 
     private void openGameSelector(ServerPlayer player) {
         var games = new ArrayList<>(gameManager.getGames());
-        var title = context.getTranslations().translateText(player, "lobby.item.select_game")
-                .formatted(ChatFormatting.GOLD);
+        var title = context.getTranslations().translateText(player, "lobby.item.select_game");
 
         OptionPrompt.open(player, title, games, game -> {
             var icon = game.getConfig().icon().copy();
