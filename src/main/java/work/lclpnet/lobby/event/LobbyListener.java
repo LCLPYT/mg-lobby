@@ -55,9 +55,9 @@ public class LobbyListener implements HookListenerModule {
         registrar.registerHook(ServerPlayConnectionHooks.JOIN, this::onJoin);
         registrar.registerHook(PlayerMoveCallback.HOOK, this::onMove);
         registrar.registerHook(PlayerInteractionHooks.ATTACK_ENTITY, this::onAttack);
-        registrar.registerHook(PlayerAdvancementPacketCallback.HOOK, (player, packet) -> true);
-        registrar.registerHook(PlayerRecipeNotificationCallback.HOOK, (player, entry, displayEntry) -> true);
-        registrar.registerHook(PlayerWaypointCallback.HOOK, (player, waypoint) -> true);
+        registrar.registerHook(PlayerAdvancementPacketCallback.HOOK, (_, _) -> true);
+        registrar.registerHook(PlayerRecipeNotificationCallback.HOOK, (_, _, _) -> true);
+        registrar.registerHook(PlayerWaypointCallback.HOOK, (_, _) -> true);
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -144,6 +144,6 @@ public class LobbyListener implements HookListenerModule {
     }
 
     private boolean isLobby(Level world) {
-        return lobbyManager.getLobbyWorld() == world;
+        return lobbyManager.getLobbyLevel() == world;
     }
 }

@@ -1,8 +1,15 @@
 package work.lclpnet.lobby.activity;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.gamerules.GameRules;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +19,8 @@ import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.hook.HookRegistrar;
+import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
+import work.lclpnet.kibu.inv.prompt.OptionPrompt;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
@@ -45,11 +54,13 @@ import work.lclpnet.lobby.game.start.LobbyGameConfigurator;
 import work.lclpnet.lobby.game.util.ProtectorComponent;
 import work.lclpnet.lobby.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
+import work.lclpnet.lobby.util.LobbyPlayerStateManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
 import work.lclpnet.translations.loader.TranslationLoader;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
@@ -64,6 +75,8 @@ public class LobbyActivity extends ComponentActivity {
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
     private final Translations translations;
     private final ReentrantLock gameLock = new ReentrantLock();
+    private final LobbyPlayerStateManager playerStateManager = new LobbyPlayerStateManager();
+
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
@@ -100,11 +113,13 @@ public class LobbyActivity extends ComponentActivity {
         Scheduler scheduler = component(SCHEDULER).scheduler();
         CommandRegistrar commands = component(COMMANDS).commands();
 
+        playerStateManager.init(hooks);
+
         MinecraftServer server = getServer();
-        var lobbyWorld = lobbyManager.getLobbyWorld();
+        var level = lobbyManager.getLobbyLevel();
         LobbyWorldConfig config = lobbyManager.getWorldConfig();
 
-        GameRules gameRules = lobbyWorld.getGameRules();
+        GameRules gameRules = level.getGameRules();
         gameRules.set(GameRules.SHOW_ADVANCEMENT_MESSAGES, false, server);
 
         // send every online player to the lobby
@@ -112,38 +127,38 @@ public class LobbyActivity extends ComponentActivity {
             lobbyManager.sendToLobby(player);
         }
 
-        ResetWorldModifier resetWorldModifier = new ResetWorldModifier(lobbyWorld, hooks);
+        ResetWorldModifier resetWorldModifier = new ResetWorldModifier(level, hooks);
         worldModifier = resetWorldModifier;
 
         hooks.registerHooks(new LobbyListener(lobbyManager, scheduler, config));
 
         // generate maze
-        new LobbyMazeCreator(lobbyManager, getLogger(), resetWorldModifier, lobbyWorld).create();
+        new LobbyMazeCreator(lobbyManager, getLogger(), resetWorldModifier, level).create();
 
         // init king of the ladder
         if (config.kingOfLadderGoal != null) {
-            kingOfLadder = new KingOfLadder(lobbyWorld, config, translations);
+            kingOfLadder = new KingOfLadder(level, config, translations);
             hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
             scheduler.interval(kingOfLadder::tick, 6);
         }
 
         // init geysers
         if (config.geysers != null) {
-            GeyserManager geyserManager = new GeyserManager(lobbyWorld, config);
+            GeyserManager geyserManager = new GeyserManager(level, config);
             scheduler.interval(geyserManager::tick, 1);
         }
 
         // jump and run
         if (config.jumpAndRunStart != null) {
-            JumpAndRun jumpAndRun = new JumpAndRun(lobbyWorld, config, resetWorldModifier, scheduler, translations);
+            JumpAndRun jumpAndRun = new JumpAndRun(level, config, resetWorldModifier, scheduler, translations);
             hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
         }
 
         // init seat handler
         new SeatHandler(resetWorldModifier, DefaultSeatProvider.getInstance(), hooks).init();
 
-        // tic tac toe
-        ticTacToeManager = new TicTacToeManager(config, translations, scheduler, lobbyWorld, resetWorldModifier);
+        // tic-tac-toe
+        ticTacToeManager = new TicTacToeManager(config, translations, scheduler, level, resetWorldModifier);
         hooks.registerHooks(new TicTacToeListener(ticTacToeManager));
 
         // protector
@@ -158,9 +173,53 @@ public class LobbyActivity extends ComponentActivity {
 
         gameManager.addStateChangeListener(this::onGameRestored);
 
-        new GreetingDisplay(config, resetWorldModifier, lobbyWorld).show();
+        new GreetingDisplay(config, resetWorldModifier, level).show();
 
-        lobbyWorld.getWaypointManager().breakAllConnections();
+        level.getWaypointManager().breakAllConnections();
+
+        initPlayerItems(hooks, level);
+    }
+
+    private void initPlayerItems(HookRegistrar hooks, ServerLevel level) {
+        hooks.registerHook(PlayerConnectionHooks.JOIN, this::giveItems);
+        PlayerLookup.level(level).forEach(this::giveItems);
+    }
+
+    private void giveItems(ServerPlayer player) {
+        Inventory inventory = player.getInventory();
+        var state = playerStateManager.getOrCreate(player);
+
+        if (Commands.LEVEL_GAMEMASTERS.check(player.level().getServer().getProfilePermissions(player.nameAndId()))) {
+            int gameSlot = state.getFreeSlot(8);
+            inventory.setItem(gameSlot, getGameSelectorStack(player));
+            state.setInteractable(gameSlot, this::openGameSelector);
+        }
+    }
+
+    private ItemStack getGameSelectorStack(ServerPlayer player) {
+        var stack = new ItemStack(Items.COMPASS);
+
+        stack.set(DataComponents.ITEM_NAME, translations.translateText(player, "lobby.item.select_game")
+                .formatted(ChatFormatting.GOLD));
+
+        return stack;
+    }
+
+    private void openGameSelector(ServerPlayer player) {
+        var games = new ArrayList<>(lobbyManager.getGameManager().getGames());
+        var title = translations.translateText(player, "lobby.item.select_game");
+
+        OptionPrompt.open(player, title, games, game -> {
+            var icon = game.getConfig().icon().copy();
+
+            icon.set(DataComponents.ITEM_NAME, translations
+                    .translateText(player, game.getConfig().titleKey())
+                    .formatted(ChatFormatting.AQUA));
+
+            return icon;
+        }).thenAccept(selected -> selected.ifPresent(
+                game -> getServer().execute(() -> changeGame(game))
+        ));
     }
 
     /**
@@ -244,7 +303,7 @@ public class LobbyActivity extends ComponentActivity {
     private void activateGame(Game game, GameFactory factory, Translations translations) {
         var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations);
 
-        var args = new LobbyArgs(childActivity, configurator, this::changeGame);
+        var args = new LobbyArgs(childActivity, configurator, playerStateManager);
         var scope = new Scope(getServer());
 
         synchronized (this) {
@@ -263,6 +322,13 @@ public class LobbyActivity extends ComponentActivity {
             game.configureStatusManager(gameStarter);
 
             gameStarter.start();
+        }
+
+        playerStateManager.reset();
+
+        for (ServerPlayer player : PlayerLookup.all(getServer())) {
+            player.getInventory().clearContent();
+            giveItems(player);
         }
     }
 

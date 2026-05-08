@@ -4,7 +4,7 @@ import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.activity.LobbyActivity;
-import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.lobby.util.LobbyPlayerStateManager;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -13,17 +13,18 @@ public class LobbyArgs implements GameStarter.Args {
 
     private final ActivityManager childActivity;
     private final LobbyGameConfigurator configurator;
-    private final Consumer<Game> changeGameConsumer;
+    private final LobbyPlayerStateManager playerStateManager;
+
     private Supplier<GameStartingActivity> startingSupplier = null;
 
-    public LobbyArgs(ActivityManager childActivity, LobbyGameConfigurator configurator, Consumer<Game> changeGameConsumer) {
+    public LobbyArgs(
+            ActivityManager childActivity,
+            LobbyGameConfigurator configurator,
+            LobbyPlayerStateManager playerStateManager
+    ) {
         this.childActivity = childActivity;
         this.configurator = configurator;
-        this.changeGameConsumer = changeGameConsumer;
-    }
-
-    public Consumer<Game> getChangeGameConsumer() {
-        return changeGameConsumer;
+        this.playerStateManager = playerStateManager;
     }
 
     @Override
@@ -46,5 +47,9 @@ public class LobbyArgs implements GameStarter.Args {
 
     public void configureLobby(Consumer<LobbyActivity> ifActive) {
         configurator.configure(ifActive);
+    }
+
+    public LobbyPlayerStateManager getPlayerStateManager() {
+        return playerStateManager;
     }
 }

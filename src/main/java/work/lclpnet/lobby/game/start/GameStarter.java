@@ -71,7 +71,7 @@ public class GameStarter implements GameStatusManager {
                 this::periodicCheck
         );
 
-        schedulerStack.interval(action, 1);
+        schedulerStack.interval(action, 1, conditionCheckInterval);
     }
 
     public void finish(GameOptions options) {

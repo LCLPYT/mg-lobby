@@ -39,7 +39,6 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
     public static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyMod instance = null;
     private LobbyManagerImpl manager = null;
-    private GameManager gameManager = null;
     private Translations translations = null;
     private CompletableFuture<MinecraftServer> serverFuture = null;
 
@@ -56,7 +55,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         var configSerializer = new ExtendedConfigSerializer<>(LobbyConfig.FACTORY, logger);
         var configHandler = new ConfigHandler<>(configDir.resolve("config.json"), configSerializer, logger);
 
-        gameManager = new GameManager(logger, new AsyncGameStateIo(configDir.resolve("gameManagerState.dat")));
+        GameManager gameManager = new GameManager(logger, new AsyncGameStateIo(configDir.resolve("gameManagerState.dat")));
         manager = new LobbyManagerImpl(translations, logger, gameManager, configHandler, serverFuture);
 
         var hooks = new HookContainer();
@@ -111,7 +110,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         MinecraftServer server = serverFuture.resultNow();
 
         GameStartingActivity.Builder startingBuilder = (game, starter, trans, lobbyArgs) ->
-                new GameStartingActivity(server, logger, manager.getLobbyWorld(), gameManager, game, starter, trans, lobbyArgs);
+                new GameStartingActivity(server, logger, manager.getLobbyLevel(), game, starter, trans, lobbyArgs);
 
         ActivityManager.getInstance().startActivity(new LobbyActivity(server, logger, manager, startingBuilder, translations));
     }
