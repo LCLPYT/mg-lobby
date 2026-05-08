@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
     "MinecraftServerAccessor",
+    "ServerGamePacketListenerImplMixin",
     "ShulkerAccessor"
   ],
   "injectors": {
