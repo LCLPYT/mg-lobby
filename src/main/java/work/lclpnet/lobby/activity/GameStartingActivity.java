@@ -1,8 +1,5 @@
 package work.lclpnet.lobby.activity;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.world.BossEvent;
@@ -28,15 +25,12 @@ import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.cmd.PauseCommand;
 import work.lclpnet.lobby.cmd.ResumeCommand;
 import work.lclpnet.lobby.cmd.StartCommand;
-import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.LobbyWaitingManager;
 import work.lclpnet.lobby.game.api.Game;
 import work.lclpnet.lobby.game.api.GameConfig;
 import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.util.LobbyGameContext;
-
-import javax.inject.Named;
 
 public class GameStartingActivity extends ComponentActivity {
 
@@ -50,10 +44,8 @@ public class GameStartingActivity extends ComponentActivity {
     private int colorIndex;
     private boolean wasPaused = false;
 
-    @AssistedInject
-    public GameStartingActivity(MinecraftServer server, Logger logger, @Named("lobbyWorld") ServerLevel world,
-                                GameManager gameManager, @Assisted Game game, @Assisted GameStarter starter,
-                                @Assisted Translations translations, @Assisted LobbyArgs lobbyArgs) {
+    public GameStartingActivity(MinecraftServer server, Logger logger, ServerLevel world, Game game,
+                                GameStarter starter, Translations translations, LobbyArgs lobbyArgs) {
         super(server, logger);
         this.game = game;
         this.config = game.getConfig();
@@ -61,7 +53,7 @@ public class GameStartingActivity extends ComponentActivity {
         this.translations = translations;
 
         var context = new LobbyGameContext(server, game.getConfig(), translations);
-        this.waitingManager = new LobbyWaitingManager(world, context, starter, gameManager, lobbyArgs.getChangeGameConsumer());
+        this.waitingManager = new LobbyWaitingManager(world, context, starter, lobbyArgs.getPlayerStateManager());
     }
 
     @Override
@@ -195,7 +187,6 @@ public class GameStartingActivity extends ComponentActivity {
         }
     }
 
-    @AssistedFactory
     public interface Builder {
         GameStartingActivity create(Game game, GameStarter starter, Translations translations, LobbyArgs lobbyArgs);
     }

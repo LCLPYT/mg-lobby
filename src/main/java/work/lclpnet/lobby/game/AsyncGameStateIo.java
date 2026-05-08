@@ -5,8 +5,6 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtAccounter;
 import org.jetbrains.annotations.NotNull;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,8 +15,7 @@ public class AsyncGameStateIo implements GameStateIo {
     private final GameManagerState state = new GameManagerState();
     private final Path path;
 
-    @Inject
-    public AsyncGameStateIo(@Named("gameManagerStatePath") Path path) {
+    public AsyncGameStateIo(Path path) {
         this.path = path;
     }
 

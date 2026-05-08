@@ -36,7 +36,6 @@ import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 
-import javax.inject.Inject;
 import java.util.Set;
 
 public class LobbyListener implements HookListenerModule {
@@ -45,7 +44,6 @@ public class LobbyListener implements HookListenerModule {
     private final Scheduler scheduler;
     private final LobbyWorldConfig config;
 
-    @Inject
     public LobbyListener(LobbyManager lobbyManager, Scheduler scheduler, LobbyWorldConfig config) {
         this.lobbyManager = lobbyManager;
         this.scheduler = scheduler;
@@ -57,9 +55,9 @@ public class LobbyListener implements HookListenerModule {
         registrar.registerHook(ServerPlayConnectionHooks.JOIN, this::onJoin);
         registrar.registerHook(PlayerMoveCallback.HOOK, this::onMove);
         registrar.registerHook(PlayerInteractionHooks.ATTACK_ENTITY, this::onAttack);
-        registrar.registerHook(PlayerAdvancementPacketCallback.HOOK, (player, packet) -> true);
-        registrar.registerHook(PlayerRecipeNotificationCallback.HOOK, (player, entry, displayEntry) -> true);
-        registrar.registerHook(PlayerWaypointCallback.HOOK, (player, waypoint) -> true);
+        registrar.registerHook(PlayerAdvancementPacketCallback.HOOK, (_, _) -> true);
+        registrar.registerHook(PlayerRecipeNotificationCallback.HOOK, (_, _, _) -> true);
+        registrar.registerHook(PlayerWaypointCallback.HOOK, (_, _) -> true);
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -146,6 +144,6 @@ public class LobbyListener implements HookListenerModule {
     }
 
     private boolean isLobby(Level world) {
-        return lobbyManager.getLobbyWorld() == world;
+        return lobbyManager.getLobbyLevel() == world;
     }
 }

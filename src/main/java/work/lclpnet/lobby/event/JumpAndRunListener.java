@@ -7,13 +7,10 @@ import work.lclpnet.kibu.hook.player.PlayerMoveCallback;
 import work.lclpnet.kibu.hook.util.PositionRotation;
 import work.lclpnet.lobby.decor.jnr.JumpAndRun;
 
-import javax.inject.Inject;
-
 public class JumpAndRunListener implements HookListenerModule {
 
     private final JumpAndRun jumpAndRun;
 
-    @Inject
     public JumpAndRunListener(JumpAndRun jumpAndRun) {
         this.jumpAndRun = jumpAndRun;
     }

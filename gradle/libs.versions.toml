@@ -6,7 +6,7 @@ fabric-loom = "1.16-SNAPSHOT"
 gradle-build-tools = "1.7.0"
 java = "25"
 fantasy = "0.8.0-beta.1+26.1.1"
-kibu = "0.154.0+26.1"
+kibu = "0.155.0+26.1.2"
 kibu-world-api = "0.10.0+26.1.2"
 gaco = "0.16.0+26.1.2"
 pal = "0.16.2+26.1.2"
@@ -16,7 +16,6 @@ maze-lib = "0.3.0"
 sqlite-jdbc = "3.41.2.1+20230506"
 jetbrains-annotations = "24.1.0"
 json = "20231013"
-dagger = "2.46.1"
 commons-compress = "1.28.0"
 xz = "1.9"
 tika-core = "3.2.2"
@@ -46,8 +45,6 @@ maze-lib = { module = "work.lclpnet:maze-lib", version.ref = "maze-lib" }
 sqlite-jdbc = { module = "maven.modrinth:sqlite-jdbc", version.ref = "sqlite-jdbc" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 json = { module = "org.json:json", version.ref = "json" }
-dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
-dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
 tika-core = { module = "org.apache.tika:tika-core", version.ref = "tika-core" }

@@ -10,17 +10,13 @@ import work.lclpnet.kibu.access.entity.DisplayEntityAccess;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.util.WorldModifier;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 public class GreetingDisplay {
 
     private final LobbyWorldConfig config;
     private final WorldModifier worldModifier;
     private final ServerLevel world;
 
-    @Inject
-    public GreetingDisplay(LobbyWorldConfig config, WorldModifier worldModifier, @Named("lobbyWorld") ServerLevel world) {
+    public GreetingDisplay(LobbyWorldConfig config, WorldModifier worldModifier, ServerLevel world) {
         this.config = config;
         this.worldModifier = worldModifier;
         this.world = world;

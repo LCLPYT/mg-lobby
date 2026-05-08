@@ -19,18 +19,14 @@ import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.title.Title;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.config.LobbyWorldConfig;
-import work.lclpnet.lobby.di.ActivityScope;
 import work.lclpnet.lobby.util.WorldModifier;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@ActivityScope
 public class TicTacToeManager {
 
     private final Map<TicTacToeTable, TicTacToeInstance> tables;
@@ -39,9 +35,8 @@ public class TicTacToeManager {
     private final Map<UUID, TicTacToeTable> playing = new HashMap<>();
     private final TicTacToeDisplay display;
 
-    @Inject
     public TicTacToeManager(LobbyWorldConfig config, Translations translations, Scheduler scheduler,
-                            @Named("lobbyWorld") ServerLevel world, WorldModifier worldModifier) {
+                            ServerLevel world, WorldModifier worldModifier) {
         this(getTables(config), translations, scheduler, world, worldModifier);
     }
 

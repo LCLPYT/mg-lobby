@@ -6,14 +6,11 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.lobby.game.api.Game;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-@Singleton
 public class GameManager implements GameMangerLoader {
 
     public static final String EMPTY_GAME_ID = "none";
@@ -25,7 +22,6 @@ public class GameManager implements GameMangerLoader {
     private Map<String, Game> games = Map.of();
     private boolean restored = false;
 
-    @Inject
     public GameManager(Logger logger, GameStateIo stateManager) {
         this.logger = logger;
         this.stateManager = stateManager;

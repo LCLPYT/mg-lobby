@@ -1,8 +1,15 @@
 package work.lclpnet.lobby.activity;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.gamerules.GameRules;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +19,8 @@ import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.hook.HookRegistrar;
+import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
+import work.lclpnet.kibu.inv.prompt.OptionPrompt;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
@@ -23,9 +32,15 @@ import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.decor.GeyserManager;
 import work.lclpnet.lobby.decor.KingOfLadder;
 import work.lclpnet.lobby.decor.greet.GreetingDisplay;
+import work.lclpnet.lobby.decor.jnr.JumpAndRun;
+import work.lclpnet.lobby.decor.maze.LobbyMazeCreator;
+import work.lclpnet.lobby.decor.seat.DefaultSeatProvider;
+import work.lclpnet.lobby.decor.seat.SeatHandler;
 import work.lclpnet.lobby.decor.ttt.TicTacToeManager;
-import work.lclpnet.lobby.di.ActivityComponent;
-import work.lclpnet.lobby.di.ActivityModule;
+import work.lclpnet.lobby.event.JumpAndRunListener;
+import work.lclpnet.lobby.event.KingOfLadderListener;
+import work.lclpnet.lobby.event.LobbyListener;
+import work.lclpnet.lobby.event.TicTacToeListener;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.game.api.Game;
@@ -39,12 +54,13 @@ import work.lclpnet.lobby.game.start.LobbyGameConfigurator;
 import work.lclpnet.lobby.game.util.ProtectorComponent;
 import work.lclpnet.lobby.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
+import work.lclpnet.lobby.util.LobbyPlayerStateManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
 import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
 import work.lclpnet.translations.loader.TranslationLoader;
 
-import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
@@ -55,11 +71,12 @@ public class LobbyActivity extends ComponentActivity {
 
     private final LobbyManager lobbyManager;
     private final ActivityManager childActivity;
-    private final ActivityComponent.Builder componentBuilder;
     private final GameStartingActivity.Builder startingBuilder;
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
     private final Translations translations;
     private final ReentrantLock gameLock = new ReentrantLock();
+    private final LobbyPlayerStateManager playerStateManager = new LobbyPlayerStateManager();
+
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
@@ -67,13 +84,11 @@ public class LobbyActivity extends ComponentActivity {
     private volatile boolean changeInProgress = false;
     private volatile Game changingToGame = null;
 
-    @Inject
-    public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager, ActivityComponent.Builder componentBuilder,
+    public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager,
                          GameStartingActivity.Builder startingBuilder, Translations translations) {
         super(server, logger);
         this.lobbyManager = lobbyManager;
         this.childActivity = new SyncActivityManager();
-        this.componentBuilder = componentBuilder;
         this.startingBuilder = startingBuilder;
         this.translations = translations;
     }
@@ -98,15 +113,13 @@ public class LobbyActivity extends ComponentActivity {
         Scheduler scheduler = component(SCHEDULER).scheduler();
         CommandRegistrar commands = component(COMMANDS).commands();
 
+        playerStateManager.init(hooks);
+
         MinecraftServer server = getServer();
+        var level = lobbyManager.getLobbyLevel();
+        LobbyWorldConfig config = lobbyManager.getWorldConfig();
 
-        ActivityComponent component = componentBuilder
-                .activityModule(new ActivityModule(hooks, scheduler, server))
-                .build();
-
-        hooks.registerHooks(component.lobbyListener());
-
-        GameRules gameRules = lobbyManager.getLobbyWorld().getGameRules();
+        GameRules gameRules = level.getGameRules();
         gameRules.set(GameRules.SHOW_ADVANCEMENT_MESSAGES, false, server);
 
         // send every online player to the lobby
@@ -114,37 +127,39 @@ public class LobbyActivity extends ComponentActivity {
             lobbyManager.sendToLobby(player);
         }
 
-        worldModifier = component.worldModifier();
+        ResetWorldModifier resetWorldModifier = new ResetWorldModifier(level, hooks);
+        worldModifier = resetWorldModifier;
+
+        hooks.registerHooks(new LobbyListener(lobbyManager, scheduler, config));
 
         // generate maze
-        component.mazeGenerator().create();
+        new LobbyMazeCreator(lobbyManager, getLogger(), resetWorldModifier, level).create();
 
         // init king of the ladder
-        LobbyWorldConfig config = lobbyManager.getWorldConfig();
-
         if (config.kingOfLadderGoal != null) {
-            kingOfLadder = component.kingOfLadder();
-            hooks.registerHooks(component.kingOfLadderListener());
+            kingOfLadder = new KingOfLadder(level, config, translations);
+            hooks.registerHooks(new KingOfLadderListener(kingOfLadder));
             scheduler.interval(kingOfLadder::tick, 6);
         }
 
         // init geysers
         if (config.geysers != null) {
-            GeyserManager geyserManager = component.geyserManager();
+            GeyserManager geyserManager = new GeyserManager(level, config);
             scheduler.interval(geyserManager::tick, 1);
         }
 
         // jump and run
         if (config.jumpAndRunStart != null) {
-            hooks.registerHooks(component.jumpAndRunListener());
+            JumpAndRun jumpAndRun = new JumpAndRun(level, config, resetWorldModifier, scheduler, translations);
+            hooks.registerHooks(new JumpAndRunListener(jumpAndRun));
         }
 
         // init seat handler
-        component.seatHandler().init();
+        new SeatHandler(resetWorldModifier, DefaultSeatProvider.getInstance(), hooks).init();
 
-        // tic tac toe
-        ticTacToeManager = component.ticTacToeManager();
-        hooks.registerHooks(component.ticTacToeListener());
+        // tic-tac-toe
+        ticTacToeManager = new TicTacToeManager(config, translations, scheduler, level, resetWorldModifier);
+        hooks.registerHooks(new TicTacToeListener(ticTacToeManager));
 
         // protector
         component(ProtectorComponent.KEY).configure(this::configureProtection);
@@ -158,10 +173,53 @@ public class LobbyActivity extends ComponentActivity {
 
         gameManager.addStateChangeListener(this::onGameRestored);
 
-        GreetingDisplay greetingDisplay = component.greetingDisplay();
-        greetingDisplay.show();
+        new GreetingDisplay(config, resetWorldModifier, level).show();
 
-        lobbyManager.getLobbyWorld().getWaypointManager().breakAllConnections();
+        level.getWaypointManager().breakAllConnections();
+
+        initPlayerItems(hooks, level);
+    }
+
+    private void initPlayerItems(HookRegistrar hooks, ServerLevel level) {
+        hooks.registerHook(PlayerConnectionHooks.JOIN, this::giveItems);
+        PlayerLookup.level(level).forEach(this::giveItems);
+    }
+
+    private void giveItems(ServerPlayer player) {
+        Inventory inventory = player.getInventory();
+        var state = playerStateManager.getOrCreate(player);
+
+        if (Commands.LEVEL_GAMEMASTERS.check(player.level().getServer().getProfilePermissions(player.nameAndId()))) {
+            int gameSlot = state.getFreeSlot(8);
+            inventory.setItem(gameSlot, getGameSelectorStack(player));
+            state.setInteractable(gameSlot, this::openGameSelector);
+        }
+    }
+
+    private ItemStack getGameSelectorStack(ServerPlayer player) {
+        var stack = new ItemStack(Items.COMPASS);
+
+        stack.set(DataComponents.ITEM_NAME, translations.translateText(player, "lobby.item.select_game")
+                .formatted(ChatFormatting.GOLD));
+
+        return stack;
+    }
+
+    private void openGameSelector(ServerPlayer player) {
+        var games = new ArrayList<>(lobbyManager.getGameManager().getGames());
+        var title = translations.translateText(player, "lobby.item.select_game");
+
+        OptionPrompt.open(player, title, games, game -> {
+            var icon = game.getConfig().icon().copy();
+
+            icon.set(DataComponents.ITEM_NAME, translations
+                    .translateText(player, game.getConfig().titleKey())
+                    .formatted(ChatFormatting.AQUA));
+
+            return icon;
+        }).thenAccept(selected -> selected.ifPresent(
+                game -> getServer().execute(() -> changeGame(game))
+        ));
     }
 
     /**
@@ -245,7 +303,7 @@ public class LobbyActivity extends ComponentActivity {
     private void activateGame(Game game, GameFactory factory, Translations translations) {
         var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations);
 
-        var args = new LobbyArgs(childActivity, configurator, this::changeGame);
+        var args = new LobbyArgs(childActivity, configurator, playerStateManager);
         var scope = new Scope(getServer());
 
         synchronized (this) {
@@ -264,6 +322,13 @@ public class LobbyActivity extends ComponentActivity {
             game.configureStatusManager(gameStarter);
 
             gameStarter.start();
+        }
+
+        playerStateManager.reset();
+
+        for (ServerPlayer player : PlayerLookup.all(getServer())) {
+            player.getInventory().clearContent();
+            giveItems(player);
         }
     }
 

@@ -19,13 +19,10 @@ import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.service.PalService;
 import work.lclpnet.lobby.util.PlayerReset;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-@Singleton
 public class LobbyManagerImpl implements LobbyManager {
 
     private final ConfigHandler<LobbyConfig> configHandler;
@@ -35,7 +32,6 @@ public class LobbyManagerImpl implements LobbyManager {
     private final Future<MinecraftServer> server;
     private volatile WorldConfigHandler<LobbyWorldConfig> worldConfigHandler = null;
 
-    @Inject
     public LobbyManagerImpl(Translations translations, Logger logger,
                             GameManager gameManager, ConfigHandler<LobbyConfig> configHandler, Future<MinecraftServer> server) {
         this.logger = logger;
@@ -61,13 +57,13 @@ public class LobbyManagerImpl implements LobbyManager {
 
     @SuppressWarnings("resource")
     @Override
-    public ServerLevel getLobbyWorld() {
+    public ServerLevel getLobbyLevel() {
         return this.server.resultNow().overworld();
     }
 
     @Override
     public Vec3 getLobbySpawn() {
-        BlockPos spawnPos = getLobbyWorld().getRespawnData().pos();
+        BlockPos spawnPos = getLobbyLevel().getRespawnData().pos();
 
         return new Vec3(
                 spawnPos.getX() + 0.5,
@@ -78,7 +74,7 @@ public class LobbyManagerImpl implements LobbyManager {
 
     @Override
     public void sendToLobby(ServerPlayer player) {
-        final ServerLevel world = getLobbyWorld();
+        final ServerLevel world = getLobbyLevel();
         final Vec3 spawn = getLobbySpawn();
 
         PlayerReset.reset(player);
@@ -119,7 +115,7 @@ public class LobbyManagerImpl implements LobbyManager {
     }
 
     public void onWorldReady() {
-        ServerLevel world = getLobbyWorld();
+        ServerLevel world = getLobbyLevel();
         var serializer = new ExtendedConfigSerializer<>(LobbyWorldConfig.factory(world.registryAccess()), logger);
         Path path = Path.of("config", "lobby.json");
 

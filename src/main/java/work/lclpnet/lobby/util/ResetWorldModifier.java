@@ -6,14 +6,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.EntityRemovedCallback;
-import work.lclpnet.lobby.di.ActivityScope;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@ActivityScope
 public class ResetWorldModifier implements WorldModifier {
 
     private final ServerLevel world;
@@ -21,8 +16,7 @@ public class ResetWorldModifier implements WorldModifier {
     private final Set<UUID> entities = new HashSet<>();
     private final AtomicBoolean enabled = new AtomicBoolean(true);
 
-    @Inject
-    public ResetWorldModifier(@Named("lobbyWorld") ServerLevel world, HookRegistrar hookRegistrar) {
+    public ResetWorldModifier(ServerLevel world, HookRegistrar hookRegistrar) {
         this.world = world;
 
         hookRegistrar.registerHook(EntityRemovedCallback.HOOK, this::onEntityRemoved);

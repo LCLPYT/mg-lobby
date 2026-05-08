@@ -11,7 +11,7 @@ import work.lclpnet.lobby.game.GameManager;
 
 public interface LobbyManager extends ConfigAccess, LoggerAware {
 
-    ServerLevel getLobbyWorld();
+    ServerLevel getLobbyLevel();
 
     Vec3 getLobbySpawn();
 

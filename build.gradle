@@ -99,9 +99,6 @@ dependencies {
     activityCompileOnly(libs.jetbrains.annotations)
 
     implementation(libs.json)
-    implementation(libs.dagger)
-    annotationProcessor(libs.dagger.compiler)
-
     // include these dependencies
     def includeImpl = { dep ->
         implementation(dep)

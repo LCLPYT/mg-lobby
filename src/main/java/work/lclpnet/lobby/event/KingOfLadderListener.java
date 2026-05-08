@@ -10,13 +10,10 @@ import work.lclpnet.kibu.hook.player.PlayerMoveCallback;
 import work.lclpnet.kibu.hook.util.PositionRotation;
 import work.lclpnet.lobby.decor.KingOfLadder;
 
-import javax.inject.Inject;
-
 public class KingOfLadderListener implements HookListenerModule {
 
     private final KingOfLadder kingOfLadder;
 
-    @Inject
     public KingOfLadderListener(KingOfLadder kingOfLadder) {
         this.kingOfLadder = kingOfLadder;
     }
