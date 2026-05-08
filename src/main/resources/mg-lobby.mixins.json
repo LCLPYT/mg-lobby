@@ -3,6 +3,7 @@
   "package": "work.lclpnet.lobby.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
+    "DedicatedServerMixin",
     "MinecraftServerAccessor",
     "ServerGamePacketListenerImplMixin",
     "ShulkerAccessor"

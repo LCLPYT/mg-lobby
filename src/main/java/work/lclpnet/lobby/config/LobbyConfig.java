@@ -13,6 +13,7 @@ public class LobbyConfig implements JsonConfig {
     public static final String DEFAULT_LOBBY_LEVEL_NAME = "lobby";
     public URI lobbySource = URI.create("https://lclpnet.work/dl/lobby-26.1.2");
     public String lobbyLevelName = "lobby";
+    public boolean disableSpawnProtection = true;
 
     public LobbyConfig() {}
 
@@ -24,6 +25,10 @@ public class LobbyConfig implements JsonConfig {
 
         if (obj.has("lobby_level_name")) {
             this.lobbyLevelName = obj.getString("lobby_level_name");
+        }
+
+        if (obj.has("disable_spawn_protection")) {
+            this.disableSpawnProtection = obj.getBoolean("disable_spawn_protection");
         }
     }
 

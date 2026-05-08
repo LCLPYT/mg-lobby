@@ -3,6 +3,7 @@ package work.lclpnet.lobby;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -119,6 +120,10 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         final LobbyMod ret = instance;
         if (instance == null) throw new IllegalStateException("Lobby mod not loaded");
         return ret;
+    }
+
+    public static @Nullable LobbyMod optInstance() {
+        return instance;
     }
 
     public static Identifier identifier(String path) {
