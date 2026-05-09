@@ -1,9 +1,11 @@
 package work.lclpnet.lobby;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
@@ -32,7 +34,9 @@ import work.lclpnet.config.json.ConfigHandler;
 
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
 
@@ -72,7 +76,9 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         gameManager.discoverGames();
 
         var dataPacksPath = Path.of(manager.getConfig().getSafeLobbyLevelName()).resolve("datapacks");
-        var executor = Executors.newVirtualThreadPerTaskExecutor();
+
+        var executor = createExecutor();
+
         new DataPackService(gameManager, manager, new PathDataPackSink(dataPacksPath), executor, logger).downloadRequired();
 
         ServerWorldReadyCallback.HOOK.register(server -> {
@@ -97,6 +103,18 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         ServerWorldUnreadyCallback.HOOK.register(_ -> ActivityManager.getInstance().stop());
 
         logger.info("Lobby loaded.");
+    }
+
+    private @NonNull ExecutorService createExecutor() {
+        var threadCounter = new AtomicInteger();
+
+        var executor = Executors.newThreadPerTaskExecutor(task -> Thread.ofVirtual()
+                .name("mg-lobby-worker-" + threadCounter.getAndIncrement())
+                .start(task));
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(_ -> executor.shutdown());
+
+        return executor;
     }
 
     @Override
