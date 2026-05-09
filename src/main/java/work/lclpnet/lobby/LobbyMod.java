@@ -108,9 +108,9 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
     private @NonNull ExecutorService createExecutor() {
         var threadCounter = new AtomicInteger();
 
-        var executor = Executors.newThreadPerTaskExecutor(task -> Thread.ofVirtual()
+        var executor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
                 .name("mg-lobby-worker-" + threadCounter.getAndIncrement())
-                .start(task));
+                .factory());
 
         ServerLifecycleEvents.SERVER_STOPPING.register(_ -> executor.shutdown());
 
