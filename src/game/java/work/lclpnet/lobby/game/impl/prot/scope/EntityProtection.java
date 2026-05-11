@@ -1,21 +1,21 @@
 package work.lclpnet.lobby.game.impl.prot.scope;
 
 import net.minecraft.world.entity.Entity;
-import work.lclpnet.lobby.game.api.prot.Scope;
+import work.lclpnet.lobby.game.api.prot.Protection;
 
-public class EntityScope implements Scope<EntityScope.Check> {
+public class EntityProtection implements Protection<EntityProtection.Scope> {
 
     @Override
-    public Check getGlobalScope() {
+    public Scope getGlobalScope() {
         return _ -> true;
     }
 
     @Override
-    public Check getResultingScope(Check exclude, Check include) {
+    public Scope getCombinedExcludeScope(Scope exclude, Scope include) {
         return entity -> exclude.isWithinScope(entity) && !include.isWithinScope(entity);
     }
 
-    public interface Check {
+    public interface Scope {
 
         boolean isWithinScope(Entity entity);
     }

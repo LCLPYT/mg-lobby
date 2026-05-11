@@ -1,6 +1,6 @@
 package work.lclpnet.lobby.game.api.prot;
 
-public interface Scope<T> {
+public interface Protection<T> {
 
     /**
      * Gets the scope that encompasses everything.
@@ -14,7 +14,7 @@ public interface Scope<T> {
      * @param include The include scope.
      * @return The resulting (difference) scope.
      */
-    T getResultingScope(T exclude, T include);
+    T getCombinedExcludeScope(T exclude, T include);
 
     default void allow(ProtectionConfig config, T scope) {
         config.allow(this, scope);
@@ -22,5 +22,17 @@ public interface Scope<T> {
 
     default void disallow(ProtectionConfig config, T scope) {
         config.disallow(this, scope);
+    }
+
+    default void allow(ProtectionConfig config) {
+        config.allow(this);
+    }
+
+    default void disallow(ProtectionConfig config) {
+        config.disallow(this);
+    }
+
+    default boolean hasRestrictions(ProtectionConfig config) {
+        return config.hasRestrictions(this);
     }
 }

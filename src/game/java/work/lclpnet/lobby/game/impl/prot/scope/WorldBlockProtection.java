@@ -2,21 +2,21 @@ package work.lclpnet.lobby.game.impl.prot.scope;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import work.lclpnet.lobby.game.api.prot.Scope;
+import work.lclpnet.lobby.game.api.prot.Protection;
 
-public class WorldBlockScope implements Scope<WorldBlockScope.Check> {
+public class WorldBlockProtection implements Protection<WorldBlockProtection.Scope> {
 
     @Override
-    public Check getGlobalScope() {
+    public Scope getGlobalScope() {
         return (_, _) -> true;
     }
 
     @Override
-    public Check getResultingScope(Check exclude, Check include) {
+    public Scope getCombinedExcludeScope(Scope exclude, Scope include) {
         return (world, pos) -> exclude.isWithinScope(world, pos) && !include.isWithinScope(world, pos);
     }
 
-    public interface Check {
+    public interface Scope {
 
         boolean isWithinScope(Level world, BlockPos pos);
     }

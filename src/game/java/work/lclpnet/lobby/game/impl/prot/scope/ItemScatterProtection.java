@@ -2,21 +2,21 @@ package work.lclpnet.lobby.game.impl.prot.scope;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import work.lclpnet.lobby.game.api.prot.Scope;
+import work.lclpnet.lobby.game.api.prot.Protection;
 
-public class ItemScatterScope implements Scope<ItemScatterScope.Check> {
+public class ItemScatterProtection implements Protection<ItemScatterProtection.Scope> {
 
     @Override
-    public Check getGlobalScope() {
+    public Scope getGlobalScope() {
         return (_, _, _, _, _) -> true;
     }
 
     @Override
-    public Check getResultingScope(Check exclude, Check include) {
+    public Scope getCombinedExcludeScope(Scope exclude, Scope include) {
         return (world, x, y, z, stack) -> exclude.isWithinScope(world, x, y, z, stack) && !include.isWithinScope(world, x, y, z, stack);
     }
 
-    public interface Check {
+    public interface Scope {
 
         boolean isWithinScope(Level world, double x, double y, double z, ItemStack stack);
     }

@@ -5,30 +5,30 @@ import work.lclpnet.lobby.game.impl.prot.ProtectionTypes;
 
 public interface ProtectionConfig {
 
-    <T> void allow(Scope<T> type);
+    <T> void allow(Protection<T> type);
 
-    <T> void disallow(Scope<T> type);
+    <T> void disallow(Protection<T> type);
 
-    <T> void allow(Scope<T> type, T scope);
+    <T> void allow(Protection<T> type, T scope);
 
-    <T> void disallow(Scope<T> type, T scope);
+    <T> void disallow(Protection<T> type, T scope);
 
-    <T> boolean hasRestrictions(Scope<T> type);
-
-    @Nullable
-    <T> T getAllowedScope(Scope<T> type);
+    <T> boolean hasRestrictions(Protection<T> type);
 
     @Nullable
-    <T> T getDisallowedScope(Scope<T> type);
+    <T> T getAllowedScope(Protection<T> type);
 
-    default void allow(Scope<?>... types) {
-        for (Scope<?> type : types) {
+    @Nullable
+    <T> T getDisallowedScope(Protection<T> type);
+
+    default void allow(Protection<?>... types) {
+        for (Protection<?> type : types) {
             allow(type);
         }
     }
 
-    default void disallow(Scope<?>... types) {
-        for (Scope<?> type : types) {
+    default void disallow(Protection<?>... types) {
+        for (Protection<?> type : types) {
             disallow(type);
         }
     }
@@ -37,7 +37,7 @@ public interface ProtectionConfig {
      * Allows all builtin protection types from {@link ProtectionTypes}.
      */
     default void allowAll() {
-        for (Scope<?> type : ProtectionTypes.getTypes()) {
+        for (Protection<?> type : ProtectionTypes.getTypes()) {
             allow(type);
         }
     }
@@ -46,7 +46,7 @@ public interface ProtectionConfig {
      * Disallows all builtin protection types from {@link ProtectionTypes}.
      */
     default void disallowAll() {
-        for (Scope<?> type : ProtectionTypes.getTypes()) {
+        for (Protection<?> type : ProtectionTypes.getTypes()) {
             disallow(type);
         }
     }

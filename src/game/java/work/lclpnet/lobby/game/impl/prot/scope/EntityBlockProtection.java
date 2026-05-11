@@ -3,23 +3,23 @@ package work.lclpnet.lobby.game.impl.prot.scope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import work.lclpnet.lobby.game.api.prot.Scope;
+import work.lclpnet.lobby.game.api.prot.Protection;
 
-public class EntityBlockScope implements Scope<EntityBlockScope.Check> {
+public class EntityBlockProtection implements Protection<EntityBlockProtection.Scope> {
 
     @Override
-    public Check getGlobalScope() {
+    public Scope getGlobalScope() {
         return (_, _) -> true;
     }
 
     @Override
-    public Check getResultingScope(Check exclude, Check include) {
+    public Scope getCombinedExcludeScope(Scope exclude, Scope include) {
         return (entity, pos) -> exclude.isWithinScope(entity, pos) && !include.isWithinScope(entity, pos);
     }
 
-    public interface Check {
+    public interface Scope {
 
-        Check CREATIVE_OP = (entity, _) -> entity instanceof ServerPlayer player && player.canUseGameMasterBlocks();
+        Scope CREATIVE_OP = (entity, _) -> entity instanceof ServerPlayer player && player.canUseGameMasterBlocks();
 
         boolean isWithinScope(Entity entity, BlockPos pos);
     }

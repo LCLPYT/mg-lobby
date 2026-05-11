@@ -26,8 +26,8 @@ import work.lclpnet.kibu.hook.util.PendingResult;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.lobby.game.api.prot.ProtectionConfig;
 import work.lclpnet.lobby.game.api.prot.Protector;
-import work.lclpnet.lobby.game.api.prot.Scope;
-import work.lclpnet.lobby.game.impl.prot.scope.EntityBlockScope;
+import work.lclpnet.lobby.game.api.prot.Protection;
+import work.lclpnet.lobby.game.impl.prot.scope.EntityBlockProtection;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -308,22 +308,22 @@ public class BasicProtector implements Protector {
         }
     }
 
-    private static BlockModificationHooks.BlockModifyHook onModify(EntityBlockScope.Check scope) {
+    private static BlockModificationHooks.BlockModifyHook onModify(EntityBlockProtection.Scope scope) {
         return (_, pos, entity) -> scope.isWithinScope(entity, pos);
     }
 
-    private <T> void protect(Scope<T> type, Consumer<T> setupAction) {
+    private <T> void protect(Protection<T> type, Consumer<T> setupAction) {
         withScope(type, setupAction);
     }
 
-    private <T, H> void protect(Scope<T> type, Hook<H> hook, Function<T, H> listenerFactory) {
+    private <T, H> void protect(Protection<T> type, Hook<H> hook, Function<T, H> listenerFactory) {
         withScope(type, scope -> {
             H listener = listenerFactory.apply(scope);
             hooks.registerHook(hook, listener);
         });
     }
 
-    private <T> void withScope(Scope<T> type, Consumer<T> action) {
+    private <T> void withScope(Protection<T> type, Consumer<T> action) {
         if (!config.hasRestrictions(type)) return;
 
         T disallowed = config.getDisallowedScope(type);
@@ -338,7 +338,7 @@ public class BasicProtector implements Protector {
         }
 
         // get the resulting scope that is the difference between disallowed and allowed
-        T resultingScope = type.getResultingScope(disallowed, allowed);
+        T resultingScope = type.getCombinedExcludeScope(disallowed, allowed);
         action.accept(resultingScope);
     }
 }
