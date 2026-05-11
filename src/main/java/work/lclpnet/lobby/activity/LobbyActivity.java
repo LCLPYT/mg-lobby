@@ -376,7 +376,7 @@ public class LobbyActivity extends ComponentActivity {
     private void configureProtection(MutableProtectionConfig cfg) {
         cfg.disallowAll();
 
-        cfg.allow(ProtectionTypes.USE_BLOCK, (entity, pos) ->
+        ProtectionTypes.USE_BLOCK.allow(cfg, (entity, pos) ->
                 entity instanceof ServerPlayer player && ticTacToeManager.isTableCenter(pos)
                         && ticTacToeManager.isPlaying(player));
 
