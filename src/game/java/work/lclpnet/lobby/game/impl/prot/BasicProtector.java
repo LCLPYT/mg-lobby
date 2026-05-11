@@ -25,9 +25,9 @@ import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.hook.util.PendingResult;
 import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.lobby.game.api.prot.ProtectionConfig;
-import work.lclpnet.lobby.game.api.prot.ProtectionType;
 import work.lclpnet.lobby.game.api.prot.Protector;
-import work.lclpnet.lobby.game.api.prot.scope.EntityBlockScope;
+import work.lclpnet.lobby.game.api.prot.Scope;
+import work.lclpnet.lobby.game.impl.prot.type.EntityBlockScope;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -308,22 +308,22 @@ public class BasicProtector implements Protector {
         }
     }
 
-    private static BlockModificationHooks.BlockModifyHook onModify(EntityBlockScope scope) {
-        return (world, pos, entity) -> scope.isWithinScope(entity, pos);
+    private static BlockModificationHooks.BlockModifyHook onModify(EntityBlockScope.Check scope) {
+        return (_, pos, entity) -> scope.isWithinScope(entity, pos);
     }
 
-    private <T> void protect(ProtectionType<T> type, Consumer<T> setupAction) {
+    private <T> void protect(Scope<T> type, Consumer<T> setupAction) {
         withScope(type, setupAction);
     }
 
-    private <T, H> void protect(ProtectionType<T> type, Hook<H> hook, Function<T, H> listenerFactory) {
+    private <T, H> void protect(Scope<T> type, Hook<H> hook, Function<T, H> listenerFactory) {
         withScope(type, scope -> {
             H listener = listenerFactory.apply(scope);
             hooks.registerHook(hook, listener);
         });
     }
 
-    private <T> void withScope(ProtectionType<T> type, Consumer<T> action) {
+    private <T> void withScope(Scope<T> type, Consumer<T> action) {
         if (!config.hasRestrictions(type)) return;
 
         T disallowed = config.getDisallowedScope(type);

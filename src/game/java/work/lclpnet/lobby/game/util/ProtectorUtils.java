@@ -1,17 +1,34 @@
 package work.lclpnet.lobby.game.util;
 
 import net.minecraft.server.level.ServerPlayer;
-import work.lclpnet.lobby.game.api.prot.scope.*;
+import work.lclpnet.lobby.game.impl.prot.type.*;
 import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
+
+import java.util.List;
 
 import static work.lclpnet.lobby.game.impl.prot.ProtectionTypes.*;
 
 public class ProtectorUtils {
 
     public static void allowCreativeOperatorBypass(MutableProtectionConfig config) {
-        config.allow(EntityBlockScope.CREATIVE_OP, BREAK_BLOCKS, PLACE_BLOCKS, PICKUP_FLUID,
-                PICKUP_FLUID, CHARGE_RESPAWN_ANCHOR, COMPOSTER, EAT_CAKE, EXPLODE_RESPAWN_LOCATION, PRIME_TNT,
-                EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, EDIT_SIGN, USE_BLOCK, DECORATED_POT_STORE);
+        for (EntityBlockScope scope : List.of(
+                BREAK_BLOCKS,
+                PLACE_BLOCKS,
+                PICKUP_FLUID,
+                PICKUP_FLUID,
+                CHARGE_RESPAWN_ANCHOR,
+                COMPOSTER,
+                EAT_CAKE,
+                EXPLODE_RESPAWN_LOCATION,
+                PRIME_TNT,
+                EXTINGUISH_CANDLE,
+                TAKE_LECTERN_BOOK,
+                EDIT_SIGN,
+                USE_BLOCK,
+                DECORATED_POT_STORE
+        )) {
+            scope.allow(config, EntityBlockScope.Check.CREATIVE_OP);
+        }
 
         config.allow(SWAP_HAND_ITEMS, PlayerIntScope.CREATIVE_OP);
         config.allow(DROP_ITEM, PlayerIntBoolScope.CREATIVE_OP);
@@ -46,7 +63,7 @@ public class ProtectorUtils {
         config.allow(ALLOW_DAMAGE, (entity, source) -> source.getEntity() instanceof ServerPlayer player
                                                        && player.canUseGameMasterBlocks());
 
-        config.allow(MODIFY_INVENTORY, ClickEventScope.CREATIVE_OP);
+        MODIFY_INVENTORY.allow(config, ClickEventScope.Check.CREATIVE_OP);
 
         config.allow(PROJECTILE_BREAK_DECORATED_POT, ProjectileHitScope.CREATIVE_OP);
 
