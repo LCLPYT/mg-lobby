@@ -27,7 +27,7 @@ import work.lclpnet.kibu.hook.util.PlayerUtils;
 import work.lclpnet.lobby.game.api.prot.ProtectionConfig;
 import work.lclpnet.lobby.game.api.prot.Protector;
 import work.lclpnet.lobby.game.api.prot.Scope;
-import work.lclpnet.lobby.game.impl.prot.type.EntityBlockScope;
+import work.lclpnet.lobby.game.impl.prot.scope.EntityBlockScope;
 
 import java.util.Collections;
 import java.util.HashSet;

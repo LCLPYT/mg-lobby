@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game.impl.prot.type;
+package work.lclpnet.lobby.game.impl.prot.scope;
 
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;

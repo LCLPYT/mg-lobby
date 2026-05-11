@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game.impl.prot.type;
+package work.lclpnet.lobby.game.impl.prot.scope;
 
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.lobby.game.api.prot.Scope;

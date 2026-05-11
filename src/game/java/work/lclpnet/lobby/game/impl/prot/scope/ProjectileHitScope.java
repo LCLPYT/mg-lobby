@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game.impl.prot.type;
+package work.lclpnet.lobby.game.impl.prot.scope;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.Projectile;

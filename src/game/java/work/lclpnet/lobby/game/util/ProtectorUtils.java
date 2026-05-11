@@ -1,7 +1,7 @@
 package work.lclpnet.lobby.game.util;
 
 import net.minecraft.server.level.ServerPlayer;
-import work.lclpnet.lobby.game.impl.prot.type.*;
+import work.lclpnet.lobby.game.impl.prot.scope.*;
 import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
 
 import java.util.List;

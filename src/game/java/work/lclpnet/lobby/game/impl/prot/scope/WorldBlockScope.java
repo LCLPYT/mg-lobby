@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.game.impl.prot.type;
+package work.lclpnet.lobby.game.impl.prot.scope;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
