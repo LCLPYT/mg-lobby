@@ -1,56 +1,90 @@
 package work.lclpnet.lobby.game.util;
 
 import net.minecraft.server.level.ServerPlayer;
-import work.lclpnet.lobby.game.api.prot.scope.*;
+import work.lclpnet.lobby.game.impl.prot.scope.*;
 import work.lclpnet.lobby.game.impl.prot.MutableProtectionConfig;
+
+import java.util.List;
 
 import static work.lclpnet.lobby.game.impl.prot.ProtectionTypes.*;
 
 public class ProtectorUtils {
 
     public static void allowCreativeOperatorBypass(MutableProtectionConfig config) {
-        config.allow(EntityBlockScope.CREATIVE_OP, BREAK_BLOCKS, PLACE_BLOCKS, PICKUP_FLUID,
-                PICKUP_FLUID, CHARGE_RESPAWN_ANCHOR, COMPOSTER, EAT_CAKE, EXPLODE_RESPAWN_LOCATION, PRIME_TNT,
-                EXTINGUISH_CANDLE, TAKE_LECTERN_BOOK, EDIT_SIGN, USE_BLOCK, DECORATED_POT_STORE);
+        for (EntityBlockScope scope : List.of(
+                BREAK_BLOCKS,
+                PLACE_BLOCKS,
+                PICKUP_FLUID,
+                PICKUP_FLUID,
+                CHARGE_RESPAWN_ANCHOR,
+                COMPOSTER,
+                EAT_CAKE,
+                EXPLODE_RESPAWN_LOCATION,
+                PRIME_TNT,
+                EXTINGUISH_CANDLE,
+                TAKE_LECTERN_BOOK,
+                EDIT_SIGN,
+                USE_BLOCK,
+                DECORATED_POT_STORE
+        )) {
+            scope.allow(config, EntityBlockScope.Check.CREATIVE_OP);
+        }
 
-        config.allow(SWAP_HAND_ITEMS, PlayerIntScope.CREATIVE_OP);
-        config.allow(DROP_ITEM, PlayerIntBoolScope.CREATIVE_OP);
-        config.allow(PICKUP_ITEM, PlayerItemEntityScope.CREATIVE_OP);
+        SWAP_HAND_ITEMS.allow(config, PlayerIntScope.Check.CREATIVE_OP);
+        DROP_ITEM.allow(config, PlayerIntBoolScope.Check.CREATIVE_OP);
+        PICKUP_ITEM.allow(config, PlayerItemEntityScope.Check.CREATIVE_OP);
 
-        config.allow(PlayerEntityScope.creativeOp(), ITEM_FRAME_SET_ITEM, ITEM_FRAME_REMOVE_ITEM,
-                ITEM_FRAME_ROTATE_ITEM);
+        for (PlayerEntityScope<?> scope : List.of(
+                ITEM_FRAME_SET_ITEM,
+                ITEM_FRAME_REMOVE_ITEM,
+                ITEM_FRAME_ROTATE_ITEM
+        )) {
+            scope.allow(config, PlayerEntityScope.Check.creativeOp());
+        }
 
-        config.allow(PlayerEntityScope.creativeOp(), ARMOR_STAND_MANIPULATE);
+        ARMOR_STAND_MANIPULATE.allow(config, PlayerEntityScope.Check.creativeOp());
 
         // Player, LivingEntity, ItemStack
-        config.allow(PlayerGeneric2Scope.creativeOp(), USE_ITEM_ON_ENTITY);
+        USE_ITEM_ON_ENTITY.allow(config, PlayerGeneric2Scope.Check.creativeOp());
 
         // Player, ItemUsageContext
-        config.allow(PlayerGenericScope.creativeOp(), USE_ITEM_ON_BLOCK);
+        USE_ITEM_ON_BLOCK.allow(config, PlayerGenericScope.Check.creativeOp());
 
         // BlockPos, Collection<Entity>
-        config.allow(PlayerGeneric2Scope.creativeOp(), LEASH_ENTITIES_TO_BLOCK);
+        LEASH_ENTITIES_TO_BLOCK.allow(config, PlayerGeneric2Scope.Check.creativeOp());
 
         // Entity, Collection<Entity>
-        config.allow(PlayerGeneric2Scope.creativeOp(), LEASH_ENTITIES_TO_ENTITY);
+        LEASH_ENTITIES_TO_ENTITY.allow(config, PlayerGeneric2Scope.Check.creativeOp());
 
         // LeashKnotEntity
-        config.allow(PlayerEntityScope.creativeOp(), LEASH_KNOT_TAKE);
+        LEASH_KNOT_TAKE.allow(config, PlayerEntityScope.Check.creativeOp());
 
         // ProjectileEntity
-        config.allow(PlayerEntityScope.creativeOp(), PICKUP_PROJECTILE);
+        PICKUP_PROJECTILE.allow(config, PlayerEntityScope.Check.creativeOp());
 
         // Entity
-        config.allow(PlayerEntityScope.creativeOp(), MOUNT, DESTROY_LEASH, ATTACH_LEASH, DETACH_LEASH);
+        for (PlayerEntityScope<?> scope : List.of(
+                MOUNT,
+                DESTROY_LEASH,
+                ATTACH_LEASH,
+                DETACH_LEASH
+        )) {
+            scope.allow(config, PlayerEntityScope.Check.creativeOp());
+        }
 
-        config.allow(ALLOW_DAMAGE, (entity, source) -> source.getEntity() instanceof ServerPlayer player
-                                                       && player.canUseGameMasterBlocks());
+        ALLOW_DAMAGE.allow(config, (_, source) ->
+                source.getEntity() instanceof ServerPlayer player && player.canUseGameMasterBlocks());
 
-        config.allow(MODIFY_INVENTORY, ClickEventScope.CREATIVE_OP);
+        MODIFY_INVENTORY.allow(config, ClickEventScope.Check.CREATIVE_OP);
 
-        config.allow(PROJECTILE_BREAK_DECORATED_POT, ProjectileHitScope.CREATIVE_OP);
+        PROJECTILE_BREAK_DECORATED_POT.allow(config, ProjectileHitScope.Check.CREATIVE_OP);
 
-        config.allow(PlayerItemStackScope.CREATIVE_OP, CRAFT_ITEM, CONSUME_FOOD);
+        for (PlayerItemStackScope scope : List.of(
+                CRAFT_ITEM,
+                CONSUME_FOOD
+        )) {
+            scope.allow(config, PlayerItemStackScope.Check.CREATIVE_OP);
+        }
     }
 
     private ProtectorUtils() {}
