@@ -1,16 +1,22 @@
 package work.lclpnet.lobby.game.impl.prot.type;
 
+import net.minecraft.world.entity.Entity;
 import work.lclpnet.lobby.game.api.prot.Scope;
 
-public class EntityScope implements Scope<work.lclpnet.lobby.game.api.prot.scope.EntityScope> {
+public class EntityScope implements Scope<EntityScope.Check> {
 
     @Override
-    public work.lclpnet.lobby.game.api.prot.scope.EntityScope getGlobalScope() {
-        return entity -> true;
+    public Check getGlobalScope() {
+        return _ -> true;
     }
 
     @Override
-    public work.lclpnet.lobby.game.api.prot.scope.EntityScope getResultingScope(work.lclpnet.lobby.game.api.prot.scope.EntityScope exclude, work.lclpnet.lobby.game.api.prot.scope.EntityScope include) {
+    public Check getResultingScope(Check exclude, Check include) {
         return entity -> exclude.isWithinScope(entity) && !include.isWithinScope(entity);
+    }
+
+    public interface Check {
+
+        boolean isWithinScope(Entity entity);
     }
 }

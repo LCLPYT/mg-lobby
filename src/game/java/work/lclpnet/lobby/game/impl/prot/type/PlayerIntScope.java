@@ -1,16 +1,24 @@
 package work.lclpnet.lobby.game.impl.prot.type;
 
+import net.minecraft.world.entity.player.Player;
 import work.lclpnet.lobby.game.api.prot.Scope;
 
-public class PlayerIntScope implements Scope<work.lclpnet.lobby.game.api.prot.scope.PlayerIntScope> {
+public class PlayerIntScope implements Scope<PlayerIntScope.Check> {
 
     @Override
-    public work.lclpnet.lobby.game.api.prot.scope.PlayerIntScope getGlobalScope() {
-        return (player, i) -> true;
+    public Check getGlobalScope() {
+        return (_, _) -> true;
     }
 
     @Override
-    public work.lclpnet.lobby.game.api.prot.scope.PlayerIntScope getResultingScope(work.lclpnet.lobby.game.api.prot.scope.PlayerIntScope exclude, work.lclpnet.lobby.game.api.prot.scope.PlayerIntScope include) {
+    public Check getResultingScope(Check exclude, Check include) {
         return (player, i) -> exclude.isWithinScope(player, i) && !include.isWithinScope(player, i);
+    }
+
+    public interface Check {
+
+        Check CREATIVE_OP = (player, _) -> player.canUseGameMasterBlocks();
+
+        boolean isWithinScope(Player player, int i);
     }
 }

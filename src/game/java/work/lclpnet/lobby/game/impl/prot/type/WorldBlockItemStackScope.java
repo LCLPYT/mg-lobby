@@ -1,16 +1,24 @@
 package work.lclpnet.lobby.game.impl.prot.type;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import work.lclpnet.lobby.game.api.prot.Scope;
 
-public class WorldBlockItemStackScope implements Scope<work.lclpnet.lobby.game.api.prot.scope.WorldBlockItemStackScope> {
+public class WorldBlockItemStackScope implements Scope<WorldBlockItemStackScope.Check> {
 
     @Override
-    public work.lclpnet.lobby.game.api.prot.scope.WorldBlockItemStackScope getGlobalScope() {
-        return (world, pos, stack) -> true;
+    public Check getGlobalScope() {
+        return (_, _, _) -> true;
     }
 
     @Override
-    public work.lclpnet.lobby.game.api.prot.scope.WorldBlockItemStackScope getResultingScope(work.lclpnet.lobby.game.api.prot.scope.WorldBlockItemStackScope exclude, work.lclpnet.lobby.game.api.prot.scope.WorldBlockItemStackScope include) {
+    public Check getResultingScope(Check exclude, Check include) {
         return (world, pos, stack) -> exclude.isWithinScope(world, pos, stack) && !include.isWithinScope(world, pos, stack);
+    }
+
+    public interface Check {
+
+        boolean isWithinScope(Level world, BlockPos pos, ItemStack stack);
     }
 }

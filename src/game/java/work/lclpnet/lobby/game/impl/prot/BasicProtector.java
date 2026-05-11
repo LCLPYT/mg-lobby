@@ -53,15 +53,15 @@ public class BasicProtector implements Protector {
         protect(BREAK_BLOCKS, BlockModificationHooks.BREAK_BLOCK, BasicProtector::onModify);
 
         protect(PLACE_BLOCKS, BlockModificationHooks.PLACE_BLOCK, scope
-                -> (world, pos, entity, newState)
+                -> (_, pos, entity, _)
                 -> scope.isWithinScope(entity, pos));
 
         protect(PICKUP_FLUID, BlockModificationHooks.PICKUP_FLUID, scope
-                -> (world, pos, entity, fluid)
+                -> (_, pos, entity, _)
                 -> scope.isWithinScope(entity, pos));
 
         protect(PLACE_FLUID, BlockModificationHooks.PLACE_FLUID, scope
-                -> (world, pos, entity, fluid)
+                -> (_, pos, entity, _)
                 -> scope.isWithinScope(entity, pos));
 
         protect(USE_ITEM_ON_BLOCK, BlockModificationHooks.USE_ITEM_ON_BLOCK, scope
@@ -80,7 +80,7 @@ public class BasicProtector implements Protector {
         });
 
         protect(MOB_GRIEFING, BlockModificationHooks.CAN_MOB_GRIEF, scope
-                -> (world, pos, entity)
+                -> (_, pos, entity)
                 -> scope.isWithinScope(entity, pos));
 
         protect(CHARGE_RESPAWN_ANCHOR, BlockModificationHooks.CHARGE_RESPAWN_ANCHOR, BasicProtector::onModify);
@@ -143,14 +143,14 @@ public class BasicProtector implements Protector {
                 -> scope::isWithinScope);
 
         protect(BLOCK_XP_DROP, LevelPhysicsHooks.BLOCK_XP_DROP, scope
-                -> (world, pos, xp)
+                -> (world, pos, _)
                 -> scope.isWithinScope(world, pos));
 
         protect(SWAP_HAND_ITEMS, PlayerInventoryHooks.SWAP_HANDS, scope
                 -> scope::isWithinScope);
 
         protect(ITEM_FRAME_SET_ITEM, ItemFramePutItemCallback.HOOK, scope
-                -> (itemFrame, stack, player, hand)
+                -> (itemFrame, _, player, _)
                 -> scope.isWithinScope(player, itemFrame));
 
         protect(ITEM_FRAME_REMOVE_ITEM, ItemFrameRemoveItemCallback.HOOK, scope
@@ -162,11 +162,11 @@ public class BasicProtector implements Protector {
                 -> scope.isWithinScope(player, itemFrame));
 
         protect(ARMOR_STAND_MANIPULATE, ArmorStandManipulateCallback.HOOK, scope
-                -> (armorStand, player, slot, stack, hand)
+                -> (armorStand, player, _, _, _)
                 -> scope.isWithinScope(player, armorStand));
 
         protect(USE_ITEM_ON_ENTITY, ItemUseOnEntityCallback.HOOK, scope
-                -> (player, entity, hand, stack)
+                -> (player, entity, _, stack)
                 -> scope.isWithinScope(player, entity, stack));
 
         protect(DESTROY_LEASH, LeashDestroyCallback.HOOK, scope
@@ -197,7 +197,7 @@ public class BasicProtector implements Protector {
                 -> (world, pos, entity)
                 -> scope.isWithinScope(entity, pos));
 
-        protect(USE_BLOCK, PlayerInteractionHooks.USE_BLOCK, scope -> (player, world, hand, hitResult) -> {
+        protect(USE_BLOCK, PlayerInteractionHooks.USE_BLOCK, scope -> (player, world, _, hitResult) -> {
             BlockPos pos = hitResult.getBlockPos();
             BlockState state = world.getBlockState(pos);
 
@@ -235,7 +235,7 @@ public class BasicProtector implements Protector {
                 -> !force && entity instanceof ServerPlayer player &&
                    scope.isWithinScope(player, vehicle));
 
-        protect(CONSUME_FOOD, PlayerInteractionHooks.USE_ITEM, scope -> (player, world, hand) -> {
+        protect(CONSUME_FOOD, PlayerInteractionHooks.USE_ITEM, scope -> (player, _, hand) -> {
             ItemStack stack = player.getItemInHand(hand);
 
             if (!stack.has(DataComponents.FOOD) || !scope.isWithinScope(player, stack)) {
