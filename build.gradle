@@ -1,4 +1,6 @@
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.kohsuke.github.GHFileNotFoundException
+import org.kohsuke.github.GitHub
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
@@ -185,12 +187,29 @@ tasks.register("github", GithubDeploymentTask) {
         repository = env.get("GITHUB_REPOSITORY")
     }
 
+    def targetTag = "mg-lobby-${project.version}"
+
     release {
         title = "[${libs.versions.minecraft.get()}] $project.name $project.version"
-        tag = "mg-lobby-${project.version}"
+        tag = targetTag
     }
 
     assets.add(tasks.jar.archiveFile.get())
+
+    onlyIf("tag does not exist on GitHub") {
+        def token = env.get("GITHUB_TOKEN")
+        def repo = env.get("GITHUB_REPOSITORY")
+
+        if (token == null || repo == null) return false
+
+        try {
+            GitHub.connectUsingOAuth(token).getRepository(repo).getRef("refs/tags/$targetTag")
+            println("Tag $targetTag already exists, skipping...")
+            return false
+        } catch (GHFileNotFoundException ignored) {
+            return true
+        }
+    }
 }
 
 publishing {
