@@ -4,7 +4,6 @@ import work.lclpnet.build.task.GithubDeploymentTask
 plugins {
     alias(libs.plugins.java)
     alias(libs.plugins.fabric.loom) apply false
-    alias(libs.plugins.maven.publish)
     alias(libs.plugins.gradle.build.utils)
 }
 
@@ -22,6 +21,7 @@ base {
 
 allprojects {
     apply plugin: libs.plugins.fabric.loom.get().pluginId
+    apply plugin: libs.plugins.maven.publish.get().pluginId
 
     repositories {
         mavenCentral()
@@ -68,6 +68,12 @@ allprojects {
         filesMatching("*.mixins.json") {
             filter(ReplaceTokens, beginToken: '${', endToken: '}', tokens: tokens)
         }
+    }
+
+    publishing {
+        // automatically use DEPLOY_URL, DEPLOY_USER and DEPLOY_PASSWORD environment variables
+        // or mavenHost, mavenUser and mavenPassword from props
+        buildUtils.setupPublishRepository(repositories, props)
     }
 }
 

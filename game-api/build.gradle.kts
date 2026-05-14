@@ -1,9 +1,10 @@
 plugins {
     alias(libs.plugins.java)
+    alias(libs.plugins.maven.publish)
 }
 
 group = "work.lclpnet.mods"
-version = rootProject.version
+version = "${project.property("game_api_version")}+${libs.versions.minecraft.get()}"
 
 repositories {
     mavenCentral()
@@ -38,4 +39,19 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = base.archivesName.get()
+
+            from(components["java"])
+
+            pom {
+                name.set("game-api")
+                description.set("A library mod that provides functionality to implement games")
+            }
+        }
+    }
 }
