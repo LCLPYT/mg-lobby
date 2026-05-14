@@ -243,7 +243,7 @@ afterEvaluate {
     }
 }
 
-def checkProjectIsDeployed(Project project, Properties props) {
+static def checkProjectIsDeployed(Project project, Properties props) {
     def url = "${getDeployUrl(project, props)}/${project.group.toString().replace('.', '/')}/${project.base.archivesName.get()}/maven-metadata.xml"
     String xml
     try {
@@ -256,8 +256,10 @@ def checkProjectIsDeployed(Project project, Properties props) {
     return versions.contains(project.version.toString())
 }
 
-def getDeployUrl(Project project, Properties props) {
-    if (System.getenv().containsKey("DEPLOY_URL")) {
+static def getDeployUrl(Project project, Properties props) {
+    def env = System.getenv()
+
+    if (env.containsKey("DEPLOY_URL")) {
         return env.get("DEPLOY_URL")
     } else if (props.containsKey("mavenHost")) {
         return props.getProperty("mavenHost")
