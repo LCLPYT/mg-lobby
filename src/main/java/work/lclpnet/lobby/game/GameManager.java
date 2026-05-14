@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.game.api.Game;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;

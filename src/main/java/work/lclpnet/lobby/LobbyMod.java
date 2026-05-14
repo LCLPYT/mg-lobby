@@ -25,7 +25,7 @@ import work.lclpnet.lobby.event.ConnectionListener;
 import work.lclpnet.lobby.event.RuntimeWorldListener;
 import work.lclpnet.lobby.game.AsyncGameStateIo;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.impl.data.PathDataPackSink;
+import work.lclpnet.game.impl.data.PathDataPackSink;
 import work.lclpnet.lobby.io.LobbyWorldDownloader;
 import work.lclpnet.lobby.io.ServerPropertiesAdjuster;
 import work.lclpnet.lobby.service.DataPackService;

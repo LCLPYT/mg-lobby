@@ -2,8 +2,8 @@ package work.lclpnet.lobby.dev;
 
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
-import work.lclpnet.lobby.game.api.data.DataPackSink;
-import work.lclpnet.lobby.game.api.data.GameDataPacks;
+import work.lclpnet.game.api.data.DataPackSink;
+import work.lclpnet.game.api.data.GameDataPacks;
 
 import java.io.IOException;
 import java.io.InputStream;

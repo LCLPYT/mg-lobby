@@ -6,13 +6,13 @@ import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import work.lclpnet.kibu.translate.Translations;
-import work.lclpnet.lobby.game.api.Game;
-import work.lclpnet.lobby.game.api.GameConfig;
-import work.lclpnet.lobby.game.api.GameFactory;
-import work.lclpnet.lobby.game.api.start.GameScope;
-import work.lclpnet.lobby.game.api.start.GameStatusManager;
-import work.lclpnet.lobby.game.impl.MinecraftGameConfig;
-import work.lclpnet.lobby.game.impl.ModGameFactory;
+import work.lclpnet.game.api.Game;
+import work.lclpnet.game.api.GameConfig;
+import work.lclpnet.game.api.GameFactory;
+import work.lclpnet.game.api.start.GameScope;
+import work.lclpnet.game.api.start.GameStatusManager;
+import work.lclpnet.game.impl.MinecraftGameConfig;
+import work.lclpnet.game.impl.ModGameFactory;
 
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 

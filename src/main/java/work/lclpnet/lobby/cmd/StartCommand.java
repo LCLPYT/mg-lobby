@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
-import work.lclpnet.lobby.game.api.option.GameOptions;
+import work.lclpnet.game.api.option.GameOptions;
 import work.lclpnet.lobby.game.start.GameStarter;
 
 public class StartCommand implements KibuCommand {

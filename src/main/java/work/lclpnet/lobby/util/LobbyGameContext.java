@@ -2,8 +2,8 @@ package work.lclpnet.lobby.util;
 
 import net.minecraft.server.MinecraftServer;
 import work.lclpnet.kibu.translate.Translations;
-import work.lclpnet.lobby.game.api.GameConfig;
-import work.lclpnet.lobby.game.api.GameContext;
+import work.lclpnet.game.api.GameConfig;
+import work.lclpnet.game.api.GameContext;
 
 public class LobbyGameContext implements GameContext {
 

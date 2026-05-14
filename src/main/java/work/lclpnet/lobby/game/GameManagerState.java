@@ -2,7 +2,7 @@ package work.lclpnet.lobby.game;
 
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
-import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.game.api.Game;
 
 import java.util.Objects;
 

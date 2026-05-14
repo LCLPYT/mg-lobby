@@ -8,8 +8,8 @@ import work.lclpnet.kibu.jnbt.Tag;
 import work.lclpnet.kibu.jnbt.io.NbtIOHelper;
 import work.lclpnet.lobby.config.ConfigAccess;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.api.Game;
-import work.lclpnet.lobby.game.api.data.DataPackSink;
+import work.lclpnet.game.api.Game;
+import work.lclpnet.game.api.data.DataPackSink;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

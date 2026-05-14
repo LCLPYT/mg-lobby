@@ -21,10 +21,10 @@ import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.kibu.translate.util.Partial;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.activity.GameStartingActivity;
-import work.lclpnet.lobby.game.api.GameContext;
-import work.lclpnet.lobby.game.api.GameEnvironment;
-import work.lclpnet.lobby.game.api.option.GameOptions;
-import work.lclpnet.lobby.game.api.start.GameStatusManager;
+import work.lclpnet.game.api.GameContext;
+import work.lclpnet.game.api.GameEnvironment;
+import work.lclpnet.game.api.option.GameOptions;
+import work.lclpnet.game.api.start.GameStatusManager;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -3,10 +3,10 @@ package work.lclpnet.lobby.dev;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.scheduler.Ticks;
-import work.lclpnet.lobby.game.api.GameEnvironment;
-import work.lclpnet.lobby.game.api.GameInstance;
-import work.lclpnet.lobby.game.api.option.GameOptions;
-import work.lclpnet.lobby.game.api.option.VoteResult;
+import work.lclpnet.game.api.GameEnvironment;
+import work.lclpnet.game.api.GameInstance;
+import work.lclpnet.game.api.option.GameOptions;
+import work.lclpnet.game.api.option.VoteResult;
 
 import java.util.Comparator;
 import java.util.Map.Entry;

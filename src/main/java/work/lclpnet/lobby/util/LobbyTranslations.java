@@ -5,7 +5,7 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.api.Game;
+import work.lclpnet.game.api.Game;
 import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
 import work.lclpnet.translations.loader.TranslationLoader;

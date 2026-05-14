@@ -13,8 +13,8 @@ import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.prompt.OptionPrompt;
 import work.lclpnet.kibu.translate.Translations;
-import work.lclpnet.lobby.game.api.option.OptionVoting;
-import work.lclpnet.lobby.game.api.option.VoteResult;
+import work.lclpnet.game.api.option.OptionVoting;
+import work.lclpnet.game.api.option.VoteResult;
 
 import java.util.*;
 import java.util.stream.Collectors;

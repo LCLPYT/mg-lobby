@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
-import work.lclpnet.lobby.game.api.GameFinisher;
+import work.lclpnet.game.api.GameFinisher;
 
 public class EndCommand implements KibuCommand {
 

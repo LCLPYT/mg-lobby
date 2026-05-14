@@ -6,7 +6,7 @@ import work.lclpnet.kibu.jnbt.NBTConstants;
 import work.lclpnet.kibu.jnbt.Tag;
 import work.lclpnet.kibu.jnbt.io.NbtIOHelper;
 import work.lclpnet.lobby.config.ConfigAccess;
-import work.lclpnet.lobby.io.copy.WorldCopier;
+import work.lclpnet.game.io.copy.WorldCopier;
 
 import java.io.IOException;
 import java.net.URI;
