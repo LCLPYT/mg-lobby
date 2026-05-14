@@ -4,10 +4,8 @@ import work.lclpnet.build.task.GithubDeploymentTask
 plugins {
     alias(libs.plugins.java)
     alias(libs.plugins.fabric.loom) apply false
-    alias(libs.plugins.gradle.build.utils)
+    alias(libs.plugins.gradle.build.utils) apply false
 }
-
-Properties props = buildUtils.loadProperties("publish.properties")
 
 group = project.maven_group
 version = "${project.mod_version}+${libs.versions.minecraft.get()}"
@@ -22,6 +20,9 @@ base {
 allprojects {
     apply plugin: libs.plugins.fabric.loom.get().pluginId
     apply plugin: libs.plugins.maven.publish.get().pluginId
+    apply plugin: libs.plugins.gradle.build.utils.get().pluginId
+
+    Properties props = buildUtils.loadProperties("publish.properties")
 
     repositories {
         mavenCentral()
@@ -62,25 +63,6 @@ allprojects {
         it.options.release.set(javaVersion)
     }
 
-    processResources {
-        def tokens = [
-                "version": project.version.toString(),
-                "loader_version": libs.versions.fabric.loader.get(),
-                "minecraft_compat": project.minecraft_compat,
-                "java_version": javaVersion.toString()
-        ]
-
-        inputs.properties(tokens)
-
-        filesMatching("fabric.mod.json") {
-            expand(tokens)
-        }
-
-        filesMatching("*.mixins.json") {
-            filter(ReplaceTokens, beginToken: '${', endToken: '}', tokens: tokens)
-        }
-    }
-
     [tasks.jar, tasks.sourcesJar].each {
         it.from("LICENSE") {
             rename { "${it}_${project.base.archivesName.get()}" }
@@ -111,8 +93,7 @@ dependencies {
     implementation(libs.fantasy)
     implementation(libs.sqlite.jdbc)
     implementation(libs.gaco)
-    implementation(project(":game-api"))
-    include(project(":game-api"))
+    implementation(project(":mg-api"))
 
     localRuntime(libs.pal)
     compileOnly(libs.pal)
@@ -156,6 +137,25 @@ test {
     systemProperty("fabric.side", "server")
 }
 
+processResources {
+    def tokens = [
+            "version": project.version.toString(),
+            "loader_version": libs.versions.fabric.loader.get(),
+            "minecraft_compat": project.minecraft_compat,
+            "java_version": javaVersion.toString()
+    ]
+
+    inputs.properties(tokens)
+
+    filesMatching("fabric.mod.json") {
+        expand(tokens)
+    }
+
+    filesMatching("*.mixins.json") {
+        filter(ReplaceTokens, beginToken: '${', endToken: '}', tokens: tokens)
+    }
+}
+
 // add main dependencies to dev source set
 configurations.named("devImplementation").configure {
     it.extendsFrom(configurations.implementation)
@@ -187,15 +187,13 @@ tasks.register("github", GithubDeploymentTask) {
 
     release {
         title = "[${libs.versions.minecraft.get()}] $project.name $project.version"
-        tag = project.version
+        tag = "mg-lobby-${project.version}"
     }
 
     assets.add(tasks.jar.archiveFile.get())
 }
 
 publishing {
-    buildUtils.setupPublishRepository(repositories, props)
-
     publications {
         create("mavenJava", MavenPublication) {
             artifactId = project.base.archivesName.get()

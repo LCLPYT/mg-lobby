@@ -15,4 +15,4 @@ pluginManagement {
 
 rootProject.name = 'mg-lobby'
 
-include 'game-api'
+include 'mg-api'
