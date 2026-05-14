@@ -1,0 +1,10 @@
+{
+  "maps": [
+    {
+      "path": "bar/baz"
+    },
+    {
+      "path": "bar/hi"
+    }
+  ]
+}

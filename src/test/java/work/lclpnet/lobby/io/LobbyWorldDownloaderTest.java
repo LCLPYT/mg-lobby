@@ -15,9 +15,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LobbyWorldDownloaderTest {
 
@@ -76,6 +76,23 @@ class LobbyWorldDownloaderTest {
 
         // verify the junk content was deleted
         assertFalse(Files.exists(nestedDir));
-        DirectoryWorldCopierTest.assertIsTestContent(lobbyDir);  // will verify exact file count
+        assertIsTestContent(lobbyDir);  // will verify exact file count
+    }
+
+    public static void assertIsTestContent(Path dst) throws IOException {
+        List<Path> checks = List.of(
+                dst.resolve("bar.json"),
+                dst.resolve("foo.txt"),
+                dst.resolve("nested"),
+                dst.resolve("nested").resolve("baz.yml"),
+                dst.resolve("nested").resolve("further_nested"),
+                dst.resolve("nested").resolve("further_nested").resolve("hello_world.md")
+        );
+
+        checks.forEach(path -> assertTrue(Files.exists(path)));
+
+        try (var files = Files.walk(dst)) {
+            assertEquals(7, files.count());
+        }
     }
 }

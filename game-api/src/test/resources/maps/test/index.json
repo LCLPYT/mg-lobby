@@ -1,0 +1,18 @@
+{
+  "maps": [
+    {
+      "path": "map_one"
+    },
+    {
+      "path": "map_two",
+      "icon": "minecraft:diamond"
+    },
+    {
+      "path": "map_three",
+      "authors": ["LCLP", "b_o_p_s"],
+      "any_property": {
+        "weight": 0.75
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "mg-lobby-dev",
-  "version": "${version}",
+  "version": "0.1.0",
   "name": "Mini Game Lobby Dev mod",
   "description": "A mod that introduces a game lifecycle along with a waiting lobby",
   "authors": [
