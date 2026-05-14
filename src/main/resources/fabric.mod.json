@@ -28,7 +28,8 @@
     "java": ">=${java_version}",
     "fabric-api": "*",
     "kibu": "*",
-    "kibu-world-api": "*"
+    "kibu-world-api": "*",
+    "mg-api": "*"
   },
   "suggests": {
     "pal": "*",

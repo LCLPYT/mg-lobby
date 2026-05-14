@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.gradle.build.utils)
 }
 
-Properties props = buildUtils.loadProperties('publish.properties')
+Properties props = buildUtils.loadProperties("publish.properties")
 
 group = project.maven_group
 version = "${project.mod_version}+${libs.versions.minecraft.get()}"
@@ -51,6 +51,17 @@ allprojects {
         }
     }
 
+    java {
+        withSourcesJar()
+
+        sourceCompatibility = JavaVersion.toVersion(javaVersion)
+        targetCompatibility = JavaVersion.toVersion(javaVersion)
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.release.set(javaVersion)
+    }
+
     processResources {
         def tokens = [
                 "version": project.version.toString(),
@@ -70,15 +81,18 @@ allprojects {
         }
     }
 
+    [tasks.jar, tasks.sourcesJar].each {
+        it.from("LICENSE") {
+            rename { "${it}_${project.base.archivesName.get()}" }
+        }
+    }
+
     publishing {
         // automatically use DEPLOY_URL, DEPLOY_USER and DEPLOY_PASSWORD environment variables
         // or mavenHost, mavenUser and mavenPassword from props
         buildUtils.setupPublishRepository(repositories, props)
     }
 }
-
-def extraMcSourceSets = ['dev']
-def localExtraSourceSets = ['dev']
 
 sourceSets {
     dev {
@@ -97,7 +111,8 @@ dependencies {
     implementation(libs.fantasy)
     implementation(libs.sqlite.jdbc)
     implementation(libs.gaco)
-    implementation(project(':game-api'))
+    implementation(project(":game-api"))
+    include(project(":game-api"))
 
     localRuntime(libs.pal)
     compileOnly(libs.pal)
@@ -141,67 +156,23 @@ test {
     systemProperty("fabric.side", "server")
 }
 
-java {
-    withSourcesJar()
-
-    sourceCompatibility = JavaVersion.toVersion(javaVersion)
-    targetCompatibility = JavaVersion.toVersion(javaVersion)
+// add main dependencies to dev source set
+configurations.named("devImplementation").configure {
+    it.extendsFrom(configurations.implementation)
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.release.set(javaVersion)
+configurations.named("devCompileClasspath").configure {
+    it.extendsFrom(configurations.modCompileClasspathMapped)
 }
 
-// add main dependencies to the extra sourceSets
-extraMcSourceSets.each { name ->
-    configurations.named("${name}Implementation").configure {
-        it.extendsFrom(configurations.implementation)
-    }
-
-    configurations.named("${name}CompileClasspath").configure {
-        it.extendsFrom(configurations.modCompileClasspathMapped)
-    }
-
-    configurations.named("${name}RuntimeClasspath").configure {
-        it.extendsFrom(configurations.modCompileClasspathMapped)
-    }
-
-    // add minecraft dependencies to extra sourceSet (only available after project evaluation)
-    afterEvaluate {
-        configurations.named("${name}CompileClasspath").get().extendsFrom(configurations.minecraftNamedCompile)
-        configurations.named("${name}RuntimeClasspath").get().extendsFrom(configurations.minecraftNamedRuntime)
-    }
-
-    def set = sourceSets.named(name).get()
-
-    sourceSets.named('test').configure {
-        it.compileClasspath += set.output
-        it.runtimeClasspath += set.output
-    }
-
-    if (!localExtraSourceSets.contains(name)) {
-        tasks.named("process${name.capitalize()}Resources").configure {
-            tasks.processResources.dependsOn(it)
-        }
-
-        // include extra sourceSet in main jar tasks
-        jar {
-            from set.output
-        }
-
-        sourcesJar {
-            from set.allSource
-        }
-    }
+configurations.named("devRuntimeClasspath").configure {
+    it.extendsFrom(configurations.modCompileClasspathMapped)
 }
 
-def licenseJarTasks = [jar, sourcesJar]
-
-// include license file in jar tasks
-licenseJarTasks.each {
-    it.from('LICENSE') {
-        rename { "${it}_${project.base.archivesName.get()}" }
-    }
+// add minecraft dependencies to dev source set (only available after project evaluation)
+afterEvaluate {
+    configurations.named("devCompileClasspath").get().extendsFrom(configurations.minecraftNamedCompile)
+    configurations.named("devRuntimeClasspath").get().extendsFrom(configurations.minecraftNamedRuntime)
 }
 
 def env = System.getenv()
