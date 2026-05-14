@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game.api;
 
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public interface GameConfig {
 
@@ -10,13 +11,13 @@ public interface GameConfig {
      * A unique string identifier of the game.
      * @return The game path.
      */
-    String identifier();
+    @NotNull String identifier();
 
     /**
      * The translation key of the title of the game.
      * @return The game title.
      */
-    default String titleKey() {
+    default @NotNull String titleKey() {
         return "game.%s.title".formatted(identifier());
     }
 
@@ -24,7 +25,7 @@ public interface GameConfig {
      * An icon for visually displaying the game.
      * @return The game icon.
      */
-    ItemStack icon();
+    @NotNull ItemStack icon();
 
     /**
      * The time for lobby-like game-hosts to wait for players to join, in seconds.

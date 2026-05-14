@@ -7,6 +7,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.translate.Translations;
@@ -32,30 +34,30 @@ public class TestGame implements Game, GameConfigurator {
     public static final Logger logger = LoggerFactory.getLogger(MOD_ID);
 
     @Override
-    public GameConfig getConfig() {
+    public @NotNull GameConfig getConfig() {
         return new MinecraftGameConfig("test", new ItemStackTemplate(Items.STRUCTURE_VOID));
     }
 
     @Override
-    public boolean canBePlayed(GameScope scope) {
+    public boolean canBePlayed(@NonNull GameScope scope) {
         return scope.playerCount() >= getRequiredPlayers();
     }
 
     @Override
-    public GameFactory createFactory() {
+    public @NonNull GameFactory createFactory() {
         // will be called each time this game is selected to be played
         return new ModGameFactory(MOD_ID, logger, TestGameInstance::new);
     }
 
     // optional, use this if the game requires data packs that must be loaded at bootstrap (e.g. world generators, biomes, other static registry data)
     @Override
-    public GameDataPacks getBootstrapDataPacks() {
+    public @NonNull GameDataPacks getBootstrapDataPacks() {
         return new TestGameDataPacks();
     }
 
     // optional, use this if your game has configurable options, such as map-votings etc.
     @Override
-    public void configureOptions(GameOptionConfig config) {
+    public void configureOptions(@NotNull GameOptionConfig config) {
         config.registerVoting("map", new OptionVoting<>(
                 _ -> {
                     var stack = new ItemStack(Items.PAPER);
@@ -82,7 +84,7 @@ public class TestGame implements Game, GameConfigurator {
     }
 
     @Override
-    public void configureStatusManager(GameStatusManager manager) {
+    public void configureStatusManager(@NotNull GameStatusManager manager) {
         Translations translations = manager.getContext().getTranslations();
 
         // you can set a periodic condition message that gets sent to everyone, if the game cannot start.

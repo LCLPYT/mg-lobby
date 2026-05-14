@@ -11,7 +11,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -45,12 +47,12 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
     }
 
     @Override
-    public GameContext getContext() {
+    public @NonNull GameContext getContext() {
         return context;
     }
 
     @Override
-    public synchronized <T> VotingConfig registerVoting(String name, OptionVoting<T> voting) {
+    public synchronized @NotNull <T> VotingConfig registerVoting(@NotNull String name, @NotNull OptionVoting<T> voting) {
         if (getVoting(name, null).isPresent()) {
             throw new IllegalArgumentException("Voting named %s already exists".formatted(name));
         }
@@ -74,7 +76,7 @@ public class LobbyWaitingManager implements GameOptionConfig, GameOptions {
     }
 
     @Override
-    public synchronized void addTimedAction(Runnable runnable, int ticksBeforeStart) {
+    public synchronized void addTimedAction(@NotNull Runnable runnable, int ticksBeforeStart) {
         Objects.requireNonNull(runnable, "Action must not be null");
 
         if (ticksBeforeStart < 0) {

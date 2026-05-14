@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.api;
 
+import org.jetbrains.annotations.NotNull;
 import work.lclpnet.lobby.game.api.data.GameDataPacks;
 import work.lclpnet.lobby.game.api.option.GameOptionConfig;
 import work.lclpnet.lobby.game.api.start.GameScope;
@@ -31,13 +32,13 @@ import work.lclpnet.lobby.game.api.start.GameStatusManager;
 /// created every time the game is started.
 public interface Game {
 
-    GameConfig getConfig();
+    @NotNull GameConfig getConfig();
 
-    boolean canBePlayed(GameScope scope);
+    boolean canBePlayed(@NotNull GameScope scope);
 
-    GameFactory createFactory();
+    @NotNull GameFactory createFactory();
 
-    default GameDataPacks getBootstrapDataPacks() {
+    default @NotNull GameDataPacks getBootstrapDataPacks() {
         return GameDataPacks.EMPTY;
     }
 
@@ -47,7 +48,7 @@ public interface Game {
      * This can be used for game-map votings for example.
      * @param config The {@link GameOptionConfig} used to register options.
      */
-    default void configureOptions(GameOptionConfig config) {}
+    default void configureOptions(@NotNull GameOptionConfig config) {}
 
-    default void configureStatusManager(GameStatusManager manager) {}
+    default void configureStatusManager(@NotNull GameStatusManager manager) {}
 }

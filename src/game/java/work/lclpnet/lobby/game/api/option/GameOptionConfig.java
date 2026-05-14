@@ -1,12 +1,14 @@
 package work.lclpnet.lobby.game.api.option;
 
+import org.jetbrains.annotations.NotNull;
 import work.lclpnet.lobby.game.api.GameContext;
 
 public interface GameOptionConfig {
 
-    GameContext getContext();
+    @NotNull GameContext getContext();
 
-    <T> VotingConfig registerVoting(String name, OptionVoting<T> voting);
+    @NotNull
+    <T> VotingConfig registerVoting(@NotNull String name, @NotNull OptionVoting<T> voting);
 
-    void addTimedAction(Runnable runnable, int ticksBeforeStart);
+    void addTimedAction(@NotNull Runnable runnable, int ticksBeforeStart);
 }

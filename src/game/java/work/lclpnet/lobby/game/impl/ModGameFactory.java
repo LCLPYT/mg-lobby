@@ -1,6 +1,7 @@
 package work.lclpnet.lobby.game.impl;
 
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.lobby.game.api.GameEnvironment;
@@ -31,7 +32,7 @@ public class ModGameFactory implements GameFactory {
     }
 
     @Override
-    public GameInstance createInstance(GameEnvironment environment) {
+    public @NonNull GameInstance createInstance(GameEnvironment environment) {
         return instanceFactory.apply(environment);
     }
 }

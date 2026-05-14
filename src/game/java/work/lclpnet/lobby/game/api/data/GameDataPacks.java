@@ -1,11 +1,13 @@
 package work.lclpnet.lobby.game.api.data;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public interface GameDataPacks {
 
-    GameDataPacks EMPTY = (sink, executor) -> CompletableFuture.completedFuture(null);
+    GameDataPacks EMPTY = (_, _) -> CompletableFuture.completedFuture(null);
 
-    CompletableFuture<Void> downloadPacks(DataPackSink sink, Executor executor);
+    @NotNull CompletableFuture<Void> downloadPacks(@NotNull DataPackSink sink, @NotNull Executor executor);
 }
