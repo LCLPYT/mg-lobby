@@ -1,3 +1,4 @@
+import groovy.xml.XmlSlurper
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.GitHub
@@ -178,6 +179,7 @@ afterEvaluate {
 }
 
 def env = System.getenv()
+def props = buildUtils.loadProperties("publish.properties")
 
 tasks.register("github", GithubDeploymentTask) {
     dependsOn tasks.jar
@@ -224,5 +226,42 @@ publishing {
                 description = 'A mod that introduces a game lifecycle along with a waiting lobby'
             }
         }
+    }
+}
+
+publishMavenJavaPublicationToMavenRepository.onlyIf("version not yet deployed to Maven") {
+    !checkProjectIsDeployed(project, props)
+}
+
+afterEvaluate {
+    project(":mg-api") {
+        tasks.named("publishMavenJavaPublicationToMavenRepository") {
+            onlyIf("version not yet deployed to Maven") {
+                !checkProjectIsDeployed(project, props)
+            }
+        }
+    }
+}
+
+def checkProjectIsDeployed(Project project, Properties props) {
+    def url = "${getDeployUrl(project, props)}/${project.group.toString().replace('.', '/')}/${project.base.archivesName.get()}/maven-metadata.xml"
+    String xml
+    try {
+        xml = URI.create(url).toURL().text
+    } catch (Throwable ignored) {
+        return false
+    }
+    def meta = new XmlSlurper().parseText(xml)
+    def versions = meta.versioning.versions.version*.text()
+    return versions.contains(project.version.toString())
+}
+
+def getDeployUrl(Project project, Properties props) {
+    if (System.getenv().containsKey("DEPLOY_URL")) {
+        return env.get("DEPLOY_URL")
+    } else if (props.containsKey("mavenHost")) {
+        return props.getProperty("mavenHost")
+    } else {
+        return "file:///${project.projectDir}/repo"
     }
 }
