@@ -70,6 +70,7 @@ import static work.lclpnet.activity.component.builtin.BuiltinComponents.*;
 public class LobbyActivity extends ComponentActivity {
 
     private final LobbyManager lobbyManager;
+    private final ActivityManager rootActivityManager;
     private final ActivityManager childActivity;
     private final GameStartingActivity.Builder startingBuilder;
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
@@ -85,9 +86,11 @@ public class LobbyActivity extends ComponentActivity {
     private volatile Game changingToGame = null;
 
     public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager,
-                         GameStartingActivity.Builder startingBuilder, Translations translations) {
+                         GameStartingActivity.Builder startingBuilder, Translations translations,
+                         ActivityManager rootActivityManager) {
         super(server, logger);
         this.lobbyManager = lobbyManager;
+        this.rootActivityManager = rootActivityManager;
         this.childActivity = new SyncActivityManager();
         this.startingBuilder = startingBuilder;
         this.translations = translations;
@@ -301,7 +304,7 @@ public class LobbyActivity extends ComponentActivity {
     }
 
     private void activateGame(Game game, GameFactory factory, Translations translations) {
-        var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations);
+        var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations, rootActivityManager);
 
         var args = new LobbyArgs(childActivity, configurator, playerStateManager);
         var scope = new Scope(getServer());

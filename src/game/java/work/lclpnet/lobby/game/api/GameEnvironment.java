@@ -1,5 +1,6 @@
 package work.lclpnet.lobby.game.api;
 
+import work.lclpnet.activity.Activity;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.scheduler.util.SchedulerStack;
@@ -20,4 +21,12 @@ public interface GameEnvironment extends GameContext {
     GameFinisher getFinisher();
 
     void whenDone(Runnable action);
+
+    /**
+     * Switches the current root activity.
+     * Only one root activity may be active at a time.
+     * Switching the activity will destroy the previous activity, e.g. the lobby activity or any other currently active activity.
+     * @param activity The activity to make the new root activity.
+     */
+    void switchRootActivity(Activity activity);
 }

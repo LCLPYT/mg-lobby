@@ -2,6 +2,8 @@ package work.lclpnet.lobby.game;
 
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
+import work.lclpnet.activity.Activity;
+import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.cmd.impl.CommandContainer;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
 import work.lclpnet.kibu.hook.HookStack;
@@ -35,11 +37,14 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     private volatile WorldFacadeImpl worldFacade;
     private WorldContainer worldContainer;
 
-    public FinishableGameEnvironment(MinecraftServer server, Logger logger, GameConfig gameConfig, Translations translations) {
+    private final ActivityManager activityManager;
+
+    public FinishableGameEnvironment(MinecraftServer server, Logger logger, GameConfig gameConfig, Translations translations, ActivityManager activityManager) {
         this.server = server;
         this.logger = logger;
         this.gameConfig = gameConfig;
         this.translations = translations;
+        this.activityManager = activityManager;
     }
 
     @Override
@@ -156,6 +161,11 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
                 throw new IllegalStateException("Game environment is already destroyed");
             }
         }
+    }
+
+    @Override
+    public void switchRootActivity(Activity activity) {
+        activityManager.startActivity(activity);
     }
 
     @Override

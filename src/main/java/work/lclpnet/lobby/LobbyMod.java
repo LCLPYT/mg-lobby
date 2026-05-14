@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.config.json.ConfigHandler;
+import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.level.ServerWorldReadyCallback;
 import work.lclpnet.kibu.hook.level.ServerWorldUnreadyCallback;
@@ -42,6 +43,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
     public static final String ID = "mg-lobby";
     public static final Logger logger = LoggerFactory.getLogger(ID);
     private static LobbyMod instance = null;
+    private final ActivityManager activityManager = new SyncActivityManager();
     private LobbyManagerImpl manager = null;
     private Translations translations = null;
     private CompletableFuture<MinecraftServer> serverFuture = null;
@@ -100,7 +102,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
             });
         });
 
-        ServerWorldUnreadyCallback.HOOK.register(_ -> ActivityManager.getInstance().stop());
+        ServerWorldUnreadyCallback.HOOK.register(_ -> activityManager.stop());
 
         logger.info("Lobby loaded.");
     }
@@ -131,7 +133,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
         GameStartingActivity.Builder startingBuilder = (game, starter, trans, lobbyArgs) ->
                 new GameStartingActivity(server, logger, manager.getLobbyLevel(), game, starter, trans, lobbyArgs);
 
-        ActivityManager.getInstance().startActivity(new LobbyActivity(server, logger, manager, startingBuilder, translations));
+        activityManager.startActivity(new LobbyActivity(server, logger, manager, startingBuilder, translations, activityManager));
     }
 
     public static LobbyMod getInstance() {

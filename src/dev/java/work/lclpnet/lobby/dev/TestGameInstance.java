@@ -2,7 +2,6 @@ package work.lclpnet.lobby.dev;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.kibu.scheduler.Ticks;
 import work.lclpnet.lobby.game.api.GameEnvironment;
 import work.lclpnet.lobby.game.api.GameInstance;
@@ -36,7 +35,7 @@ public class TestGameInstance implements GameInstance {
 
         TestGameActivity activity = new TestGameActivity(environment.getServer(), logger);
 
-        ActivityManager.getInstance().startActivity(activity);
+        environment.switchRootActivity(activity);
 
         environment.getSchedulerStack().timeout(() -> {
             System.out.println("The test game has ended!");
