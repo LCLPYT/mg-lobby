@@ -1,11 +1,12 @@
 package work.lclpnet.lobby.util;
 
 import org.slf4j.Logger;
+import work.lclpnet.game.GameApiInit;
+import work.lclpnet.game.api.Game;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.game.api.Game;
 import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
 import work.lclpnet.translations.loader.TranslationLoader;
@@ -40,6 +41,7 @@ public class LobbyTranslations {
         }
 
         // translations added later will overwrite previous translations, put mg-lobby last
+        combined.addLoader(ModTranslations.assetTranslationLoader(GameApiInit.MOD_ID, logger));
         combined.addLoader(ModTranslations.assetTranslationLoader(LobbyMod.ID, logger));
 
         return loadFrom(combined);

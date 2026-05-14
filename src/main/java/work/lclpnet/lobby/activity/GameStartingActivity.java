@@ -2,19 +2,21 @@ package work.lclpnet.lobby.activity;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.world.BossEvent;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.BossEvent;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.component.builtin.BossBarComponent;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
+import work.lclpnet.game.api.Game;
+import work.lclpnet.game.api.GameConfig;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
@@ -26,8 +28,6 @@ import work.lclpnet.lobby.cmd.PauseCommand;
 import work.lclpnet.lobby.cmd.ResumeCommand;
 import work.lclpnet.lobby.cmd.StartCommand;
 import work.lclpnet.lobby.game.LobbyWaitingManager;
-import work.lclpnet.game.api.Game;
-import work.lclpnet.game.api.GameConfig;
 import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.util.LobbyGameContext;
@@ -108,7 +108,7 @@ public class GameStartingActivity extends ComponentActivity {
 
     private Pair<String, Object[]> titleTranslation() {
         if (wasPaused) {
-            return Pair.of("lobby.countdown.title.paused", new Object[] {
+            return Pair.of("mg-api.countdown.title.paused", new Object[] {
                     translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD)
             });
         }
@@ -118,14 +118,14 @@ public class GameStartingActivity extends ComponentActivity {
         seconds = seconds % 60;
 
         if (minutes > 0) {
-            return Pair.of("lobby.countdown.title.minutes", new Object[] {
+            return Pair.of("mg-api.countdown.title.minutes", new Object[] {
                     translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD),
                     minutes,
                     seconds
             });
         }
 
-        return Pair.of("lobby.countdown.title.seconds", new Object[] {
+        return Pair.of("mg-api.countdown.title.seconds", new Object[] {
                 translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD),
                 seconds
         });

@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.game.api.Game;
 import work.lclpnet.game.api.GameConfig;
 import work.lclpnet.game.api.GameConfigurator;
@@ -23,6 +22,7 @@ import work.lclpnet.game.api.start.GameScope;
 import work.lclpnet.game.api.start.GameStatusManager;
 import work.lclpnet.game.impl.MinecraftGameConfig;
 import work.lclpnet.game.impl.ModGameFactory;
+import work.lclpnet.game.util.GameStartUtil;
 
 import java.util.List;
 
@@ -85,16 +85,8 @@ public class TestGame implements Game, GameConfigurator {
 
     @Override
     public void configureStatusManager(@NotNull GameStatusManager manager) {
-        Translations translations = manager.getContext().getTranslations();
-
-        // you can set a periodic condition message that gets sent to everyone, if the game cannot start.
-        var notEnoughPlayers = translations.translateText("lobby.game.not_enough_players", getRequiredPlayers())
-                .formatted(ChatFormatting.RED);
-
-        manager.setCannotStartMessage(notEnoughPlayers::translateFor);
-
-        // you can set a title that gets displayed in the boss bar if the game cannot start
-        manager.setCannotStartBossBarValue(translations.translateText("lobby.game.waiting_for_players"));
+        GameStartUtil.configureNotEnoughPlayersMessage(manager, getRequiredPlayers());
+        GameStartUtil.configureWaitingForPlayersBossBar(manager);
     }
 
     private int getRequiredPlayers() {

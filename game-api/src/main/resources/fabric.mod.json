@@ -13,7 +13,11 @@
   },
   "license": "MIT",
   "environment": "server",
-  "entrypoints": {},
+  "entrypoints": {
+    "main": [
+      "work.lclpnet.game.GameApiInit"
+    ]
+  },
   "mixins": [],
   "depends": {
     "fabricloader": ">=${loader_version}",

@@ -17,6 +17,14 @@ import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
+import work.lclpnet.game.GameApiInit;
+import work.lclpnet.game.api.Game;
+import work.lclpnet.game.api.GameFactory;
+import work.lclpnet.game.api.start.GameScope;
+import work.lclpnet.game.impl.prot.MutableProtectionConfig;
+import work.lclpnet.game.impl.prot.ProtectionTypes;
+import work.lclpnet.game.util.ProtectorComponent;
+import work.lclpnet.game.util.ProtectorUtils;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -43,16 +51,9 @@ import work.lclpnet.lobby.event.LobbyListener;
 import work.lclpnet.lobby.event.TicTacToeListener;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.game.api.Game;
-import work.lclpnet.game.api.GameFactory;
-import work.lclpnet.game.api.start.GameScope;
-import work.lclpnet.game.impl.prot.MutableProtectionConfig;
-import work.lclpnet.game.impl.prot.ProtectionTypes;
 import work.lclpnet.lobby.game.start.GameStarter;
 import work.lclpnet.lobby.game.start.LobbyArgs;
 import work.lclpnet.lobby.game.start.LobbyGameConfigurator;
-import work.lclpnet.game.util.ProtectorComponent;
-import work.lclpnet.game.util.ProtectorUtils;
 import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.LobbyPlayerStateManager;
 import work.lclpnet.lobby.util.ResetWorldModifier;
@@ -344,9 +345,11 @@ public class LobbyActivity extends ComponentActivity {
         }
 
         // the game provides a translation loader, load translations union
+        var gameApiTranslationLoader = ModTranslations.assetTranslationLoader(GameApiInit.MOD_ID, getLogger());
         var lobbyTranslationLoader = ModTranslations.assetTranslationLoader(LobbyMod.ID, getLogger());
 
         var loader = new MultiTranslationLoader();
+        loader.addLoader(gameApiTranslationLoader);
         loader.addLoader(lobbyTranslationLoader);
         loader.addLoader(gameTranslationLoader);
 

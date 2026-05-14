@@ -1,12 +1,12 @@
 package work.lclpnet.game.util;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.world.BossEvent;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.BossEvent;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.scheduler.api.RunningTask;
 import work.lclpnet.kibu.scheduler.api.SchedulerAction;
@@ -103,7 +103,7 @@ public class BossBarTimer implements SchedulerAction {
 
     private Pair<String, Object[]> titleTranslation() {
         if (paused) {
-            return Pair.of("lobby.countdown.title.paused", new Object[] {
+            return Pair.of("mg-api.countdown.title.paused", new Object[] {
                     styled(subject, ChatFormatting.AQUA, ChatFormatting.BOLD)
             });
         }
@@ -113,14 +113,14 @@ public class BossBarTimer implements SchedulerAction {
         seconds = seconds % 60;
 
         if (minutes > 0) {
-            return Pair.of("lobby.countdown.title.minutes", new Object[] {
+            return Pair.of("mg-api.countdown.title.minutes", new Object[] {
                     styled(subject, ChatFormatting.AQUA, ChatFormatting.BOLD),
                     minutes,
                     seconds
             });
         }
 
-        return Pair.of("lobby.countdown.title.seconds", new Object[] {
+        return Pair.of("mg-api.countdown.title.seconds", new Object[] {
                 styled(subject, ChatFormatting.AQUA, ChatFormatting.BOLD),
                 seconds
         });

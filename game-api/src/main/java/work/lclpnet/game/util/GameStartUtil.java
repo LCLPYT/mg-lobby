@@ -1,9 +1,9 @@
 package work.lclpnet.game.util;
 
 import net.minecraft.ChatFormatting;
+import work.lclpnet.game.api.start.GameStatusManager;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.text.TranslatedText;
-import work.lclpnet.game.api.start.GameStatusManager;
 
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
@@ -25,12 +25,12 @@ public class GameStartUtil {
 
     public static TranslatedText getNotEnoughPlayersMessage(Translations translations, int requiredPlayers) {
         return translations.translateText(
-                "lobby.game.not_enough_players",
+                "mg-api.game.not_enough_players",
                 styled(requiredPlayers, ChatFormatting.YELLOW)
         ).formatted(ChatFormatting.RED);
     }
 
     public static TranslatedText getWaitingForPlayersMessage(Translations translations) {
-        return translations.translateText("lobby.game.waiting_for_players");
+        return translations.translateText("mg-api.game.waiting_for_players");
     }
 }

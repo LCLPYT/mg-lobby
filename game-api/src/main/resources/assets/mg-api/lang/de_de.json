@@ -1,0 +1,7 @@
+{
+  "mg-api.countdown.title.minutes": "%s %smin %ssek",
+  "mg-api.countdown.title.seconds": "%s %ssek",
+  "mg-api.countdown.title.paused": "%s pausiert",
+  "mg-api.game.waiting_for_players": "Warten auf Spieler",
+  "mg-api.game.not_enough_players": "Es müssen mindestens %s Spieler online sein, damit das Spiel beginnen kann."
+}
