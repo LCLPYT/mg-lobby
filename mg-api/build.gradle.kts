@@ -1,5 +1,4 @@
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.GitHub
 import work.lclpnet.build.task.GithubDeploymentTask
 import work.lclpnet.build.util.GithubUtil
@@ -79,11 +78,9 @@ tasks.register<GithubDeploymentTask>("github") {
 
     dependsOn(artifactTask)
 
-    doFirst {
-        config {
-            token = requireNotNull(env["GITHUB_TOKEN"]) { "Undefined env variable 'GITHUB_TOKEN'" }
-            repository = requireNotNull(env["GITHUB_REPOSITORY"]) { "Undefined env variable 'GITHUB_REPOSITORY'" }
-        }
+    config {
+        token = env["GITHUB_TOKEN"]
+        repository = env["GITHUB_REPOSITORY"]
     }
 
     val targetTag = "mg-api-${project.version}"
