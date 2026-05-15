@@ -1,8 +1,8 @@
 import groovy.xml.XmlSlurper
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.GitHub
 import work.lclpnet.build.task.GithubDeploymentTask
+import work.lclpnet.build.util.GithubUtil
 
 plugins {
     alias(libs.plugins.java)
@@ -204,13 +204,7 @@ tasks.register("github", GithubDeploymentTask) {
 
         if (token == null || repo == null) return false
 
-        try {
-            GitHub.connectUsingOAuth(token).getRepository(repo).getRef("refs/tags/$targetTag")
-            println("Tag $targetTag already exists, skipping...")
-            return false
-        } catch (GHFileNotFoundException ignored) {
-            return true
-        }
+        return !new GithubUtil(GitHub.connectUsingOAuth(token)).tagExists(repo, targetTag)
     }
 }
 

@@ -2,6 +2,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.GitHub
 import work.lclpnet.build.task.GithubDeploymentTask
+import work.lclpnet.build.util.GithubUtil
 
 plugins {
     alias(libs.plugins.java)
@@ -78,9 +79,11 @@ tasks.register<GithubDeploymentTask>("github") {
 
     dependsOn(artifactTask)
 
-    config {
-        token = requireNotNull(env["GITHUB_TOKEN"]) { "Undefined env variable 'GITHUB_TOKEN'" }
-        repository = requireNotNull(env["GITHUB_REPOSITORY"]) { "Undefined env variable 'GITHUB_REPOSITORY'" }
+    doFirst {
+        config {
+            token = requireNotNull(env["GITHUB_TOKEN"]) { "Undefined env variable 'GITHUB_TOKEN'" }
+            repository = requireNotNull(env["GITHUB_REPOSITORY"]) { "Undefined env variable 'GITHUB_REPOSITORY'" }
+        }
     }
 
     val targetTag = "mg-api-${project.version}"
@@ -96,13 +99,7 @@ tasks.register<GithubDeploymentTask>("github") {
         val token = env["GITHUB_TOKEN"] ?: return@onlyIf false
         val repo = env["GITHUB_REPOSITORY"] ?: return@onlyIf false
 
-        try {
-            GitHub.connectUsingOAuth(token).getRepository(repo).getRef("refs/tags/$targetTag")
-            println("Tag $targetTag already exists, skipping...")
-            false
-        } catch (_: GHFileNotFoundException) {
-            true
-        }
+        GithubUtil(GitHub.connectUsingOAuth(token)).tagExists(repo, targetTag)
     }
 }
 
