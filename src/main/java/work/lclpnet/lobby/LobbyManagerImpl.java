@@ -1,14 +1,15 @@
 package work.lclpnet.lobby;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.config.json.ConfigHandler;
+import work.lclpnet.game.util.PlayerReset;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
@@ -17,7 +18,6 @@ import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.config.WorldConfigHandler;
 import work.lclpnet.lobby.game.GameManager;
 import work.lclpnet.lobby.service.PalService;
-import work.lclpnet.lobby.util.PlayerReset;
 
 import java.nio.file.Path;
 import java.util.Set;

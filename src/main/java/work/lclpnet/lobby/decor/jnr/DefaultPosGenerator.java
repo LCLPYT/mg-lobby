@@ -1,16 +1,16 @@
 package work.lclpnet.lobby.decor.jnr;
 
 import it.unimi.dsi.fastutil.ints.IntFloatPair;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.core.Vec3i;
-import net.minecraft.world.level.ClipContext;
 import org.jetbrains.annotations.Nullable;
-import work.lclpnet.lobby.util.RayCaster;
+import work.lclpnet.game.util.RayCaster;
 
 import java.util.*;
 import java.util.function.BiFunction;

@@ -1,11 +1,11 @@
 package work.lclpnet.lobby.decor.maze;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
-import work.lclpnet.lobby.util.WorldModifier;
+import work.lclpnet.game.util.WorldModifier;
 import work.lclpnet.maze.Maze;
 import work.lclpnet.maze.MazeOutput;
 import work.lclpnet.maze.algorithm.DijkstraAlgorithm;

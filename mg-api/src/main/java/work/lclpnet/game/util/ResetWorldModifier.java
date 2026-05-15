@@ -1,11 +1,12 @@
-package work.lclpnet.lobby.util;
+package work.lclpnet.game.util;
 
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.EntityRemovedCallback;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 

@@ -2,8 +2,8 @@ package work.lclpnet.lobby.decor.maze;
 
 import net.minecraft.world.level.BlockGetter;
 import org.slf4j.Logger;
+import work.lclpnet.game.util.WorldModifier;
 import work.lclpnet.lobby.config.ConfigAccess;
-import work.lclpnet.lobby.util.WorldModifier;
 import work.lclpnet.maze.MazeCreator;
 import work.lclpnet.maze.algorithm.MazeGenerationAlgorithm;
 import work.lclpnet.maze.algorithm.RecursiveBacktrackingMazeGenerationAlgorithm;

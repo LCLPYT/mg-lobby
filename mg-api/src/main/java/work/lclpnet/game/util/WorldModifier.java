@@ -1,9 +1,9 @@
-package work.lclpnet.lobby.util;
+package work.lclpnet.game.util;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.core.BlockPos;
 
 public interface WorldModifier {
     
