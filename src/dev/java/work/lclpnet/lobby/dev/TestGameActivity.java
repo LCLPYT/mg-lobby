@@ -1,8 +1,9 @@
 package work.lclpnet.lobby.dev;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
@@ -17,7 +18,7 @@ public class TestGameActivity extends ComponentActivity {
     }
 
     @Override
-    protected void registerComponents(ComponentBundle components) {
+    protected void registerComponents(@NotNull ComponentBundle components) {
         components.add(BuiltinComponents.HOOKS);
     }
 

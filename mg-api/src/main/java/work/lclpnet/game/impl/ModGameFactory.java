@@ -1,5 +1,6 @@
 package work.lclpnet.game.impl;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class ModGameFactory implements GameFactory {
     }
 
     @Override
-    public @NonNull GameInstance createInstance(GameEnvironment environment) {
+    public @NonNull GameInstance createInstance(@NotNull GameEnvironment environment) {
         return instanceFactory.apply(environment);
     }
 }

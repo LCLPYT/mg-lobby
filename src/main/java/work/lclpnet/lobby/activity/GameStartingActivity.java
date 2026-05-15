@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
@@ -57,7 +58,7 @@ public class GameStartingActivity extends ComponentActivity {
     }
 
     @Override
-    protected void registerComponents(ComponentBundle components) {
+    protected void registerComponents(@NotNull ComponentBundle components) {
         components
                 .add(BuiltinComponents.BOSS_BAR)
                 .add(BuiltinComponents.SCHEDULER)

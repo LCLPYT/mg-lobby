@@ -27,5 +27,5 @@ public interface GameFactory {
      * @param environment The {@link GameEnvironment}, provided by the game runtime.
      * @return The {@link GameInstance} that the game will take place in.
      */
-    @NotNull GameInstance createInstance(GameEnvironment environment);
+    @NotNull GameInstance createInstance(@NotNull GameEnvironment environment);
 }

@@ -1,13 +1,14 @@
 package work.lclpnet.activity.component;
 
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 public interface ComponentContext {
 
-    Logger getLogger();
+    @NotNull Logger getLogger();
 
-    MinecraftServer getServer();
+    @NotNull MinecraftServer getServer();
 
-    ComponentView getComponents();
+    @NotNull ComponentView getComponents();
 }

@@ -1,13 +1,14 @@
 package work.lclpnet.game.api;
 
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.NotNull;
 import work.lclpnet.kibu.translate.Translations;
 
 public interface GameContext {
 
-    MinecraftServer getServer();
+    @NotNull MinecraftServer getServer();
 
-    GameConfig getGameConfig();
+    @NotNull GameConfig getGameConfig();
 
-    Translations getTranslations();
+    @NotNull Translations getTranslations();
 }

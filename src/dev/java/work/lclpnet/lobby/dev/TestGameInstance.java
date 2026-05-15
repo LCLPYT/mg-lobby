@@ -1,12 +1,13 @@
 package work.lclpnet.lobby.dev;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import work.lclpnet.kibu.scheduler.Ticks;
 import work.lclpnet.game.api.GameEnvironment;
 import work.lclpnet.game.api.GameInstance;
 import work.lclpnet.game.api.option.GameOptions;
 import work.lclpnet.game.api.option.VoteResult;
+import work.lclpnet.kibu.scheduler.Ticks;
 
 import java.util.Comparator;
 import java.util.Map.Entry;
@@ -21,7 +22,7 @@ public class TestGameInstance implements GameInstance {
     }
 
     @Override
-    public void start(GameOptions options) {
+    public void start(@NotNull GameOptions options) {
         System.out.println("The test game was started! (will end in 10 seconds)");
 
         VoteResult<String> mapVotingResult = options.getVotingResults("map", String.class).orElseThrow();

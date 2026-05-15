@@ -1,9 +1,10 @@
 package work.lclpnet.lobby.util;
 
 import net.minecraft.server.MinecraftServer;
-import work.lclpnet.kibu.translate.Translations;
+import org.jspecify.annotations.NonNull;
 import work.lclpnet.game.api.GameConfig;
 import work.lclpnet.game.api.GameContext;
+import work.lclpnet.kibu.translate.Translations;
 
 public class LobbyGameContext implements GameContext {
 
@@ -18,17 +19,17 @@ public class LobbyGameContext implements GameContext {
     }
 
     @Override
-    public MinecraftServer getServer() {
+    public @NonNull MinecraftServer getServer() {
         return server;
     }
 
     @Override
-    public GameConfig getGameConfig() {
+    public @NonNull GameConfig getGameConfig() {
         return gameConfig;
     }
 
     @Override
-    public Translations getTranslations() {
+    public @NonNull Translations getTranslations() {
         return translations;
     }
 }

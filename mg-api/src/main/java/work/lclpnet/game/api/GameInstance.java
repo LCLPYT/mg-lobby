@@ -1,5 +1,6 @@
 package work.lclpnet.game.api;
 
+import org.jetbrains.annotations.NotNull;
 import work.lclpnet.game.api.option.GameOptions;
 
 /**
@@ -11,5 +12,5 @@ import work.lclpnet.game.api.option.GameOptions;
  */
 public interface GameInstance {
 
-    void start(GameOptions options);
+    void start(@NotNull GameOptions options);
 }

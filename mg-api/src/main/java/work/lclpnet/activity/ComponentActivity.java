@@ -1,6 +1,8 @@
 package work.lclpnet.activity;
 
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import work.lclpnet.activity.component.*;
 import work.lclpnet.activity.util.DAG;
@@ -11,12 +13,14 @@ import java.util.Map;
 
 public abstract class ComponentActivity implements Activity, ComponentContext {
 
+    @NotNull
     private final MinecraftServer server;
+    @NotNull
     private final Logger logger;
     private final ComponentView components;
     private final DAG<ComponentKey<?>> dependencyTree;
 
-    public ComponentActivity(MinecraftServer server, Logger logger) {
+    public ComponentActivity(@NonNull MinecraftServer server, @NonNull Logger logger) {
         this.server = server;
         this.logger = logger;
 
@@ -66,24 +70,24 @@ public abstract class ComponentActivity implements Activity, ComponentContext {
         componentMap.put(key, component);
     }
 
-    protected abstract void registerComponents(ComponentBundle components);
+    protected abstract void registerComponents(@NotNull ComponentBundle components);
 
     public final <T extends Component> T component(ComponentKey<T> key) {
         return components.get(key);
     }
 
     @Override
-    public final ComponentView getComponents() {
+    public final @NonNull ComponentView getComponents() {
         return components;
     }
 
     @Override
-    public final MinecraftServer getServer() {
+    public final @NonNull MinecraftServer getServer() {
         return server;
     }
 
     @Override
-    public final Logger getLogger() {
+    public final @NonNull Logger getLogger() {
         return logger;
     }
 

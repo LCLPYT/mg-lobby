@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.gamerules.GameRules;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.activity.ComponentActivity;
@@ -98,7 +99,7 @@ public class LobbyActivity extends ComponentActivity {
     }
 
     @Override
-    protected void registerComponents(ComponentBundle components) {
+    protected void registerComponents(@NotNull ComponentBundle components) {
         components
                 .add(HOOKS)
                 .add(SCHEDULER)

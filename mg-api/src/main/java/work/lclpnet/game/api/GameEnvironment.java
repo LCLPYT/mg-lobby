@@ -1,5 +1,6 @@
 package work.lclpnet.game.api;
 
+import org.jetbrains.annotations.NotNull;
 import work.lclpnet.activity.Activity;
 import work.lclpnet.game.map.MapManager;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
@@ -10,17 +11,17 @@ import java.util.function.Supplier;
 
 public interface GameEnvironment extends GameContext {
 
-    HookStack getHookStack();
+    @NotNull HookStack getHookStack();
 
-    CommandStack getCommandStack();
+    @NotNull CommandStack getCommandStack();
 
-    SchedulerStack getSchedulerStack();
+    @NotNull SchedulerStack getSchedulerStack();
 
-    WorldFacade getWorldFacade(Supplier<MapManager> mapManagerSupplier);
+    @NotNull WorldFacade getWorldFacade(@NotNull Supplier<MapManager> mapManagerSupplier);
 
-    GameFinisher getFinisher();
+    @NotNull GameFinisher getFinisher();
 
-    void whenDone(Runnable action);
+    void whenDone(@NotNull Runnable action);
 
     /**
      * Switches the current root activity.
@@ -28,5 +29,5 @@ public interface GameEnvironment extends GameContext {
      * Switching the activity will destroy the previous activity, e.g. the lobby activity or any other currently active activity.
      * @param activity The activity to make the new root activity.
      */
-    void switchRootActivity(Activity activity);
+    void switchRootActivity(@NotNull Activity activity);
 }

@@ -1,22 +1,23 @@
 package work.lclpnet.lobby.game;
 
 import net.minecraft.server.MinecraftServer;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.manager.ActivityManager;
+import work.lclpnet.game.api.GameConfig;
+import work.lclpnet.game.api.GameEnvironment;
+import work.lclpnet.game.api.GameFinisher;
+import work.lclpnet.game.api.WorldFacade;
+import work.lclpnet.game.impl.WorldContainer;
+import work.lclpnet.game.impl.WorldFacadeImpl;
+import work.lclpnet.game.map.MapManager;
 import work.lclpnet.kibu.cmd.impl.CommandContainer;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.scheduler.util.SchedulerStack;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.LobbyAPI;
-import work.lclpnet.game.api.GameEnvironment;
-import work.lclpnet.game.api.GameFinisher;
-import work.lclpnet.game.api.WorldFacade;
-import work.lclpnet.game.api.GameConfig;
-import work.lclpnet.game.impl.WorldContainer;
-import work.lclpnet.game.impl.WorldFacadeImpl;
-import work.lclpnet.game.map.MapManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +49,12 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public MinecraftServer getServer() {
+    public @NonNull MinecraftServer getServer() {
         return server;
     }
 
     @Override
-    public HookStack getHookStack() {
+    public @NonNull HookStack getHookStack() {
         assertNotDestroyed();
 
         if (hookStack != null) {
@@ -70,7 +71,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public CommandStack getCommandStack() {
+    public @NonNull CommandStack getCommandStack() {
         assertNotDestroyed();
 
         if (commandStack != null) {
@@ -87,7 +88,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public SchedulerStack getSchedulerStack() {
+    public @NonNull SchedulerStack getSchedulerStack() {
         assertNotDestroyed();
 
         if (schedulerStack != null) {
@@ -104,7 +105,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public WorldFacade getWorldFacade(Supplier<MapManager> mapManagerSupplier) {
+    public @NonNull WorldFacade getWorldFacade(@NonNull Supplier<MapManager> mapManagerSupplier) {
         assertNotDestroyed();
 
         if (worldFacade != null) {
@@ -126,17 +127,17 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public GameConfig getGameConfig() {
+    public @NonNull GameConfig getGameConfig() {
         return gameConfig;
     }
 
     @Override
-    public GameFinisher getFinisher() {
+    public @NonNull GameFinisher getFinisher() {
         return this;
     }
 
     @Override
-    public void whenDone(Runnable action) {
+    public void whenDone(@NonNull Runnable action) {
         Objects.requireNonNull(action);
 
         assertNotDestroyed();
@@ -151,7 +152,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public Translations getTranslations() {
+    public @NonNull Translations getTranslations() {
         return translations;
     }
 
@@ -164,7 +165,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public void switchRootActivity(Activity activity) {
+    public void switchRootActivity(@NonNull Activity activity) {
         activityManager.startActivity(activity);
     }
 
