@@ -99,7 +99,7 @@ tasks.register<GithubDeploymentTask>("github") {
         val token = env["GITHUB_TOKEN"] ?: return@onlyIf false
         val repo = env["GITHUB_REPOSITORY"] ?: return@onlyIf false
 
-        GithubUtil(GitHub.connectUsingOAuth(token)).tagExists(repo, targetTag)
+        !GithubUtil(GitHub.connectUsingOAuth(token)).tagExists(repo, targetTag)
     }
 }
 

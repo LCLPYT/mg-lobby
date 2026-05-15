@@ -183,6 +183,7 @@ def props = buildUtils.loadProperties("publish.properties")
 
 tasks.register("github", GithubDeploymentTask) {
     dependsOn tasks.jar
+    dependsOn project(":mg-api").tasks.named("github")
 
     config {
         token = env.get("GITHUB_TOKEN")
