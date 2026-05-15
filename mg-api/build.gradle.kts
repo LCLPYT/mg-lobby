@@ -33,8 +33,13 @@ dependencies {
         include(dep)
     }
 
+    fun includeApi(dep: Any) {
+        api(dep)
+        include(dep)
+    }
+
     includeImpl(libs.tika.core)
-    includeImpl(libs.translations4j)
+    includeApi(libs.translations4j)
     includeImpl(libs.json)
     includeImpl(libs.xz)
     includeImpl(libs.commons.compress)
