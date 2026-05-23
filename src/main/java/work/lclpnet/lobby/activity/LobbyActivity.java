@@ -88,7 +88,7 @@ public class LobbyActivity extends ComponentActivity {
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
     private TicTacToeManager ticTacToeManager;
-    private @Nullable ScopedItemReservationManager gameItemReservationManager = null;
+    private volatile @Nullable ScopedItemReservationManager gameItemReservationManager = null;
     private @Nullable Activity gameSelectedActivity = null;
     private volatile boolean changeInProgress = false;
     private volatile @Nullable Game changingToGame = null;
@@ -341,7 +341,7 @@ public class LobbyActivity extends ComponentActivity {
 
                     factory.createInstance(environment).start();
                 },
-                gs -> createGameStartingActivity(game, gs, translations, waitingManager)
+                gs -> createGameStartingActivity(game, gs, translations, waitingManager, itemManager)
         );
 
         // make sure to activate the game on the server thread
@@ -366,12 +366,11 @@ public class LobbyActivity extends ComponentActivity {
             gameStarter = starter;
 
             Activity oldActivity = gameSelectedActivity;
+            gameSelectedActivity = null;
 
             if (oldActivity != null) {
                 oldActivity.stop();
             }
-
-            gameSelectedActivity = startingActivity;
 
             game.configureStatusManager(starter);
 
@@ -385,15 +384,25 @@ public class LobbyActivity extends ComponentActivity {
             giveItems(player);
         }
 
-        if (startingActivity != null) {
-            startingActivity.start();
+        synchronized (this) {
+            gameSelectedActivity = startingActivity;
+
+            if (startingActivity != null) {
+                startingActivity.start();
+            }
         }
     }
 
-    private @NotNull GameStartingActivity createGameStartingActivity(Game game, GameStarter starter, Translations translations, LobbyGameStartOptions waitingManager) {
+    private @NotNull GameStartingActivity createGameStartingActivity(
+            Game game,
+            GameStarter starter,
+            Translations translations,
+            LobbyGameStartOptions waitingManager,
+            ItemReservationManager itemManager
+    ) {
         GameStartItemManager startItemManager = new GameStartItemManager(
                 lobbyManager.getLobbyLevel(),
-                gameItemReservationManager,
+                itemManager,
                 playerStateManager,
                 translations,
                 starter::finish
@@ -455,8 +464,13 @@ public class LobbyActivity extends ComponentActivity {
 
         childActivity.stop();
 
-        if (gameSelectedActivity != null) {
-            gameSelectedActivity.stop();
+        Activity toStop;
+        synchronized (this) {
+            toStop = gameSelectedActivity;
+        }
+
+        if (toStop != null) {
+            toStop.stop();
         }
 
         GameManager gameManager = lobbyManager.getGameManager();
