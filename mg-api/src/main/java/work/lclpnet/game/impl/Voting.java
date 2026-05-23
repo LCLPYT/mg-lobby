@@ -20,6 +20,7 @@ import work.lclpnet.kibu.translate.Translations;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.max;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.summingInt;
 import static net.minecraft.ChatFormatting.*;
@@ -90,6 +91,8 @@ public class Voting<T> {
 
     private ItemStack getIcon(ServerPlayer player, T option, boolean selected, int votes) {
         ItemStack icon = data.optionIcons().apply(player, option);
+
+        icon.setCount(max(1, votes));
 
         List<Component> lore = icon.getOrDefault(DataComponents.LORE, ItemLore.EMPTY).lines();
         List<Component> newLore = new ArrayList<>();
