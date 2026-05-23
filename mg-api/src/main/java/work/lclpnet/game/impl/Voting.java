@@ -14,6 +14,7 @@ import work.lclpnet.game.api.option.VoteResult;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.prompt.OptionPrompt;
+import work.lclpnet.kibu.inv.type.RestrictedInventory;
 import work.lclpnet.kibu.translate.Translations;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class Voting<T> {
     private final OptionVoting<T> data;
     private final Translations translations;
     private final Map<UUID, T> votes = new HashMap<>();
+    private final Map<UUID, OpenView> openPrompts = new HashMap<>();
     private final boolean showVoteCount;
 
     private boolean open = true;
@@ -66,8 +68,24 @@ public class Voting<T> {
 
         Component title = data.title().apply(player);
 
-        OptionPrompt.open(player, title, data.options(), opt -> getIcon(player, opt, opt.equals(currentVote), current.votes(opt)))
-                .thenAccept(selected -> selected.ifPresent(opt -> vote(player, opt)));
+        var handle = OptionPrompt.openHandle(player, title, data.options(),
+                opt -> getIcon(player, opt, opt.equals(currentVote), current.votes(opt)));
+
+        UUID uuid = player.getUUID();
+
+        synchronized (this) {
+            openPrompts.put(uuid, new OpenView(player, handle.inventory()));
+        }
+
+        handle.future().whenComplete((selected, err) -> {
+            synchronized (this) {
+                openPrompts.remove(uuid);
+            }
+
+            if (selected != null && err == null) {
+                selected.ifPresent(opt -> vote(player, opt));
+            }
+        });
     }
 
     private ItemStack getIcon(ServerPlayer player, T option, boolean selected, int votes) {
@@ -117,13 +135,45 @@ public class Voting<T> {
         Component name = data.optionName().apply(player, option);
 
         player.sendSystemMessage(translations.translateText(player, "mg-api.voting.voted_for", styled(name, YELLOW)).formatted(GREEN));
+
+        refreshOpenPrompts();
     }
 
-    public synchronized void removeVote(ServerPlayer player) {
-        if (!open) return;
+    public void removeVote(ServerPlayer player) {
+        synchronized (this) {
+            if (!open) return;
 
-        votes.remove(player.getUUID());
+            votes.remove(player.getUUID());
+        }
+
+        refreshOpenPrompts();
     }
+
+    private void refreshOpenPrompts() {
+        List<OpenView> views;
+        VoteResult<T> result;
+        Map<UUID, T> votesSnapshot;
+
+        synchronized (this) {
+            if (openPrompts.isEmpty()) return;
+
+            views = List.copyOf(openPrompts.values());
+            result = getCurrentResult();
+            votesSnapshot = Map.copyOf(votes);
+        }
+
+        for (OpenView view : views) {
+            ServerPlayer viewer = view.player();
+            T viewerVote = votesSnapshot.get(viewer.getUUID());
+            int i = 0;
+
+            for (T opt : data.options()) {
+                view.inventory().setItem(i++, getIcon(viewer, opt, opt.equals(viewerVote), result.votes(opt)));
+            }
+        }
+    }
+
+    private record OpenView(ServerPlayer player, RestrictedInventory inventory) {}
 
     public synchronized VoteResult<T> end() {
         open = false;
