@@ -4,12 +4,15 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.gamerules.GameRules;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +37,9 @@ import work.lclpnet.game.util.ResetWorldModifier;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
+import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.prompt.OptionPrompt;
+import work.lclpnet.kibu.inv.type.RestrictedInventory;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
@@ -66,8 +71,7 @@ import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
 import work.lclpnet.translations.loader.TranslationLoader;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -83,6 +87,7 @@ public class LobbyActivity extends ComponentActivity {
     private final ReentrantLock gameLock = new ReentrantLock();
     private final LobbyPlayerStateManager playerStateManager = new LobbyPlayerStateManager();
     private final ScopedItemReservationManager itemReservationManager = new ScopedItemReservationManager();
+    private final Map<UUID, GameSelectorView> openGameSelectors = new HashMap<>();
 
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
@@ -231,19 +236,78 @@ public class LobbyActivity extends ComponentActivity {
     private void openGameSelector(ServerPlayer player) {
         var games = new ArrayList<>(lobbyManager.getGameManager().getGames());
         var title = translations.translateText(player, "lobby.item.select_game");
+        Game currentGame = lobbyManager.getGameManager().getCurrentGame();
 
-        OptionPrompt.open(player, title, games, game -> {
-            var icon = game.getConfig().icon().copy();
+        var handle = OptionPrompt.openHandle(player, title, games,
+                game -> buildGameSelectorIcon(player, game, game.equals(currentGame)));
 
-            icon.set(DataComponents.ITEM_NAME, translations
-                    .translateText(player, game.getConfig().titleKey())
-                    .formatted(ChatFormatting.AQUA));
+        UUID uuid = player.getUUID();
 
-            return icon;
-        }).thenAccept(selected -> selected.ifPresent(
-                game -> getServer().execute(() -> changeGame(game))
-        ));
+        synchronized (openGameSelectors) {
+            openGameSelectors.put(uuid, new GameSelectorView(player, handle.inventory(), games));
+        }
+
+        handle.future().whenComplete((selected, _) -> {
+            synchronized (openGameSelectors) {
+                openGameSelectors.remove(uuid);
+            }
+
+            if (selected != null) {
+                selected.ifPresent(game -> getServer().execute(() -> changeGame(game)));
+            }
+        });
     }
+
+    private ItemStack buildGameSelectorIcon(ServerPlayer player, Game game, boolean selected) {
+        var icon = game.getConfig().icon().copy();
+
+        icon.set(DataComponents.ITEM_NAME, translations
+                .translateText(player, game.getConfig().titleKey())
+                .formatted(ChatFormatting.GREEN));
+
+        if (selected) {
+            icon.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+
+            List<Component> existingLore = icon.getOrDefault(DataComponents.LORE, ItemLore.EMPTY).lines();
+            List<Component> newLore = new ArrayList<>(existingLore);
+
+            if (!existingLore.isEmpty()) {
+                newLore.add(Component.empty());
+            }
+
+            newLore.add(translations.translateText(player, "mg-api.voting.selected").formatted(ChatFormatting.AQUA));
+
+            ItemStackUtil.setLore(icon, newLore);
+
+            icon.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT
+                    .withHidden(DataComponents.ENCHANTMENTS, true));
+        }
+
+        return icon;
+    }
+
+    private void refreshOpenGameSelectors() {
+        Game currentGame = lobbyManager.getGameManager().getCurrentGame();
+
+        List<GameSelectorView> views;
+
+        synchronized (openGameSelectors) {
+            if (openGameSelectors.isEmpty()) return;
+
+            views = List.copyOf(openGameSelectors.values());
+        }
+
+        for (GameSelectorView view : views) {
+            ServerPlayer viewer = view.player();
+            int i = 0;
+
+            for (Game game : view.games()) {
+                view.inventory().setItem(i++, buildGameSelectorIcon(viewer, game, game.equals(currentGame)));
+            }
+        }
+    }
+
+    private record GameSelectorView(ServerPlayer player, RestrictedInventory inventory, List<Game> games) {}
 
     /**
      * Callback method that tries to change the game to the last played.
@@ -308,6 +372,8 @@ public class LobbyActivity extends ComponentActivity {
     @Blocking
     private void changeAtomicAsync(@Nullable Game game) {
         lobbyManager.getGameManager().setCurrentGame(game);
+
+        getServer().execute(this::refreshOpenGameSelectors);
 
         if (game == null) return;
 
