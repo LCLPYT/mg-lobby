@@ -2,6 +2,8 @@ package work.lclpnet.game.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import work.lclpnet.activity.Activity;
+import work.lclpnet.game.api.start.GameStartArgs;
 import work.lclpnet.translations.loader.TranslationLoader;
 
 /**
@@ -28,4 +30,16 @@ public interface GameFactory {
      * @return The {@link GameInstance} that the game will take place in.
      */
     @NotNull GameInstance createInstance(@NotNull GameEnvironment environment);
+
+    /**
+     * Creates an activity that is active while the lobby has this game selected.
+     * The game may also not yet be starting, as start conditions may be not met yet.
+     * This may be used to add a voting, a team selector etc.
+     * The state resulting of such activities should be passed to {@link #createInstance(GameEnvironment)} in order for it to be used in the actual game instance.
+     * @param args The game start arguments.
+     * @return The activity that should be active while the lobby has this game selected, or null to skip it.
+     */
+    default @Nullable Activity createGameSelectedActivity(@NotNull GameStartArgs args) {
+        return null;
+    }
 }

@@ -1,20 +1,20 @@
-package work.lclpnet.lobby.util;
+package work.lclpnet.game.impl;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.TooltipDisplay;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import work.lclpnet.game.api.option.OptionVoting;
+import work.lclpnet.game.api.option.VoteResult;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.prompt.OptionPrompt;
 import work.lclpnet.kibu.translate.Translations;
-import work.lclpnet.game.api.option.OptionVoting;
-import work.lclpnet.game.api.option.VoteResult;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,13 +77,13 @@ public class Voting<T> {
         List<Component> newLore = new ArrayList<>();
 
         if (showVoteCount) {
-            newLore.add(translations.translateText(player, "lobby.voting.votes", styled(votes, YELLOW)).formatted(GREEN));
+            newLore.add(translations.translateText(player, "mg-api.voting.votes", styled(votes, YELLOW)).formatted(GREEN));
         }
 
         if (selected) {
             icon.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 
-            newLore.add(translations.translateText(player, "lobby.voting.selected").formatted(AQUA));
+            newLore.add(translations.translateText(player, "mg-api.voting.selected").formatted(AQUA));
         }
 
         if (!newLore.isEmpty()) {
@@ -116,7 +116,7 @@ public class Voting<T> {
 
         Component name = data.optionName().apply(player, option);
 
-        player.sendSystemMessage(translations.translateText(player, "lobby.voting.voted_for", styled(name, YELLOW)).formatted(GREEN));
+        player.sendSystemMessage(translations.translateText(player, "mg-api.voting.voted_for", styled(name, YELLOW)).formatted(GREEN));
     }
 
     public synchronized void removeVote(ServerPlayer player) {
@@ -144,5 +144,13 @@ public class Voting<T> {
 
     public synchronized Set<UUID> getVoters() {
         return Set.copyOf(votes.keySet());
+    }
+
+    public boolean hasVoted(ServerPlayer player) {
+        return hasVoted(player.getUUID());
+    }
+
+    public synchronized boolean hasVoted(UUID uuid) {
+        return votes.containsKey(uuid);
     }
 }

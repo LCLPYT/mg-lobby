@@ -17,8 +17,8 @@ import java.util.function.Function;
  */
 public class ModGameFactory implements GameFactory {
 
-    private final String modId;
-    private final Logger logger;
+    protected final String modId;
+    protected final Logger logger;
     private final Function<GameEnvironment, GameInstance> instanceFactory;
 
     public ModGameFactory(String modId, Logger logger, Function<GameEnvironment, GameInstance> instanceFactory) {

@@ -14,14 +14,18 @@ import net.minecraft.world.level.gamerules.GameRules;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
+import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.ComponentActivity;
 import work.lclpnet.activity.component.ComponentBundle;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.game.GameApiInit;
 import work.lclpnet.game.api.Game;
 import work.lclpnet.game.api.GameFactory;
-import work.lclpnet.game.api.start.GameScope;
+import work.lclpnet.game.api.start.GameStartArgs;
+import work.lclpnet.game.api.start.GameStartScope;
+import work.lclpnet.game.api.start.ItemReservationManager;
 import work.lclpnet.game.impl.prot.MutableProtectionConfig;
 import work.lclpnet.game.impl.prot.ProtectionTypes;
 import work.lclpnet.game.util.ProtectorComponent;
@@ -53,10 +57,10 @@ import work.lclpnet.lobby.event.LobbyListener;
 import work.lclpnet.lobby.event.TicTacToeListener;
 import work.lclpnet.lobby.game.FinishableGameEnvironment;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.lobby.game.start.GameStarter;
-import work.lclpnet.lobby.game.start.LobbyArgs;
-import work.lclpnet.lobby.game.start.LobbyGameConfigurator;
+import work.lclpnet.lobby.game.LobbyGameStartOptions;
+import work.lclpnet.lobby.game.start.*;
 import work.lclpnet.lobby.service.SyncActivityManager;
+import work.lclpnet.lobby.util.LobbyGameContext;
 import work.lclpnet.lobby.util.LobbyPlayerStateManager;
 import work.lclpnet.translations.DefaultLanguageTranslator;
 import work.lclpnet.translations.loader.MultiTranslationLoader;
@@ -74,27 +78,34 @@ public class LobbyActivity extends ComponentActivity {
     private final LobbyManager lobbyManager;
     private final ActivityManager rootActivityManager;
     private final ActivityManager childActivity;
-    private final GameStartingActivity.Builder startingBuilder;
     private final LobbyGameConfigurator configurator = new LobbyGameConfigurator();
     private final Translations translations;
     private final ReentrantLock gameLock = new ReentrantLock();
     private final LobbyPlayerStateManager playerStateManager = new LobbyPlayerStateManager();
+    private final ScopedItemReservationManager itemReservationManager = new ScopedItemReservationManager();
 
     private GameStarter gameStarter;
     private ResetWorldModifier worldModifier;
     private KingOfLadder kingOfLadder;
     private TicTacToeManager ticTacToeManager;
+    private @Nullable ScopedItemReservationManager gameItemReservationManager = null;
+    private @Nullable Activity gameSelectedActivity = null;
     private volatile boolean changeInProgress = false;
-    private volatile Game changingToGame = null;
+    private volatile @Nullable Game changingToGame = null;
+    private @Nullable ItemReservationManager.Reservation gameChangerSlot = null;
 
-    public LobbyActivity(MinecraftServer server, Logger logger, LobbyManager lobbyManager,
-                         GameStartingActivity.Builder startingBuilder, Translations translations,
-                         ActivityManager rootActivityManager) {
+    public LobbyActivity(
+            MinecraftServer server,
+            Logger logger,
+            LobbyManager lobbyManager,
+            Translations translations,
+            ActivityManager rootActivityManager
+    ) {
         super(server, logger);
+
         this.lobbyManager = lobbyManager;
         this.rootActivityManager = rootActivityManager;
         this.childActivity = new SyncActivityManager();
-        this.startingBuilder = startingBuilder;
         this.translations = translations;
     }
 
@@ -186,7 +197,10 @@ public class LobbyActivity extends ComponentActivity {
     }
 
     private void initPlayerItems(HookRegistrar hooks, ServerLevel level) {
+        gameChangerSlot = itemReservationManager.reserve(8);
+
         hooks.registerHook(PlayerConnectionHooks.JOIN, this::giveItems);
+
         PlayerLookup.level(level).forEach(this::giveItems);
     }
 
@@ -194,8 +208,12 @@ public class LobbyActivity extends ComponentActivity {
         Inventory inventory = player.getInventory();
         var state = playerStateManager.getOrCreate(player);
 
-        if (Commands.LEVEL_GAMEMASTERS.check(player.level().getServer().getProfilePermissions(player.nameAndId()))) {
-            int gameSlot = state.getFreeSlot(8);
+        if (!Commands.LEVEL_GAMEMASTERS.check(player.level().getServer().getProfilePermissions(player.nameAndId()))) {
+            return;
+        }
+
+        if (gameChangerSlot != null) {
+            int gameSlot = gameChangerSlot.slot();
             inventory.setItem(gameSlot, getGameSelectorStack(player));
             state.setInteractable(gameSlot, this::openGameSelector);
         }
@@ -293,11 +311,41 @@ public class LobbyActivity extends ComponentActivity {
 
         if (game == null) return;
 
+        var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations, rootActivityManager);
+        var args = new LobbyArgs(childActivity, configurator);
+        var scope = new StartScope(getServer());
+
+        LobbyGameStartOptions waitingManager = createWaitingManager(game);
+
+        ScopedItemReservationManager oldGameItemReservationManager = gameItemReservationManager;
+
+        if (oldGameItemReservationManager != null) {
+            oldGameItemReservationManager.free();
+        }
+
+        // the game start args will receive a subscope of the item reservations that is automatically freed when destroyed
+        ScopedItemReservationManager itemManager = itemReservationManager.createSubScope();
+        gameItemReservationManager = itemManager;
+
+        GameStartArgs startArgs = new GameStartArgs(waitingManager, itemManager);
         GameFactory factory = game.createFactory();
+
         Translations translations = createGameTranslations(factory).join();
 
+        var starter = new GameStarter(
+                args,
+                environment,
+                () -> game.canBePlayed(scope),
+                () -> {
+                    new EndCommand(environment.getFinisher()).register(environment.getCommandStack());
+
+                    factory.createInstance(environment).start();
+                },
+                gs -> createGameStartingActivity(game, gs, translations, waitingManager)
+        );
+
         // make sure to activate the game on the server thread
-        getServer().submit(() -> activateGame(game, factory, translations)).join();
+        getServer().submit(() -> activateGameOnServerThread(game, starter, factory, startArgs)).join();
 
         synchronized (this) {
             changingToGame = null;
@@ -305,28 +353,33 @@ public class LobbyActivity extends ComponentActivity {
         }
     }
 
-    private void activateGame(Game game, GameFactory factory, Translations translations) {
-        var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations, rootActivityManager);
-
-        var args = new LobbyArgs(childActivity, configurator, playerStateManager);
-        var scope = new Scope(getServer());
+    private void activateGameOnServerThread(Game game, GameStarter starter, GameFactory factory, GameStartArgs startArgs) {
+        var startingActivity = factory.createGameSelectedActivity(startArgs);
 
         synchronized (this) {
-            if (gameStarter != null) {
-                gameStarter.destroy();
+            GameStarter oldStarter = gameStarter;
+
+            if (oldStarter != null) {
+                oldStarter.destroy();
             }
 
-            gameStarter = new GameStarter(() -> game.canBePlayed(scope), args, options -> {
-                new EndCommand(environment.getFinisher()).register(environment.getCommandStack());
+            gameStarter = starter;
 
-                factory.createInstance(environment).start(options);
-            }, environment);
+            Activity oldActivity = gameSelectedActivity;
 
-            args.injectStartingSupplier(() -> startingBuilder.create(game, gameStarter, translations, args));
+            if (oldActivity != null) {
+                oldActivity.stop();
+            }
 
-            game.configureStatusManager(gameStarter);
+            gameSelectedActivity = startingActivity;
 
-            gameStarter.start();
+            game.configureStatusManager(starter);
+
+            starter.start();
+        }
+
+        if (startingActivity != null) {
+            startingActivity.start();
         }
 
         playerStateManager.reset();
@@ -335,6 +388,32 @@ public class LobbyActivity extends ComponentActivity {
             player.getInventory().clearContent();
             giveItems(player);
         }
+    }
+
+    private @NotNull GameStartingActivity createGameStartingActivity(Game game, GameStarter starter, Translations translations, LobbyGameStartOptions waitingManager) {
+        GameStartItemManager startItemManager = new GameStartItemManager(
+                lobbyManager.getLobbyLevel(),
+                gameItemReservationManager,
+                playerStateManager,
+                translations,
+                starter::finish
+        );
+
+        return new GameStartingActivity(
+                getServer(),
+                getLogger(),
+                game,
+                starter,
+                translations,
+                waitingManager,
+                startItemManager
+        );
+    }
+
+    private @NonNull LobbyGameStartOptions createWaitingManager(Game game) {
+        var context = new LobbyGameContext(getServer(), game.getConfig(), translations);
+
+        return new LobbyGameStartOptions(context);
     }
 
     private CompletableFuture<Translations> createGameTranslations(GameFactory factory) {
@@ -376,6 +455,10 @@ public class LobbyActivity extends ComponentActivity {
 
         childActivity.stop();
 
+        if (gameSelectedActivity != null) {
+            gameSelectedActivity.stop();
+        }
+
         GameManager gameManager = lobbyManager.getGameManager();
         gameManager.removeStateChangeListener(this::onGameRestored);
     }
@@ -390,7 +473,7 @@ public class LobbyActivity extends ComponentActivity {
         ProtectorUtils.allowCreativeOperatorBypass(cfg);
     }
 
-    private record Scope(MinecraftServer server) implements GameScope {
+    private record StartScope(MinecraftServer server) implements GameStartScope {
 
         @Override
         public int playerCount() {

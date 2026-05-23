@@ -1,16 +1,13 @@
 package work.lclpnet.game.api;
 
-import org.jetbrains.annotations.NotNull;
-import work.lclpnet.game.api.option.GameOptions;
-
 /**
  * Represents an instance of a game.
  * A game instance is created when the game-host starts the game, i.e. when the lobby countdown is over.
  * If the game-host is a lobby, the lobby usually has a duration to wait for players to join.
- * In that phase, the game-host is responsible for handling any game configuration, e.g. for map-votings and similar.
- * Those configuration options are then passed to the instance via the GameFactory.
+ * In that phase, the {@link GameFactory} of the game is responsible for handling any pre-game configuration, e.g. map-voting, team selection and similar.
+ * Those configuration options should then be passes to the {@link GameInstance} implementation by the {@link GameFactory}.
  */
 public interface GameInstance {
 
-    void start(@NotNull GameOptions options);
+    void start();
 }

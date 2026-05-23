@@ -2,23 +2,20 @@ package work.lclpnet.lobby.cmd;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
-import work.lclpnet.game.api.option.GameOptions;
 import work.lclpnet.lobby.game.start.GameStarter;
 
 public class StartCommand implements KibuCommand {
 
     private final GameStarter starter;
-    private final GameOptions options;
 
-    public StartCommand(GameStarter starter, GameOptions options) {
+    public StartCommand(GameStarter starter) {
         this.starter = starter;
-        this.options = options;
     }
 
     @Override
@@ -46,7 +43,7 @@ public class StartCommand implements KibuCommand {
         ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)
                 .append(Component.literal("Started the game.").withStyle(ChatFormatting.GRAY)));
 
-        starter.finish(options);
+        starter.finish();
 
         return 0;
     }

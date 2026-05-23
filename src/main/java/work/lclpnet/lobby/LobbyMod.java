@@ -11,12 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.activity.manager.ActivityManager;
 import work.lclpnet.config.json.ConfigHandler;
-import work.lclpnet.lobby.service.SyncActivityManager;
+import work.lclpnet.game.impl.data.PathDataPackSink;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.level.ServerWorldReadyCallback;
 import work.lclpnet.kibu.hook.level.ServerWorldUnreadyCallback;
 import work.lclpnet.kibu.translate.Translations;
-import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.activity.LobbyActivity;
 import work.lclpnet.lobby.api.LobbyManager;
 import work.lclpnet.lobby.config.ExtendedConfigSerializer;
@@ -25,10 +24,10 @@ import work.lclpnet.lobby.event.ConnectionListener;
 import work.lclpnet.lobby.event.RuntimeWorldListener;
 import work.lclpnet.lobby.game.AsyncGameStateIo;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.game.impl.data.PathDataPackSink;
 import work.lclpnet.lobby.io.LobbyWorldDownloader;
 import work.lclpnet.lobby.io.ServerPropertiesAdjuster;
 import work.lclpnet.lobby.service.DataPackService;
+import work.lclpnet.lobby.service.SyncActivityManager;
 import work.lclpnet.lobby.util.LobbyTranslations;
 import work.lclpnet.lobby.util.WholesomeChatManager;
 
@@ -130,10 +129,7 @@ public class LobbyMod implements DedicatedServerModInitializer, LobbyAPI {
 
         MinecraftServer server = serverFuture.resultNow();
 
-        GameStartingActivity.Builder startingBuilder = (game, starter, trans, lobbyArgs) ->
-                new GameStartingActivity(server, logger, manager.getLobbyLevel(), game, starter, trans, lobbyArgs);
-
-        activityManager.startActivity(new LobbyActivity(server, logger, manager, startingBuilder, translations, activityManager));
+        activityManager.startActivity(new LobbyActivity(server, logger, manager, translations, activityManager));
     }
 
     public static LobbyMod getInstance() {

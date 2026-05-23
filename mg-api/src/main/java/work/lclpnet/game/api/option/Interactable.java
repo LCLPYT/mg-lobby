@@ -1,4 +1,4 @@
-package work.lclpnet.lobby.util;
+package work.lclpnet.game.api.option;
 
 import net.minecraft.server.level.ServerPlayer;
 

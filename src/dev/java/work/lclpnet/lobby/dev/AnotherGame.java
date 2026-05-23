@@ -7,7 +7,7 @@ import org.jspecify.annotations.NonNull;
 import work.lclpnet.game.api.Game;
 import work.lclpnet.game.api.GameConfig;
 import work.lclpnet.game.api.GameFactory;
-import work.lclpnet.game.api.start.GameScope;
+import work.lclpnet.game.api.start.GameStartScope;
 import work.lclpnet.game.api.start.GameStatusManager;
 import work.lclpnet.game.impl.MinecraftGameConfig;
 import work.lclpnet.game.impl.ModGameFactory;
@@ -23,7 +23,7 @@ public class AnotherGame implements Game {
     }
 
     @Override
-    public boolean canBePlayed(@NonNull GameScope scope) {
+    public boolean canBePlayed(@NonNull GameStartScope scope) {
         return scope.playerCount() >= 2;
     }
 

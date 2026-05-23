@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import work.lclpnet.game.api.option.Interactable;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.entity.PlayerInteractionHooks;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -58,7 +59,6 @@ public class LobbyPlayerStateManager {
 
     public static class PlayerState {
         private final Int2ObjectMap<Interactable> interactables = new Int2ObjectArrayMap<>();
-        private int firstFreeSlot = 0;
 
         public void setInteractable(int slot, Interactable interactable) {
             interactables.put(slot, interactable);
@@ -74,22 +74,6 @@ public class LobbyPlayerStateManager {
 
             return true;
 
-        }
-
-        public int getFreeSlot(int preferredSlot) {
-            while (interactables.containsKey(preferredSlot)) {
-                preferredSlot++;
-            }
-
-            return preferredSlot;
-        }
-
-        public int getFirstFreeSlot() {
-            int freeSlot = getFreeSlot(firstFreeSlot);
-
-            firstFreeSlot = freeSlot;
-
-            return freeSlot;
         }
     }
 }

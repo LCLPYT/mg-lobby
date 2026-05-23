@@ -2,54 +2,29 @@ package work.lclpnet.lobby.game.start;
 
 import work.lclpnet.activity.Activity;
 import work.lclpnet.activity.manager.ActivityManager;
-import work.lclpnet.lobby.activity.GameStartingActivity;
 import work.lclpnet.lobby.activity.LobbyActivity;
-import work.lclpnet.lobby.util.LobbyPlayerStateManager;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-public class LobbyArgs implements GameStarter.Args {
+public class LobbyArgs {
 
     private final ActivityManager childActivity;
     private final LobbyGameConfigurator configurator;
-    private final LobbyPlayerStateManager playerStateManager;
 
-    private Supplier<GameStartingActivity> startingSupplier = null;
-
-    public LobbyArgs(
-            ActivityManager childActivity,
-            LobbyGameConfigurator configurator,
-            LobbyPlayerStateManager playerStateManager
-    ) {
+    public LobbyArgs(ActivityManager childActivity, LobbyGameConfigurator configurator) {
         this.childActivity = childActivity;
         this.configurator = configurator;
-        this.playerStateManager = playerStateManager;
     }
 
-    @Override
     public void startChildActivity(Activity activity) {
         childActivity.startActivity(activity);
     }
 
-    @Override
     public void stopChildActivity() {
         childActivity.stop();
     }
 
-    public void injectStartingSupplier(Supplier<GameStartingActivity> supplier) {
-        this.startingSupplier = supplier;
-    }
-
-    public GameStartingActivity createGameStartingActivity() {
-        return startingSupplier.get();
-    }
-
     public void configureLobby(Consumer<LobbyActivity> ifActive) {
         configurator.configure(ifActive);
-    }
-
-    public LobbyPlayerStateManager getPlayerStateManager() {
-        return playerStateManager;
     }
 }

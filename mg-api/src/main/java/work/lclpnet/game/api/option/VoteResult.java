@@ -33,4 +33,8 @@ public interface VoteResult<T> {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
     }
+
+    static <T> VoteResult<T> empty() {
+        return Map::of;
+    }
 }

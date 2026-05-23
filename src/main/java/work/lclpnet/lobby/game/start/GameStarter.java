@@ -1,14 +1,17 @@
 package work.lclpnet.lobby.game.start;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import work.lclpnet.activity.Activity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import org.jspecify.annotations.NonNull;
 import work.lclpnet.activity.component.builtin.BuiltinComponents;
+import work.lclpnet.game.api.GameContext;
+import work.lclpnet.game.api.GameEnvironment;
+import work.lclpnet.game.api.start.GameStatusManager;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
@@ -21,10 +24,6 @@ import work.lclpnet.kibu.translate.bossbar.TranslatedBossBar;
 import work.lclpnet.kibu.translate.util.Partial;
 import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.activity.GameStartingActivity;
-import work.lclpnet.game.api.GameContext;
-import work.lclpnet.game.api.GameEnvironment;
-import work.lclpnet.game.api.option.GameOptions;
-import work.lclpnet.game.api.start.GameStatusManager;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,10 +33,11 @@ import java.util.function.Function;
 
 public class GameStarter implements GameStatusManager {
 
-    private final BooleanSupplier condition;
-    private final Args args;
-    private final Consumer<GameOptions> onStart;
+    private final LobbyArgs args;
     private final GameEnvironment environment;
+    private final BooleanSupplier condition;
+    private final Runnable onStart;
+    private final Partial<GameStartingActivity, GameStarter> startingActivityPartial;
     private final AtomicBoolean gameStarting = new AtomicBoolean(false);
     private final AtomicBoolean gameStarted = new AtomicBoolean(false);
     private final int conditionCheckInterval = Ticks.seconds(20);
@@ -45,11 +45,13 @@ public class GameStarter implements GameStatusManager {
     private Function<ServerPlayer, Component> cannotStartMessage = null;
     private TranslatedBossBar bossBar = null;
 
-    public GameStarter(BooleanSupplier condition, Args args, Consumer<GameOptions> onStart, GameEnvironment environment) {
-        this.condition = condition;
+    public GameStarter(LobbyArgs args, GameEnvironment environment, BooleanSupplier condition, Runnable onStart,
+                       Partial<GameStartingActivity, GameStarter> activityPartial) {
         this.args = args;
-        this.onStart = onStart;
         this.environment = environment;
+        this.condition = condition;
+        this.onStart = onStart;
+        this.startingActivityPartial = activityPartial;
     }
 
     public void start() {
@@ -74,7 +76,7 @@ public class GameStarter implements GameStatusManager {
         schedulerStack.interval(action, 1, conditionCheckInterval);
     }
 
-    public void finish(GameOptions options) {
+    public void finish() {
         gameStarting.set(false);
 
         if (gameStarted.get()) return;
@@ -85,7 +87,7 @@ public class GameStarter implements GameStatusManager {
 
         unload();
 
-        onStart.accept(options);
+        onStart.run();
     }
 
     public void unload() {
@@ -141,13 +143,9 @@ public class GameStarter implements GameStatusManager {
     private void initGameStart() {
         if (gameStarting.get()) return;
 
-        if (!(args instanceof LobbyArgs lobbyArgs)) {
-            throw new RuntimeException("Expected argument type of " + LobbyArgs.class.getName());
-        }
-
         hideBossBar();
 
-        GameStartingActivity activity = lobbyArgs.createGameStartingActivity();
+        GameStartingActivity activity = startingActivityPartial.with(this);
 
         args.startChildActivity(activity);
 
@@ -192,11 +190,7 @@ public class GameStarter implements GameStatusManager {
         hideBossBar();
         bossBar = null;
 
-        if (!(args instanceof LobbyArgs lobbyArgs)) {
-            throw new RuntimeException("Expected argument type of " + LobbyArgs.class.getName());
-        }
-
-        lobbyArgs.configureLobby(lobbyActivity -> {
+        args.configureLobby(lobbyActivity -> {
             var bossBars = lobbyActivity.component(BuiltinComponents.BOSS_BAR);
 
             bossBar = bossBarPartial.with(bossBars);
@@ -208,7 +202,7 @@ public class GameStarter implements GameStatusManager {
     }
 
     @Override
-    public GameContext getContext() {
+    public @NonNull GameContext getContext() {
         return environment;
     }
 
@@ -228,12 +222,5 @@ public class GameStarter implements GameStatusManager {
                                 .styled(style -> style.withItalic(false)),
                         value),
                 bar -> bar.formatted(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
-    }
-
-    public interface Args {
-
-        void startChildActivity(Activity activity);
-
-        void stopChildActivity();
     }
 }

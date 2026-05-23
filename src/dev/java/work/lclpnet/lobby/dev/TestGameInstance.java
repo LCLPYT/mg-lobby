@@ -1,11 +1,9 @@
 package work.lclpnet.lobby.dev;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.game.api.GameEnvironment;
 import work.lclpnet.game.api.GameInstance;
-import work.lclpnet.game.api.option.GameOptions;
 import work.lclpnet.game.api.option.VoteResult;
 import work.lclpnet.kibu.scheduler.Ticks;
 
@@ -16,16 +14,17 @@ public class TestGameInstance implements GameInstance {
 
     private static final Logger logger = LoggerFactory.getLogger(TestGameInstance.class);
     private final GameEnvironment environment;
+    private final VoteResult<String> mapVotingResult;
 
-    public TestGameInstance(GameEnvironment environment) {
+    public TestGameInstance(GameEnvironment environment, VoteResult<String> mapVotingResult) {
         this.environment = environment;
+        this.mapVotingResult = mapVotingResult;
     }
 
     @Override
-    public void start(@NotNull GameOptions options) {
+    public void start() {
         System.out.println("The test game was started! (will end in 10 seconds)");
 
-        VoteResult<String> mapVotingResult = options.getVotingResults("map", String.class).orElseThrow();
         System.out.println("Most voted map: " + mapVotingResult.getMostVoted());
 
         System.out.println("All map votes:");

@@ -3,5 +3,8 @@
   "mg-api.countdown.title.seconds": "%s %ssec",
   "mg-api.countdown.title.paused": "%s paused",
   "mg-api.game.waiting_for_players": "Waiting for players",
-  "mg-api.game.not_enough_players": "There must be at least %s players online to start the game."
+  "mg-api.game.not_enough_players": "There must be at least %s players online to start the game.",
+  "mg-api.voting.selected": "Selected",
+  "mg-api.voting.voted_for": "You voted for %s",
+  "mg-api.voting.votes": "Votes: %s"
 }

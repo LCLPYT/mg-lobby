@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -28,33 +27,38 @@ import work.lclpnet.lobby.LobbyMod;
 import work.lclpnet.lobby.cmd.PauseCommand;
 import work.lclpnet.lobby.cmd.ResumeCommand;
 import work.lclpnet.lobby.cmd.StartCommand;
-import work.lclpnet.lobby.game.LobbyWaitingManager;
+import work.lclpnet.lobby.game.LobbyGameStartOptions;
+import work.lclpnet.lobby.game.start.GameStartItemManager;
 import work.lclpnet.lobby.game.start.GameStarter;
-import work.lclpnet.lobby.game.start.LobbyArgs;
-import work.lclpnet.lobby.util.LobbyGameContext;
 
 public class GameStartingActivity extends ComponentActivity {
 
-    private final Game game;
     private final GameConfig config;
     private final GameStarter starter;
     private final Translations translations;
-    private final LobbyWaitingManager waitingManager;
+    private final LobbyGameStartOptions startOptions;
+    private final GameStartItemManager startItemManager;
     private TranslatedBossBar bossBar;
     private int timer;
     private int colorIndex;
     private boolean wasPaused = false;
 
-    public GameStartingActivity(MinecraftServer server, Logger logger, ServerLevel world, Game game,
-                                GameStarter starter, Translations translations, LobbyArgs lobbyArgs) {
+    public GameStartingActivity(
+            MinecraftServer server,
+            Logger logger,
+            Game game,
+            GameStarter starter,
+            Translations translations,
+            LobbyGameStartOptions startOptions,
+            GameStartItemManager startItemManager
+    ) {
         super(server, logger);
-        this.game = game;
+
         this.config = game.getConfig();
         this.starter = starter;
         this.translations = translations;
-
-        var context = new LobbyGameContext(server, game.getConfig(), translations);
-        this.waitingManager = new LobbyWaitingManager(world, context, starter, lobbyArgs.getPlayerStateManager());
+        this.startOptions = startOptions;
+        this.startItemManager = startItemManager;
     }
 
     @Override
@@ -72,7 +76,7 @@ public class GameStartingActivity extends ComponentActivity {
 
         CommandRegistrar commands = component(BuiltinComponents.COMMANDS).commands();
 
-        new StartCommand(starter, waitingManager).register(commands);
+        new StartCommand(starter).register(commands);
         new PauseCommand(starter).register(commands);
         new ResumeCommand(starter).register(commands);
 
@@ -93,18 +97,12 @@ public class GameStartingActivity extends ComponentActivity {
 
         bossBars.showOnJoin(bossBar);
 
-        initWaitingManager();
+        startItemManager.initGameStartItem(component(BuiltinComponents.HOOKS).hooks());
 
         final Scheduler scheduler = component(BuiltinComponents.SCHEDULER).scheduler();
 
         scheduler.interval(this::tick, 1)
                 .whenComplete(() -> bossBar.setVisible(false));
-    }
-
-    private void initWaitingManager() {
-        game.configureOptions(waitingManager);
-
-        waitingManager.init(component(BuiltinComponents.HOOKS).hooks());
     }
 
     private Pair<String, Object[]> titleTranslation() {
@@ -158,11 +156,11 @@ public class GameStartingActivity extends ComponentActivity {
         }
 
         wasPaused = false;
-        waitingManager.runTimedActions(timer);
+        startOptions.runTimedActions(timer);
 
         if (timer-- == 0) {
             task.cancel();
-            starter.finish(waitingManager);
+            starter.finish();
             return;
         }
 
@@ -186,9 +184,5 @@ public class GameStartingActivity extends ComponentActivity {
         for (ServerPlayer player : PlayerLookup.all(getServer())) {
             player.getInventory().clearContent();
         }
-    }
-
-    public interface Builder {
-        GameStartingActivity create(Game game, GameStarter starter, Translations translations, LobbyArgs lobbyArgs);
     }
 }
