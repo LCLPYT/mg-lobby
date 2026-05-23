@@ -20,11 +20,14 @@ public record VotingHandler<T>(Voting<T> voting) {
 
             ItemStack stack = player.getItemInHand(hand);
 
-            CustomNbt.get(stack, MAP_CODEC)
+            if (CustomNbt.get(stack, MAP_CODEC)
                     .filter(voting.getId()::equals)
-                    .ifPresent(_ -> voting.open(sp));
+                    .isPresent()) {
+                voting.open(sp);
+                return InteractionResult.SUCCESS_SERVER;
+            }
 
-            return InteractionResult.SUCCESS_SERVER;
+            return InteractionResult.PASS;
         });
 
         PlayerConnectionHooks.QUIT.registerWith(hooks, voting::removeVote);
