@@ -381,8 +381,6 @@ public class LobbyActivity extends ComponentActivity {
         var args = new LobbyArgs(childActivity, configurator);
         var scope = new StartScope(getServer());
 
-        LobbyGameStartOptions waitingManager = createWaitingManager(game);
-
         ScopedItemReservationManager oldGameItemReservationManager = gameItemReservationManager;
 
         if (oldGameItemReservationManager != null) {
@@ -393,10 +391,12 @@ public class LobbyActivity extends ComponentActivity {
         ScopedItemReservationManager itemManager = itemReservationManager.createSubScope();
         gameItemReservationManager = itemManager;
 
-        GameStartArgs startArgs = new GameStartArgs(waitingManager, itemManager);
         GameFactory factory = game.createFactory();
 
         Translations translations = createGameTranslations(factory).join();
+
+        LobbyGameStartOptions waitingManager = createWaitingManager(game, translations);
+        GameStartArgs startArgs = new GameStartArgs(waitingManager, itemManager);
 
         var starter = new GameStarter(
                 args,
@@ -485,7 +485,7 @@ public class LobbyActivity extends ComponentActivity {
         );
     }
 
-    private @NonNull LobbyGameStartOptions createWaitingManager(Game game) {
+    private @NonNull LobbyGameStartOptions createWaitingManager(Game game, Translations translations) {
         var context = new LobbyGameContext(getServer(), game.getConfig(), translations);
 
         return new LobbyGameStartOptions(context);
