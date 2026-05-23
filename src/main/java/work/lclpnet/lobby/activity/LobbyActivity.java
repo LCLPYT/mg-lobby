@@ -377,7 +377,6 @@ public class LobbyActivity extends ComponentActivity {
 
         if (game == null) return;
 
-        var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations, rootActivityManager);
         var args = new LobbyArgs(childActivity, configurator);
         var scope = new StartScope(getServer());
 
@@ -397,6 +396,7 @@ public class LobbyActivity extends ComponentActivity {
 
         LobbyGameStartOptions waitingManager = createWaitingManager(game, translations);
         GameStartArgs startArgs = new GameStartArgs(waitingManager, itemManager);
+        var environment = new FinishableGameEnvironment(getServer(), getLogger(), game.getConfig(), translations, rootActivityManager);
 
         var starter = new GameStarter(
                 args,
