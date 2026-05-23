@@ -378,15 +378,15 @@ public class LobbyActivity extends ComponentActivity {
             starter.start();
         }
 
-        if (startingActivity != null) {
-            startingActivity.start();
-        }
-
         playerStateManager.reset();
 
         for (ServerPlayer player : PlayerLookup.all(getServer())) {
             player.getInventory().clearContent();
             giveItems(player);
+        }
+
+        if (startingActivity != null) {
+            startingActivity.start();
         }
     }
 
