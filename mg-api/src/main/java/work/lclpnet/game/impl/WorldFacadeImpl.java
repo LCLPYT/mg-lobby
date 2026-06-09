@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FileUtils;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import work.lclpnet.game.api.MapOptions;
 import work.lclpnet.game.api.WorldFacade;
@@ -98,10 +99,10 @@ public class WorldFacadeImpl implements WorldFacade {
         if (existingWorld != null) {
             if (options.isCleanMapRequired()) {
                 return worldUnloader.unloadMap(newKey)
-                        .thenCompose(nil -> changeToYetUnloadedMap(map.get(), newKey, options));
+                        .thenCompose(_ -> changeToYetUnloadedMap(map.get(), newKey, options));
             }
 
-            return CompletableFuture.completedFuture(null).thenComposeAsync(nil -> server.submit(
+            return CompletableFuture.completedFuture(null).thenComposeAsync(_ -> server.submit(
                     () -> onLevelLoaded(map.get(), newKey, existingWorld, options)
             ).join());
         }
@@ -113,27 +114,32 @@ public class WorldFacadeImpl implements WorldFacade {
         LevelStorageSource.LevelStorageAccess session = ((MinecraftServerAccessor) server).getStorageSource();
         Path directory = session.getDimensionPath(newKey);
 
-        return CompletableFuture.runAsync(() -> {
-            try {
-                if (Files.exists(directory)) {
-                    FileUtils.forceDelete(directory.toFile());
-                }
+        return CompletableFuture.runAsync(() -> prepareMapFiles(map, directory))
+                .thenComposeAsync(_ -> server.submit(() -> loadMap(map, newKey, options)).join());
+    }
 
-                mapManager.pull(map, directory);
-            } catch (IOException e) {
-                throw new CompletionException(e);
+    private void prepareMapFiles(GameMap map, Path directory) {
+        try {
+            if (Files.exists(directory)) {
+                FileUtils.forceDelete(directory.toFile());
             }
-        }).thenComposeAsync(_ -> server.submit(() -> {
-            var optHandle = KibuLevels.getInstance().getWorldManager(server).openPersistentLevel(newKey.identifier());
 
-            RuntimeLevelHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
+            mapManager.pull(map, directory);
+        } catch (IOException e) {
+            throw new CompletionException(e);
+        }
+    }
 
-            worldContainer.trackHandle(handle);  // automatically unload world, if not done manually
+    private @NonNull CompletableFuture<ServerLevel> loadMap(GameMap map, ResourceKey<Level> newKey, MapOptions options) {
+        var optHandle = KibuLevels.getInstance().getWorldManager(server).openPersistentLevel(newKey.identifier());
 
-            ServerLevel level = handle.asLevel();
+        RuntimeLevelHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
 
-            return onLevelLoaded(map, newKey, level, options);
-        }).join());
+        worldContainer.trackHandle(handle);  // automatically unload world, if not done manually
+
+        ServerLevel level = handle.asLevel();
+
+        return onLevelLoaded(map, newKey, level, options);
     }
 
     private CompletableFuture<ServerLevel> onLevelLoaded(GameMap map, ResourceKey<Level> newKey, ServerLevel level, MapOptions options) {
@@ -142,7 +148,7 @@ public class WorldFacadeImpl implements WorldFacade {
                     logger.error("Failed to bootstrap map. Continuing without bootstrap...", throwable);
                     return null;
                 })
-                .thenCompose(nil -> server.submit(() -> onLevelBootstrapped(map, newKey, level, options)));
+                .thenCompose(_ -> server.submit(() -> onLevelBootstrapped(map, newKey, level, options)));
     }
 
     private ServerLevel onLevelBootstrapped(GameMap map, ResourceKey<Level> newKey, ServerLevel level, MapOptions options) {
@@ -154,8 +160,10 @@ public class WorldFacadeImpl implements WorldFacade {
         this.spawn = MapUtils.getSpawnPosition(map);
         this.yaw = MapUtils.getSpawnYaw(map);
 
-        for (ServerPlayer player : PlayerLookup.all(server)) {
-            player.teleportTo(level, spawn.x(), spawn.y(), spawn.z(), Set.of(), yaw, 0, true);
+        if (options.shouldTeleportPlayers()) {
+            for (ServerPlayer player : PlayerLookup.all(server)) {
+                player.teleportTo(level, spawn.x(), spawn.y(), spawn.z(), Set.of(), yaw, 0, true);
+            }
         }
 
         // cleanup current map if requested
