@@ -74,7 +74,7 @@ public class WorldFacadeImpl implements WorldFacade {
     public CompletableFuture<ServerLevel> changeLevel(
             Identifier id,
             WorldOptions options,
-            PositionRotation spawn,
+            Function<ServerLevel, CompletableFuture<PositionRotation>> spawnGetter,
             Function<ResourceKey<Level>, CompletableFuture<RuntimeLevelHandle>> factory
     ) {
         var key = ResourceKey.create(Registries.DIMENSION, id);
@@ -82,31 +82,33 @@ public class WorldFacadeImpl implements WorldFacade {
         ServerLevel existingLevel = server.getLevel(key);
 
         if (existingLevel == null) {
-            return changeToYetUnloadedLevel(options, spawn, () -> factory.apply(key));
+            return changeToYetUnloadedLevel(options, spawnGetter, () -> factory.apply(key));
         }
 
         if (options.isCleanMapRequired()) {
             return worldUnloader.unloadMap(key)
-                    .thenCompose(_ -> changeToYetUnloadedLevel(options, spawn, () -> factory.apply(key)));
+                    .thenCompose(_ -> changeToYetUnloadedLevel(options, spawnGetter, () -> factory.apply(key)));
         }
 
-        return server.submit(() -> {
+        return spawnGetter.apply(existingLevel).thenCompose(spawn -> server.submit(() -> {
             onLevelReady(existingLevel, options, spawn);
 
             return existingLevel;
-        });
+        }));
     }
 
     private CompletableFuture<ServerLevel> changeToYetUnloadedLevel(
             WorldOptions options,
-            PositionRotation spawn,
+            Function<ServerLevel, CompletableFuture<PositionRotation>> spawnGetter,
             Supplier<CompletableFuture<RuntimeLevelHandle>> handleSupplier
     ) {
-        return handleSupplier.get().thenCompose(handle -> {
-            // automatically unload world, if not done manually
-            worldContainer.trackHandle(handle);
+        return handleSupplier.get().thenComposeAsync(handle -> {
+            PositionRotation spawn = spawnGetter.apply(handle.asLevel()).join();
 
             return server.submit(() -> {
+                // automatically unload world, if not done manually
+                worldContainer.trackHandle(handle);
+
                 onLevelReady(handle.asLevel(), options, spawn);
 
                 return handle.asLevel();

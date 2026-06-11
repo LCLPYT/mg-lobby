@@ -27,7 +27,7 @@ public interface WorldFacade {
     CompletableFuture<ServerLevel> changeLevel(
             Identifier id,
             WorldOptions options,
-            PositionRotation spawn,
+            Function<ServerLevel, CompletableFuture<PositionRotation>> spawn,
             Function<ResourceKey<Level>, CompletableFuture<RuntimeLevelHandle>> factory
     );
 
