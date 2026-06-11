@@ -11,7 +11,6 @@ import work.lclpnet.game.api.GameFinisher;
 import work.lclpnet.game.api.WorldFacade;
 import work.lclpnet.game.impl.WorldContainer;
 import work.lclpnet.game.impl.WorldFacadeImpl;
-import work.lclpnet.game.map.MapManager;
 import work.lclpnet.kibu.cmd.impl.CommandContainer;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
 import work.lclpnet.kibu.hook.HookStack;
@@ -22,7 +21,6 @@ import work.lclpnet.lobby.LobbyAPI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public class FinishableGameEnvironment implements GameEnvironment, GameFinisher {
 
@@ -105,7 +103,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
     }
 
     @Override
-    public @NonNull WorldFacade getWorldFacade(@NonNull Supplier<MapManager> mapManagerSupplier) {
+    public @NonNull WorldFacade getWorldFacade() {
         assertNotDestroyed();
 
         if (worldFacade != null) {
@@ -116,7 +114,7 @@ public class FinishableGameEnvironment implements GameEnvironment, GameFinisher 
             if (worldFacade != null) return worldFacade;
 
             worldContainer = new WorldContainer(server);
-            worldFacade = new WorldFacadeImpl(server, mapManagerSupplier.get(), worldContainer, logger);
+            worldFacade = new WorldFacadeImpl(server, worldContainer);
         }
 
         HookStack hookStack = getHookStack();

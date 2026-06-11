@@ -8,49 +8,31 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.io.FileUtils;
-import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import work.lclpnet.game.api.MapOptions;
 import work.lclpnet.game.api.WorldFacade;
 import work.lclpnet.game.api.WorldOptions;
-import work.lclpnet.game.map.GameMap;
-import work.lclpnet.game.map.MapManager;
-import work.lclpnet.game.map.MapUtils;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerSpawnLocationCallback;
 import work.lclpnet.kibu.hook.util.PositionRotation;
-import work.lclpnet.kibu.world.KibuLevels;
-import work.lclpnet.kibu.world.mixin.MinecraftServerAccessor;
 import xyz.nucleoid.fantasy.RuntimeLevelHandle;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class WorldFacadeImpl implements WorldFacade {
 
     private final MinecraftServer server;
-    private final MapManager mapManager;
     private final WorldContainer worldContainer;
     private final WorldUnloader worldUnloader;
-    private final Logger logger;
     private WorldOptions mapOptions = null;
     private ResourceKey<Level> mapKey = null;
     private PositionRotation spawn = null;
 
-    public WorldFacadeImpl(MinecraftServer server, MapManager mapManager, WorldContainer worldContainer, Logger logger) {
+    public WorldFacadeImpl(MinecraftServer server, WorldContainer worldContainer) {
         this.server = server;
-        this.mapManager = mapManager;
         this.worldContainer = worldContainer;
-        this.logger = logger;
         this.worldUnloader = new WorldUnloader(server, worldContainer);
     }
 
@@ -86,28 +68,6 @@ public class WorldFacadeImpl implements WorldFacade {
         }
 
         player.teleportTo(world, spawn.x(), spawn.y(), spawn.z(), Set.of(), spawn.getYaw(), spawn.getPitch(), true);
-    }
-
-    @Override
-    public CompletableFuture<ServerLevel> changeMap(Identifier identifier, MapOptions options) {
-        var optMap = mapManager.getCollection().getMap(identifier);
-
-        if (optMap.isEmpty()) {
-            return CompletableFuture.failedFuture(new IllegalStateException("Unknown map %s".formatted(identifier)));
-        }
-
-        GameMap map = optMap.get();
-
-        Vec3 pos = MapUtils.getSpawnPosition(map);
-        float yaw = MapUtils.getSpawnYaw(map);
-        PositionRotation spawn = new PositionRotation(pos.x(), pos.y(), pos.z(), yaw, 0f);
-
-        return changeLevel(
-                identifier,
-                options.worldOptions(),
-                spawn,
-                key -> changeToYetUnloadedMap(map, key, options)
-        );
     }
 
     @Override
@@ -152,40 +112,6 @@ public class WorldFacadeImpl implements WorldFacade {
                 return handle.asLevel();
             });
         });
-    }
-
-    private CompletableFuture<RuntimeLevelHandle> changeToYetUnloadedMap(GameMap map, ResourceKey<Level> key, MapOptions options) {
-        LevelStorageSource.LevelStorageAccess session = ((MinecraftServerAccessor) server).getStorageSource();
-        Path directory = session.getDimensionPath(key);
-
-        return CompletableFuture.runAsync(() -> prepareMapFiles(map, directory))
-                .thenComposeAsync(_ -> loadMap(map, key, options));
-    }
-
-    private void prepareMapFiles(GameMap map, Path directory) {
-        try {
-            if (Files.exists(directory)) {
-                FileUtils.forceDelete(directory.toFile());
-            }
-
-            mapManager.pull(map, directory);
-        } catch (IOException e) {
-            throw new CompletionException(e);
-        }
-    }
-
-    private @NonNull CompletableFuture<RuntimeLevelHandle> loadMap(GameMap map, ResourceKey<Level> key, MapOptions options) {
-        return server.submit(() -> KibuLevels.getInstance()
-                .getWorldManager(server)
-                .openPersistentLevel(key.identifier())
-                .orElseThrow(() -> new IllegalStateException("Failed to load map"))
-        ).thenCompose(handle -> options.bootstrapWorld(handle.asLevel(), map)
-                .exceptionally(throwable -> {
-                    logger.error("Failed to bootstrap map. Continuing without bootstrap...", throwable);
-                    return null;
-                })
-                .thenApply(_ -> handle)
-        );
     }
 
     private void onLevelReady(ServerLevel level, WorldOptions options, PositionRotation spawn) {

@@ -14,17 +14,6 @@ import java.util.function.Function;
 public interface WorldFacade {
 
     /**
-     * Changes the current map.
-     * If the new map is not yet loaded, it will be loaded first.
-     * All players will be moved to the new map by default.
-     * Newly joining players will be moved to the new map as well.
-     * @param identifier The map id.
-     * @param options The map options to specify loading behavior.
-     * @return A future of the loaded map level.
-     */
-    CompletableFuture<ServerLevel> changeMap(Identifier identifier, MapOptions options);
-
-    /**
      * Changes the current level.
      * If the new level is not yet loaded, it will be loaded first.
      * All players will be moved to the new level by default.
@@ -48,8 +37,4 @@ public interface WorldFacade {
      * @param player The player to teleport.
      */
     void teleport(ServerPlayer player);
-
-    default CompletableFuture<ServerLevel> changeMap(Identifier identifier) {
-        return changeMap(identifier, MapOptions.createSimple(WorldOptions.TEMPORARY));
-    }
 }
