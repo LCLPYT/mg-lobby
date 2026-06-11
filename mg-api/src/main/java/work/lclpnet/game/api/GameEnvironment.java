@@ -2,12 +2,9 @@ package work.lclpnet.game.api;
 
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.activity.Activity;
-import work.lclpnet.game.map.MapManager;
 import work.lclpnet.kibu.cmd.impl.CommandStack;
 import work.lclpnet.kibu.hook.HookStack;
 import work.lclpnet.kibu.scheduler.util.SchedulerStack;
-
-import java.util.function.Supplier;
 
 public interface GameEnvironment extends GameContext {
 
@@ -17,7 +14,7 @@ public interface GameEnvironment extends GameContext {
 
     @NotNull SchedulerStack getSchedulerStack();
 
-    @NotNull WorldFacade getWorldFacade(@NotNull Supplier<MapManager> mapManagerSupplier);
+    @NotNull WorldFacade getWorldFacade();
 
     @NotNull GameFinisher getFinisher();
 
