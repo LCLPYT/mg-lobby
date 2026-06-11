@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class WorldFacadeImpl implements WorldFacade {
@@ -89,26 +90,24 @@ public class WorldFacadeImpl implements WorldFacade {
 
     @Override
     public CompletableFuture<ServerLevel> changeMap(Identifier identifier, MapOptions options) {
-        var map = mapManager.getCollection().getMap(identifier);
+        var optMap = mapManager.getCollection().getMap(identifier);
 
-        if (map.isEmpty()) {
+        if (optMap.isEmpty()) {
             return CompletableFuture.failedFuture(new IllegalStateException("Unknown map %s".formatted(identifier)));
         }
 
-        var newKey = ResourceKey.create(Registries.DIMENSION, identifier);
+        GameMap map = optMap.get();
 
-        ServerLevel existingWorld = server.getLevel(newKey);
+        Vec3 pos = MapUtils.getSpawnPosition(map);
+        float yaw = MapUtils.getSpawnYaw(map);
+        PositionRotation spawn = new PositionRotation(pos.x(), pos.y(), pos.z(), yaw, 0f);
 
-        if (existingWorld != null) {
-            if (options.worldOptions().isCleanMapRequired()) {
-                return worldUnloader.unloadMap(newKey)
-                        .thenCompose(_ -> changeToYetUnloadedMap(map.get(), newKey, options));
-            }
-
-            return onMapLevelLoaded(map.get(), existingWorld, options);
-        }
-
-        return changeToYetUnloadedMap(map.get(), newKey, options);
+        return changeLevel(
+                identifier,
+                options.worldOptions(),
+                spawn,
+                key -> changeToYetUnloadedMap(map, key, options)
+        );
     }
 
     @Override
@@ -116,19 +115,19 @@ public class WorldFacadeImpl implements WorldFacade {
             Identifier id,
             WorldOptions options,
             PositionRotation spawn,
-            Supplier<RuntimeLevelHandle> handleSupplier
+            Function<ResourceKey<Level>, CompletableFuture<RuntimeLevelHandle>> factory
     ) {
         var key = ResourceKey.create(Registries.DIMENSION, id);
 
         ServerLevel existingLevel = server.getLevel(key);
 
         if (existingLevel == null) {
-            return changeToYetUnloadedLevel(options, spawn, handleSupplier);
+            return changeToYetUnloadedLevel(options, spawn, () -> factory.apply(key));
         }
 
         if (options.isCleanMapRequired()) {
             return worldUnloader.unloadMap(key)
-                    .thenCompose(_ -> changeToYetUnloadedLevel(options, spawn, handleSupplier));
+                    .thenCompose(_ -> changeToYetUnloadedLevel(options, spawn, () -> factory.apply(key)));
         }
 
         return server.submit(() -> {
@@ -141,25 +140,26 @@ public class WorldFacadeImpl implements WorldFacade {
     private CompletableFuture<ServerLevel> changeToYetUnloadedLevel(
             WorldOptions options,
             PositionRotation spawn,
-            Supplier<RuntimeLevelHandle> handleSupplier
+            Supplier<CompletableFuture<RuntimeLevelHandle>> handleSupplier
     ) {
-        RuntimeLevelHandle handle = handleSupplier.get();
+        return handleSupplier.get().thenCompose(handle -> {
+            // automatically unload world, if not done manually
+            worldContainer.trackHandle(handle);
 
-        trackLevelHandle(handle);
+            return server.submit(() -> {
+                onLevelReady(handle.asLevel(), options, spawn);
 
-        return server.submit(() -> {
-            onLevelReady(handle.asLevel(), options, spawn);
-
-            return handle.asLevel();
+                return handle.asLevel();
+            });
         });
     }
 
-    private CompletableFuture<ServerLevel> changeToYetUnloadedMap(GameMap map, ResourceKey<Level> key, MapOptions options) {
+    private CompletableFuture<RuntimeLevelHandle> changeToYetUnloadedMap(GameMap map, ResourceKey<Level> key, MapOptions options) {
         LevelStorageSource.LevelStorageAccess session = ((MinecraftServerAccessor) server).getStorageSource();
         Path directory = session.getDimensionPath(key);
 
         return CompletableFuture.runAsync(() -> prepareMapFiles(map, directory))
-                .thenComposeAsync(_ -> server.submit(() -> loadMap(map, key, options)).join());
+                .thenComposeAsync(_ -> loadMap(map, key, options));
     }
 
     private void prepareMapFiles(GameMap map, Path directory) {
@@ -174,38 +174,18 @@ public class WorldFacadeImpl implements WorldFacade {
         }
     }
 
-    private @NonNull CompletableFuture<ServerLevel> loadMap(GameMap map, ResourceKey<Level> key, MapOptions options) {
-        var optHandle = KibuLevels.getInstance().getWorldManager(server).openPersistentLevel(key.identifier());
-
-        RuntimeLevelHandle handle = optHandle.orElseThrow(() -> new IllegalStateException("Failed to load map"));
-
-        trackLevelHandle(handle);
-
-        return onMapLevelLoaded(map, handle.asLevel(), options);
-    }
-
-    private void trackLevelHandle(RuntimeLevelHandle handle) {
-        // automatically unload world, if not done manually
-        worldContainer.trackHandle(handle);
-    }
-
-    private CompletableFuture<ServerLevel> onMapLevelLoaded(GameMap map, ServerLevel level, MapOptions options) {
-        return options.bootstrapWorld(level, map)
+    private @NonNull CompletableFuture<RuntimeLevelHandle> loadMap(GameMap map, ResourceKey<Level> key, MapOptions options) {
+        return server.submit(() -> KibuLevels.getInstance()
+                .getWorldManager(server)
+                .openPersistentLevel(key.identifier())
+                .orElseThrow(() -> new IllegalStateException("Failed to load map"))
+        ).thenCompose(handle -> options.bootstrapWorld(handle.asLevel(), map)
                 .exceptionally(throwable -> {
                     logger.error("Failed to bootstrap map. Continuing without bootstrap...", throwable);
                     return null;
                 })
-                .thenCompose(_ -> server.submit(() -> onMapLevelBootstrapped(map, level, options)));
-    }
-
-    private ServerLevel onMapLevelBootstrapped(GameMap map, ServerLevel level, MapOptions options) {
-        Vec3 pos = MapUtils.getSpawnPosition(map);
-        float yaw = MapUtils.getSpawnYaw(map);
-        PositionRotation spawn = new PositionRotation(pos.x(), pos.y(), pos.z(), yaw, 0f);
-
-        onLevelReady(level, options.worldOptions(), spawn);
-
-        return level;
+                .thenApply(_ -> handle)
+        );
     }
 
     private void onLevelReady(ServerLevel level, WorldOptions options, PositionRotation spawn) {

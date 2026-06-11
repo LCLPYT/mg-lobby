@@ -1,13 +1,15 @@
 package work.lclpnet.game.api;
 
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import work.lclpnet.kibu.hook.util.PositionRotation;
 import xyz.nucleoid.fantasy.RuntimeLevelHandle;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public interface WorldFacade {
 
@@ -30,10 +32,15 @@ public interface WorldFacade {
      * @param id The level id.
      * @param options The level options to specify loading behavior.
      * @param spawn The new spawn position to set as default spawn.
-     * @param handleSupplier The factory to create the level, if needed.
+     * @param factory The factory to create the level, if needed.
      * @return A future of the loaded level.
      */
-    CompletableFuture<ServerLevel> changeLevel(Identifier id, WorldOptions options, PositionRotation spawn, Supplier<RuntimeLevelHandle> handleSupplier);
+    CompletableFuture<ServerLevel> changeLevel(
+            Identifier id,
+            WorldOptions options,
+            PositionRotation spawn,
+            Function<ResourceKey<Level>, CompletableFuture<RuntimeLevelHandle>> factory
+    );
 
     /**
      * Teleport a player to the current level.
