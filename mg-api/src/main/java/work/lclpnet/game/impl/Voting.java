@@ -121,7 +121,10 @@ public class Voting<T> {
                 .withHidden(DataComponents.ATTRIBUTE_MODIFIERS, true)
                 .withHidden(DataComponents.UNBREAKABLE, true)
                 .withHidden(DataComponents.ENCHANTMENTS, true)
-                .withHidden(DataComponents.DAMAGE, true));
+                .withHidden(DataComponents.DAMAGE, true)
+                .withHidden(DataComponents.POTION_CONTENTS, true)
+                .withHidden(DataComponents.TRIM, true)
+                .withHidden(DataComponents.DYED_COLOR, true));
 
         return icon;
     }
