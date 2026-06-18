@@ -14,7 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.TeamColor;
 import work.lclpnet.game.util.WorldModifier;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
@@ -32,30 +33,19 @@ import work.lclpnet.lobby.config.LobbyWorldConfig;
 import work.lclpnet.lobby.mixin.ShulkerAccessor;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class JumpAndRun {
 
     private static final int DESTROYER_TIMEOUT_TICKS = 700;
     private static final int DESTROYER_DELAY_TICKS = 20;
     private final Random random = new Random();
-    private final Map<Block, DyeColor> palette = Map.ofEntries(
-            Map.entry(Blocks.BLACK_TERRACOTTA, DyeColor.BLACK),
-            Map.entry(Blocks.BLUE_TERRACOTTA, DyeColor.BLUE),
-            Map.entry(Blocks.BROWN_TERRACOTTA, DyeColor.BROWN),
-            Map.entry(Blocks.CYAN_TERRACOTTA, DyeColor.CYAN),
-            Map.entry(Blocks.GRAY_TERRACOTTA, DyeColor.GRAY),
-            Map.entry(Blocks.GREEN_TERRACOTTA, DyeColor.GREEN),
-            Map.entry(Blocks.LIGHT_BLUE_TERRACOTTA, DyeColor.LIGHT_BLUE),
-            Map.entry(Blocks.LIGHT_GRAY_TERRACOTTA, DyeColor.LIGHT_GRAY),
-            Map.entry(Blocks.LIME_TERRACOTTA, DyeColor.LIME),
-            Map.entry(Blocks.MAGENTA_TERRACOTTA, DyeColor.MAGENTA),
-            Map.entry(Blocks.ORANGE_TERRACOTTA, DyeColor.ORANGE),
-            Map.entry(Blocks.PINK_TERRACOTTA, DyeColor.PINK),
-            Map.entry(Blocks.PURPLE_TERRACOTTA, DyeColor.PURPLE),
-            Map.entry(Blocks.RED_TERRACOTTA, DyeColor.RED),
-            Map.entry(Blocks.WHITE_TERRACOTTA, DyeColor.WHITE),
-            Map.entry(Blocks.YELLOW_TERRACOTTA, DyeColor.YELLOW)
-    );
+    private final Map<Block, DyeColor> palette = Arrays.stream(DyeColor.values())
+            .collect(Collectors.toMap(
+                    Blocks.DYED_TERRACOTTA::pick,
+                    Function.identity()
+            ));
     private final Block[] blockPalette = palette.keySet().toArray(Block[]::new);
 
     private final ServerLevel world;
@@ -146,7 +136,7 @@ public class JumpAndRun {
         var players = PlayerLookup.all(world.getServer());
 
         translations.translateText("lobby.jump_n_run.completed", FormatWrapper.styled(player.getScoreboardName(), ChatFormatting.YELLOW, ChatFormatting.BOLD))
-                .formatted(ChatFormatting.GOLD, ChatFormatting.BOLD)
+                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
                 .prefixed(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE))
                 .sendTo(players);
 
@@ -171,7 +161,7 @@ public class JumpAndRun {
             shulkerEntity.discard();
         }
 
-        shulkerEntity = new Shulker(EntityType.SHULKER, world);
+        shulkerEntity = new Shulker(EntityTypes.SHULKER, world);
         shulkerEntity.setPos(Vec3.atLowerCornerOf(pos));
         shulkerEntity.setNoAi(true);
         shulkerEntity.setGlowingTag(true);
@@ -201,13 +191,13 @@ public class JumpAndRun {
         greenTeam = scoreboard.getPlayerTeam("jnr_green");
         if (greenTeam == null) {
             greenTeam = scoreboard.addPlayerTeam("jnr_green");
-            greenTeam.setColor(ChatFormatting.GREEN);
+            greenTeam.setColor(Optional.of(TeamColor.GREEN));
         }
 
         redTeam = scoreboard.getPlayerTeam("jnr_red");
         if (redTeam == null) {
             redTeam = scoreboard.addPlayerTeam("jnr_red");
-            redTeam.setColor(ChatFormatting.RED);
+            redTeam.setColor(Optional.of(TeamColor.RED));
         }
     }
 

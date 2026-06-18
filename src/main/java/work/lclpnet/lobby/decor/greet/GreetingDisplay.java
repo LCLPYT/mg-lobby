@@ -3,7 +3,7 @@ package work.lclpnet.lobby.decor.greet;
 import com.mojang.math.Transformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import work.lclpnet.game.util.WorldModifier;
@@ -25,7 +25,7 @@ public class GreetingDisplay {
     public void show() {
         if (config.greetingConfig == null) return;
 
-        Display.TextDisplay display = new Display.TextDisplay(EntityType.TEXT_DISPLAY, world);
+        Display.TextDisplay display = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, world);
 
         display.setPos(config.greetingConfig.pos());
         DisplayEntityAccess.setText(display, config.greetingConfig.text());

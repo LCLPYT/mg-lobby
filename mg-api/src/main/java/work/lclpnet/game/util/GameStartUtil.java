@@ -37,7 +37,7 @@ public class GameStartUtil {
         return translations.translateText(
                 "mg-api.game.not_enough_players",
                 styled(requiredPlayers, ChatFormatting.YELLOW)
-        ).formatted(ChatFormatting.RED);
+        ).withStyle(ChatFormatting.RED);
     }
 
     public static TranslatedText getWaitingForPlayersMessage(Translations translations) {

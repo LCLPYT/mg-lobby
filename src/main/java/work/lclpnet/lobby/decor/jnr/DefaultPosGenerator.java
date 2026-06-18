@@ -291,8 +291,8 @@ public class DefaultPosGenerator implements PosGenerator {
     }
 
     private boolean shootRay(BlockPos from, BlockPos to, BiFunction<Vec3, Vec3, Boolean> rayShooter) {
-        Vec3 start = from.getCenter();
-        Vec3 end = to.getCenter();
+        Vec3 start = Vec3.atCenterOf(from);
+        Vec3 end = Vec3.atCenterOf(to);
 
         // shoot ray at the block center
         if (rayShooter.apply(start, end)) return true;

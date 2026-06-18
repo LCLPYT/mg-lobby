@@ -3,17 +3,17 @@ package work.lclpnet.lobby.cmd;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
+import work.lclpnet.game.api.Game;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lobby.cmd.arg.GameSuggestionProvider;
 import work.lclpnet.lobby.game.GameManager;
-import work.lclpnet.game.api.Game;
 
 import java.util.function.Consumer;
 
@@ -55,7 +55,7 @@ public class SetGameCommand implements KibuCommand {
             title = Component.literal("None").withStyle(ChatFormatting.YELLOW);
         } else {
             title = translations.translateText("en_us", game.getConfig().titleKey())
-                    .formatted(ChatFormatting.YELLOW);
+                    .withStyle(ChatFormatting.YELLOW);
         }
 
         ctx.getSource().sendSystemMessage(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE)

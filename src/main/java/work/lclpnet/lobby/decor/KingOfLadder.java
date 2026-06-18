@@ -103,14 +103,14 @@ public class KingOfLadder {
 
     private void announceKing() {
         translations.translateText("lobby.king_of_ladder.new_king", styled(kingName, ChatFormatting.YELLOW))
-                .formatted(ChatFormatting.GREEN)
+                .withStyle(ChatFormatting.GREEN)
                 .prefixed(Component.literal("Lobby> ").withStyle(ChatFormatting.BLUE))
                 .sendTo(PlayerLookup.level(world));
     }
 
     private void notifyKing(ServerPlayer player) {
-        var title = translations.translateText(player, "lobby.king_of_ladder.you_title").formatted(ChatFormatting.GREEN, ChatFormatting.BOLD);
-        var subtitle = translations.translateText(player, "lobby.king_of_ladder.you_subtitle").formatted(ChatFormatting.AQUA);
+        var title = translations.translateText(player, "lobby.king_of_ladder.you_title").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD);
+        var subtitle = translations.translateText(player, "lobby.king_of_ladder.you_subtitle").withStyle(ChatFormatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 
@@ -118,8 +118,8 @@ public class KingOfLadder {
     }
 
     private void notifyFormerKing(ServerPlayer player) {
-        var title = translations.translateText(player, "lobby.king_of_ladder.not_you_title").formatted(ChatFormatting.RED);
-        var subtitle = translations.translateText(player, "lobby.king_of_ladder.not_you_subtitle").formatted(ChatFormatting.AQUA);
+        var title = translations.translateText(player, "lobby.king_of_ladder.not_you_title").withStyle(ChatFormatting.RED);
+        var subtitle = translations.translateText(player, "lobby.king_of_ladder.not_you_subtitle").withStyle(ChatFormatting.AQUA);
 
         Title.get(player).title(title, subtitle, 5, 15, 5);
 

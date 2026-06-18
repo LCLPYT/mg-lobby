@@ -98,13 +98,13 @@ public class Voting<T> {
         List<Component> newLore = new ArrayList<>();
 
         if (showVoteCount) {
-            newLore.add(translations.translateText(player, "mg-api.voting.votes", styled(votes, YELLOW)).formatted(GREEN));
+            newLore.add(translations.translateText(player, "mg-api.voting.votes", styled(votes, YELLOW)).withStyle(GREEN));
         }
 
         if (selected) {
             icon.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 
-            newLore.add(translations.translateText(player, "mg-api.voting.selected").formatted(AQUA));
+            newLore.add(translations.translateText(player, "mg-api.voting.selected").withStyle(AQUA));
         }
 
         if (!newLore.isEmpty()) {
@@ -140,7 +140,7 @@ public class Voting<T> {
 
         Component name = data.optionName().apply(player, option);
 
-        player.sendSystemMessage(translations.translateText(player, "mg-api.voting.voted_for", styled(name, YELLOW)).formatted(GREEN));
+        player.sendSystemMessage(translations.translateText(player, "mg-api.voting.voted_for", styled(name, YELLOW)).withStyle(GREEN));
 
         refreshOpenPrompts();
     }

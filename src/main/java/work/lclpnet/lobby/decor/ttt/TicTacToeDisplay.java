@@ -7,7 +7,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +35,7 @@ public class TicTacToeDisplay {
     }
 
     public void displayMarker(TicTacToeTable table, int x, int y, BlockState state) {
-        var display = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, world);
+        var display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, world);
         DisplayEntityAccess.setBlockState(display, state);
 
         var transformation = new Transformation(null, null, new Vector3f(0.125f), null);
@@ -63,10 +64,10 @@ public class TicTacToeDisplay {
         boolean spawn = false;
 
         if (indicator == null) {
-            indicator = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, world);
+            indicator = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, world);
             spawn = true;
 
-            DisplayEntityAccess.setBlockState(indicator, Blocks.MAGENTA_GLAZED_TERRACOTTA.defaultBlockState());
+            DisplayEntityAccess.setBlockState(indicator, Blocks.GLAZED_TERRACOTTA.pick(DyeColor.MAGENTA).defaultBlockState());
             DisplayEntityAccess.setInterpolationDuration(indicator, 4);
 
             turnIndicators.put(table, indicator);

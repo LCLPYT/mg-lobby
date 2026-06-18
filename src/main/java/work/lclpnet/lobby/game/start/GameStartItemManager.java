@@ -77,7 +77,7 @@ public class GameStartItemManager {
         var stack = new ItemStack(Items.EMERALD_BLOCK);
 
         stack.set(DataComponents.ITEM_NAME, translations.translateText(player, "lobby.item.start_game")
-                .formatted(ChatFormatting.GREEN));
+                .withStyle(ChatFormatting.GREEN));
 
         return stack;
     }

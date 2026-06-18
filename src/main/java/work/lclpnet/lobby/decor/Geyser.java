@@ -1,24 +1,21 @@
 package work.lclpnet.lobby.decor;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import work.lclpnet.kibu.access.VelocityModifier;
 
 import java.util.Collection;
 import java.util.Random;
-
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 public class Geyser {
 
@@ -48,7 +45,7 @@ public class Geyser {
         if (timeout != 0) {
             // on timeout
             if (timeout <= 80) {
-                Vec3 pos = position.getCenter();
+                Vec3 pos = Vec3.atCenterOf(position);
                 double x = pos.x();
                 double y = pos.y();
                 double z = pos.z();
@@ -90,7 +87,7 @@ public class Geyser {
         particleDelay = 6;
         float eruptionStrength = 0.4f + random.nextFloat() * 0.6f;  // 0.4-1.0 strength
 
-        Vec3 pos = position.getCenter();
+        Vec3 pos = Vec3.atCenterOf(position);
         box = new AABB(
                 pos.x - 2, pos.y, pos.z - 2,
                 pos.x + 2, pos.y + eruptionStrength * 35, pos.z + 2
@@ -105,7 +102,7 @@ public class Geyser {
     }
 
     private void erupting() {
-        Vec3 pos = position.getCenter();
+        Vec3 pos = Vec3.atCenterOf(position);
         double x = pos.x();
         double y = pos.y();
         double z = pos.z();
@@ -130,7 +127,7 @@ public class Geyser {
             Vec3 velocity = entity.getDeltaMovement();
 
             double vy = velocity.y();
-            vy += min(VELOCITY_Y_ACCELERATION, max(0, VELOCITY_Y_LIMIT - vy));
+            vy += Math.clamp(VELOCITY_Y_LIMIT - vy, 0, VELOCITY_Y_ACCELERATION);
 
             // stuck at top end
             if (vy < VELOCITY_Y_ACCELERATION) {

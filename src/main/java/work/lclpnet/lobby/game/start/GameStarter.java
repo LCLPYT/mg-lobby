@@ -218,8 +218,8 @@ public class GameStarter implements GameStatusManager {
 
         configureConditionBossBar(translations.translateBossBar(barId, "lobby.game.waiting_boss_bar",
                         translations.translateText(environment.getGameConfig().titleKey())
-                                .formatted(ChatFormatting.AQUA, ChatFormatting.BOLD)
-                                .styled(style -> style.withItalic(false)),
+                                .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD)
+                                .withStyle(style -> style.withItalic(false)),
                         value),
                 bar -> bar.formatted(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
     }

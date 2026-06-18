@@ -228,7 +228,7 @@ public class LobbyActivity extends ComponentActivity {
         var stack = new ItemStack(Items.COMPASS);
 
         stack.set(DataComponents.ITEM_NAME, translations.translateText(player, "lobby.item.select_game")
-                .formatted(ChatFormatting.GOLD));
+                .withStyle(ChatFormatting.GOLD));
 
         return stack;
     }
@@ -263,7 +263,7 @@ public class LobbyActivity extends ComponentActivity {
 
         icon.set(DataComponents.ITEM_NAME, translations
                 .translateText(player, game.getConfig().titleKey())
-                .formatted(ChatFormatting.GREEN));
+                .withStyle(ChatFormatting.GREEN));
 
         if (selected) {
             icon.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
@@ -275,7 +275,7 @@ public class LobbyActivity extends ComponentActivity {
                 newLore.add(Component.empty());
             }
 
-            newLore.add(translations.translateText(player, "mg-api.voting.selected").formatted(ChatFormatting.AQUA));
+            newLore.add(translations.translateText(player, "mg-api.voting.selected").withStyle(ChatFormatting.AQUA));
 
             ItemStackUtil.setLore(icon, newLore);
 

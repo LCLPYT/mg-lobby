@@ -108,7 +108,7 @@ public class GameStartingActivity extends ComponentActivity {
     private Pair<String, Object[]> titleTranslation() {
         if (wasPaused) {
             return Pair.of("mg-api.countdown.title.paused", new Object[] {
-                    translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD)
+                    translations.translateText(config.titleKey()).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD)
             });
         }
 
@@ -118,14 +118,14 @@ public class GameStartingActivity extends ComponentActivity {
 
         if (minutes > 0) {
             return Pair.of("mg-api.countdown.title.minutes", new Object[] {
-                    translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD),
+                    translations.translateText(config.titleKey()).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
                     minutes,
                     seconds
             });
         }
 
         return Pair.of("mg-api.countdown.title.seconds", new Object[] {
-                translations.translateText(config.titleKey()).formatted(ChatFormatting.AQUA, ChatFormatting.BOLD),
+                translations.translateText(config.titleKey()).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
                 seconds
         });
     }

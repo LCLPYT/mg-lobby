@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -113,8 +114,8 @@ public class TicTacToeManager {
 
         if (!table.full()) {
             for (ServerPlayer player : table.players()) {
-                var title = translations.translateText(player, "lobby.tic_tac_toe.title").formatted(ChatFormatting.AQUA);
-                var subtitle = translations.translateText(player, "lobby.tic_tac_toe.waiting").formatted(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                var title = translations.translateText(player, "lobby.tic_tac_toe.title").withStyle(ChatFormatting.AQUA);
+                var subtitle = translations.translateText(player, "lobby.tic_tac_toe.waiting").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 
                 Title.get(player).title(title, subtitle, 10, 70, 20);
             }
@@ -129,8 +130,8 @@ public class TicTacToeManager {
         }
 
         for (ServerPlayer player : table.players()) {
-            var title = translations.translateText(player, "lobby.tic_tac_toe.title").formatted(ChatFormatting.AQUA);
-            var subtitle = translations.translateText(player, "lobby.tic_tac_toe.start").formatted(ChatFormatting.GREEN, ChatFormatting.BOLD);
+            var title = translations.translateText(player, "lobby.tic_tac_toe.title").withStyle(ChatFormatting.AQUA);
+            var subtitle = translations.translateText(player, "lobby.tic_tac_toe.start").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD);
 
             Title.get(player).title(title, subtitle, 10, 20, 20);
 
@@ -143,27 +144,27 @@ public class TicTacToeManager {
     private TicTacToeInstance createInstance(TicTacToeTable table, ServerPlayer opponent) {
         return new TicTacToeInstance(new TicTacToeGame(), table.playerIndex(opponent), new BlockState[]{
                 // TODO make desired colors customizable
-                Blocks.RED_GLAZED_TERRACOTTA.defaultBlockState(),
-                Blocks.BLUE_GLAZED_TERRACOTTA.defaultBlockState()
+                Blocks.GLAZED_TERRACOTTA.pick(DyeColor.RED).defaultBlockState(),
+                Blocks.GLAZED_TERRACOTTA.pick(DyeColor.BLUE).defaultBlockState()
         });
     }
 
     private void win(ServerPlayer player) {
-        var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_won").formatted(ChatFormatting.GOLD);
+        var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_won").withStyle(ChatFormatting.GOLD);
 
         Title.get(player).title(Component.empty(), subtitle, 10, 70, 20);
         ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1f);
     }
 
     private void loose(ServerPlayer player) {
-        var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_lost").formatted(ChatFormatting.RED);
+        var subtitle = translations.translateText(player, "lobby.tic_tac_toe.you_lost").withStyle(ChatFormatting.RED);
 
         Title.get(player).title(Component.empty(), subtitle, 10, 70, 20);
         ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.BLAZE_DEATH, SoundSource.PLAYERS, 0.6f, 1f);
     }
 
     private void draw(ServerPlayer player) {
-        var subtitle = translations.translateText(player, "lobby.tic_tac_toe.draw").formatted(ChatFormatting.AQUA);
+        var subtitle = translations.translateText(player, "lobby.tic_tac_toe.draw").withStyle(ChatFormatting.AQUA);
 
         Title.get(player).title(Component.empty(), subtitle, 10, 70, 20);
         ServerPlayerAccess.playSoundToPlayer(player, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.3f, 0.57f);
