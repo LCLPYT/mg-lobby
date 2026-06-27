@@ -5,6 +5,20 @@
   "mg-api.game.waiting_for_players": "Warten auf Spieler",
   "mg-api.game.not_enough_players": "Es müssen mindestens %s Spieler online sein, damit das Spiel beginnen kann.",
   "mg-api.voting.selected": "Ausgewählt",
+  "mg-api.voting.your_vote": "Deine Stimme",
   "mg-api.voting.voted_for": "Du hast für %s gestimmt",
-  "mg-api.voting.votes": "Stimmen: %s"
+  "mg-api.voting.votes": "Stimmen: %s",
+  "mg-api.menu.search": "Suchen",
+  "mg-api.menu.search_hint": "Klicke, um nach Namen zu suchen",
+  "mg-api.menu.sort": "Sortierung: %s",
+  "mg-api.menu.sort.default": "Standard",
+  "mg-api.menu.sort.reverse": "Umgekehrt",
+  "mg-api.menu.sort.name_az": "Name A-Z",
+  "mg-api.menu.sort.name_za": "Name Z-A",
+  "mg-api.menu.sort_hint": "Linksklick: weiter, Rechtsklick: zurück",
+  "mg-api.menu.page": "Seite %s/%s",
+  "mg-api.menu.total": "%s Einträge",
+  "mg-api.menu.prev": "Vorherige Seite",
+  "mg-api.menu.next": "Nächste Seite",
+  "mg-api.menu.no_results": "Keine Ergebnisse gefunden"
 }
