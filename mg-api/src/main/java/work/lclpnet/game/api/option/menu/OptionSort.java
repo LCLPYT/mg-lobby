@@ -47,8 +47,8 @@ public interface OptionSort<T> {
      */
     static <T> List<OptionSort<T>> defaults() {
         return List.of(
-                of("mg-api.menu.sort.default", (list, nameOf) -> list),
-                of("mg-api.menu.sort.reverse", (list, nameOf) -> list.reversed()),
+                of("mg-api.menu.sort.default", (list, _) -> list),
+                of("mg-api.menu.sort.reverse", (list, _) -> list.reversed()),
                 of("mg-api.menu.sort.name_az", (list, nameOf) -> {
                     Comparator<T> byName = Comparator.comparing(option -> nameOf.apply(option).toLowerCase());
                     return list.stream().sorted(byName).toList();
