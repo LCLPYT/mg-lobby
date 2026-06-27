@@ -2,6 +2,7 @@ package work.lclpnet.game.impl;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -11,16 +12,15 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.game.api.option.OptionVoting;
 import work.lclpnet.game.api.option.VoteResult;
+import work.lclpnet.game.impl.menu.PaginatedOptionMenu;
 import work.lclpnet.kibu.access.entity.ServerPlayerAccess;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.inv.item.ItemStackUtil;
-import work.lclpnet.kibu.inv.prompt.OptionPrompt;
-import work.lclpnet.kibu.inv.type.RestrictedInventory;
 import work.lclpnet.kibu.translate.Translations;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.lang.Math.max;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.summingInt;
 import static net.minecraft.ChatFormatting.*;
@@ -32,8 +32,8 @@ public class Voting<T> {
     private final OptionVoting<T> data;
     private final Translations translations;
     private final Map<UUID, T> votes = new HashMap<>();
-    private final Map<UUID, OpenView> openPrompts = new HashMap<>();
     private final boolean showVoteCount;
+    private final PaginatedOptionMenu<T> menu;
 
     private boolean open = true;
 
@@ -42,10 +42,26 @@ public class Voting<T> {
     }
 
     public Voting(String id, OptionVoting<T> data, Translations translations, boolean showVoteCount) {
+        this(id, data, translations, showVoteCount, false, false);
+    }
+
+    public Voting(String id, OptionVoting<T> data, Translations translations, boolean showVoteCount, boolean search, boolean sort) {
         this.id = id;
         this.data = data;
         this.translations = translations;
         this.showVoteCount = showVoteCount;
+
+        this.menu = PaginatedOptionMenu.<T>builder(translations, Identifier.fromNamespaceAndPath("mg-api", "voting/" + id))
+                .title(data.title())
+                .options(data.options())
+                .optionIcon(data.optionIcons())
+                .decorator(this::decorate)
+                .searchText((player, option) -> data.optionName().apply(player, option).getString())
+                .search(search)
+                .sort(sort)
+                .onSelect(this::vote)
+                .closeOnSelect(true)
+                .build();
     }
 
     public String getId() {
@@ -56,55 +72,49 @@ public class Voting<T> {
         return data;
     }
 
-    public void open(ServerPlayer player) {
-        T currentVote;
-        VoteResult<T> current;
-
-        synchronized (this) {
-            if (!open) return;
-
-            currentVote = votes.getOrDefault(player.getUUID(), null);
-            current = getCurrentResult();
-        }
-
-        Component title = data.title().apply(player);
-
-        var handle = OptionPrompt.openHandle(player, title, data.options(),
-                opt -> getIcon(player, opt, opt.equals(currentVote), current.votes(opt)));
-
-        UUID uuid = player.getUUID();
-
-        synchronized (this) {
-            openPrompts.put(uuid, new OpenView(player, handle.inventory()));
-        }
-
-        handle.future().whenComplete((selected, err) -> {
-            synchronized (this) {
-                openPrompts.remove(uuid);
-            }
-
-            if (selected != null && err == null) {
-                selected.ifPresent(opt -> vote(player, opt));
-            }
-        });
+    /**
+     * Register the hooks required by the voting menu. Called by
+     * {@link work.lclpnet.game.util.GameStartUtil#setupVoting}.
+     *
+     * @param hooks The hook registrar of the surrounding activity.
+     */
+    public void init(HookRegistrar hooks) {
+        menu.init(hooks);
     }
 
-    private ItemStack getIcon(ServerPlayer player, T option, boolean selected, int votes) {
-        ItemStack icon = data.optionIcons().apply(player, option);
+    public void open(ServerPlayer player) {
+        synchronized (this) {
+            if (!open) return;
+        }
 
-        icon.setCount(max(1, votes));
+        menu.open(player);
+    }
+
+    private ItemStack decorate(ServerPlayer player, T option, ItemStack icon) {
+        int voteCount = getCurrentResult().votes(option);
+
+        T currentVote;
+        synchronized (this) {
+            currentVote = votes.get(player.getUUID());
+        }
+
+        boolean selected = option.equals(currentVote);
+
+        icon.setCount(Math.clamp(voteCount, 1, icon.getMaxStackSize()));
 
         List<Component> lore = icon.getOrDefault(DataComponents.LORE, ItemLore.EMPTY).lines();
         List<Component> newLore = new ArrayList<>();
 
         if (showVoteCount) {
-            newLore.add(translations.translateText(player, "mg-api.voting.votes", styled(votes, YELLOW)).withStyle(GREEN));
+            newLore.add(translations.translateText(player, "mg-api.voting.votes", styled(voteCount, YELLOW)).withStyle(GREEN));
+        }
+
+        if (voteCount > 0) {
+            icon.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
         }
 
         if (selected) {
-            icon.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
-
-            newLore.add(translations.translateText(player, "mg-api.voting.selected").withStyle(AQUA));
+            newLore.add(translations.translateText(player, "mg-api.voting.your_vote").withStyle(AQUA));
         }
 
         if (!newLore.isEmpty()) {
@@ -142,7 +152,7 @@ public class Voting<T> {
 
         player.sendSystemMessage(translations.translateText(player, "mg-api.voting.voted_for", styled(name, YELLOW)).withStyle(GREEN));
 
-        refreshOpenPrompts();
+        menu.refresh();
     }
 
     public void removeVote(ServerPlayer player) {
@@ -152,34 +162,8 @@ public class Voting<T> {
             votes.remove(player.getUUID());
         }
 
-        refreshOpenPrompts();
+        menu.refresh();
     }
-
-    private void refreshOpenPrompts() {
-        List<OpenView> views;
-        VoteResult<T> result;
-        Map<UUID, T> votesSnapshot;
-
-        synchronized (this) {
-            if (openPrompts.isEmpty()) return;
-
-            views = List.copyOf(openPrompts.values());
-            result = getCurrentResult();
-            votesSnapshot = Map.copyOf(votes);
-        }
-
-        for (OpenView view : views) {
-            ServerPlayer viewer = view.player();
-            T viewerVote = votesSnapshot.get(viewer.getUUID());
-            int i = 0;
-
-            for (T opt : data.options()) {
-                view.inventory().setItem(i++, getIcon(viewer, opt, opt.equals(viewerVote), result.votes(opt)));
-            }
-        }
-    }
-
-    private record OpenView(ServerPlayer player, RestrictedInventory inventory) {}
 
     public synchronized VoteResult<T> end() {
         open = false;

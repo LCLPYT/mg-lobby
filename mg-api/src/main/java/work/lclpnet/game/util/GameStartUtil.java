@@ -63,6 +63,7 @@ public class GameStartUtil {
 
         MinecraftServer server = args.options().getContext().getServer();
 
+        voting.init(hooks);
         handler.init(hooks);
         handler.giveStackTo(PlayerLookup.all(server), slot);
         handler.giveStackToNewPlayers(hooks, slot);
