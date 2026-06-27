@@ -72,6 +72,8 @@ public class TestGameFactory implements GameFactory {
                         (_, map) -> getOptionStack(map)
                 ),
                 args.options().getContext().getTranslations(),
+                true,
+                true,
                 true
         );
 

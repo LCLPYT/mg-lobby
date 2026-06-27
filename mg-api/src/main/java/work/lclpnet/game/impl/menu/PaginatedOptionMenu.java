@@ -50,7 +50,6 @@ public final class PaginatedOptionMenu<T> {
 
     private static final int ROWS = 6;
     private static final int HEADER_SIZE = 9;
-    private static final int PAGE_SIZE = (ROWS - 1) * 9;
     private static final int SIMPLE_CAPACITY = ROWS * 9;
 
     private static final int SLOT_PREV = 0;
@@ -118,9 +117,16 @@ public final class PaginatedOptionMenu<T> {
      * Open the menu for a player, creating their view on first open.
      */
     public void open(ServerPlayer player) {
-        View view = views.computeIfAbsent(player.getUUID(), uuid -> new View(player));
+        View view = views.computeIfAbsent(player.getUUID(), _ -> new View(player));
+        resetView(player);
         render(view);
         view.inventory.open(player);
+    }
+
+    public void resetView(ServerPlayer player) {
+        View view = views.computeIfAbsent(player.getUUID(), _ -> new View(player));
+        view.search = "";
+        view.page = 0;
     }
 
     /**
@@ -174,16 +180,16 @@ public final class PaginatedOptionMenu<T> {
     private void renderPaged(View view) {
         ServerPlayer player = view.player;
         List<T> all = filterAndSort(player, view);
-        int pageCount = Math.max(1, (int) Math.ceil(all.size() / (double) PAGE_SIZE));
+        int pageCount = Math.max(1, (int) Math.ceil(all.size() / (double) view.pageSize));
 
         view.page = Math.clamp(view.page, 0, pageCount - 1);
 
         paintHeader(view, all.size(), pageCount);
 
-        int start = view.page * PAGE_SIZE;
-        view.pageItems = new ArrayList<>(all.subList(start, Math.min(all.size(), start + PAGE_SIZE)));
+        int start = view.page * view.pageSize;
+        view.pageItems = new ArrayList<>(all.subList(start, Math.min(all.size(), start + view.pageSize)));
 
-        for (int i = 0; i < PAGE_SIZE; i++) {
+        for (int i = 0; i < view.pageSize; i++) {
             int slot = HEADER_SIZE + i;
 
             if (i < view.pageItems.size()) {
@@ -194,7 +200,7 @@ public final class PaginatedOptionMenu<T> {
         }
 
         if (all.isEmpty() && searchEnabled && !view.search.isBlank()) {
-            view.inventory.setItem(HEADER_SIZE + PAGE_SIZE / 2, noResultsItem(player));
+            view.inventory.setItem(HEADER_SIZE + view.pageSize / 2, noResultsItem(player));
         }
     }
 
@@ -419,6 +425,7 @@ public final class PaginatedOptionMenu<T> {
         final ServerPlayer player;
         final MenuInventory inventory;
         final boolean headerActive;
+        final int pageSize;
         String search = "";
         int sortIndex = 0;
         int page = 0;
@@ -428,10 +435,10 @@ public final class PaginatedOptionMenu<T> {
             this.player = player;
             this.headerActive = useHeader();
 
-            int rows = headerActive
-                    ? ROWS
-                    : Math.clamp((int) Math.ceil(Math.max(1, options.size()) / 9d), 1, ROWS);
+            int totalRows = (int) Math.ceil(Math.max(1, options.size()) / 9d);
+            int rows = Math.clamp(headerActive ? totalRows + 1 : totalRows, 1, ROWS);
 
+            this.pageSize = Math.clamp(totalRows, 1, headerActive ? ROWS - 1 : ROWS) * 9;
             this.inventory = new MenuInventory(rows, title.apply(player));
         }
     }
