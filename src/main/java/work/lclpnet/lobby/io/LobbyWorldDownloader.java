@@ -1,12 +1,12 @@
 package work.lclpnet.lobby.io;
 
 import org.slf4j.Logger;
+import work.lclpnet.game.io.copy.WorldCopier;
 import work.lclpnet.kibu.jnbt.CompoundTag;
 import work.lclpnet.kibu.jnbt.NBTConstants;
 import work.lclpnet.kibu.jnbt.Tag;
 import work.lclpnet.kibu.jnbt.io.NbtIOHelper;
 import work.lclpnet.lobby.config.ConfigAccess;
-import work.lclpnet.game.io.copy.WorldCopier;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,9 +38,10 @@ public class LobbyWorldDownloader {
         }
 
         URI worldSource = configAccess.getConfig().lobbySource;
-        WorldCopier copier = WorldCopier.get(worldSource);  // TODO adapt mc-game-commons-maps and local caching
 
         try {
+            // TODO adapt mc-game-commons-maps and local caching
+            WorldCopier copier = WorldCopier.get(worldSource);
             copier.copyTo(lobbyDir);
         } catch (IOException e) {
             logger.error("Failed to copy lobby", e);

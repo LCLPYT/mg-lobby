@@ -1,5 +1,6 @@
 package work.lclpnet.game.io.copy;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -14,7 +15,7 @@ public interface WorldCopier {
      */
     void copyTo(Path path) throws IOException;
 
-    static WorldCopier get(URI uri) {
+    static WorldCopier get(URI uri) throws IOException {
         if (uri.getHost() != null) {
             // uri is url
             try {
@@ -39,6 +40,6 @@ public interface WorldCopier {
             }
         }
 
-        throw new IllegalStateException("File '%s' does not exist".formatted(path));
+        throw new FileNotFoundException("File '%s' does not exist".formatted(path));
     }
 }
