@@ -80,6 +80,8 @@ public class ProtectionTypes {
     public static final PlayerItemStackProtection CRAFT_ITEM;
     public static final PlayerEntityProtection<Entity> MOUNT;
     public static final PlayerItemStackProtection CONSUME_FOOD;
+    public static final PlayerGeneric2Protection<BlockPos, ItemStack> SHELF_TAKE_ITEM;
+    public static final PlayerGeneric2Protection<BlockPos, ItemStack> SHELF_PLACE_ITEM;
 
     private static final Set<Protection<?>> types;
 
@@ -136,6 +138,8 @@ public class ProtectionTypes {
                 .add(CRAFT_ITEM = new PlayerItemStackProtection())
                 .add(MOUNT = new PlayerEntityProtection<>())
                 .add(CONSUME_FOOD = new PlayerItemStackProtection())
+                .add(SHELF_TAKE_ITEM = new PlayerGeneric2Protection<>())
+                .add(SHELF_PLACE_ITEM = new PlayerGeneric2Protection<>())
                 .build();
     }
 

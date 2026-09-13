@@ -20,9 +20,7 @@ import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.entity.*;
 import work.lclpnet.kibu.hook.entity.leash.*;
-import work.lclpnet.kibu.hook.level.BlockModificationHooks;
-import work.lclpnet.kibu.hook.level.ItemScatterCallback;
-import work.lclpnet.kibu.hook.level.LevelPhysicsHooks;
+import work.lclpnet.kibu.hook.level.*;
 import work.lclpnet.kibu.hook.player.CraftingRecipeCallback;
 import work.lclpnet.kibu.hook.player.PlayerFoodHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
@@ -244,6 +242,14 @@ public class BasicProtector implements Protector {
 
             return InteractionResult.FAIL;
         });
+
+        protect(SHELF_TAKE_ITEM, ShelfTakeItemCallback.HOOK, scope
+                -> (_, pos, _, stack, player)
+                -> scope.isWithinScope(player, pos, stack));
+
+        protect(SHELF_PLACE_ITEM, ShelfPlaceItemCallback.HOOK, scope
+                -> (_, pos, _, stack, player)
+                -> scope.isWithinScope(player, pos, stack));
     }
 
     @Override

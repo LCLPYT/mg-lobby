@@ -1,6 +1,8 @@
 package work.lclpnet.game.util;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import work.lclpnet.game.impl.prot.MutableProtectionConfig;
 import work.lclpnet.game.impl.prot.scope.*;
 
@@ -84,6 +86,14 @@ public class ProtectorUtils {
                 CONSUME_FOOD
         )) {
             scope.allow(config, PlayerItemStackProtection.Scope.CREATIVE_OP);
+        }
+
+        // BlockPos, ItemStack
+        for (PlayerGeneric2Protection<BlockPos, ItemStack> scope : List.of(
+                SHELF_TAKE_ITEM,
+                SHELF_PLACE_ITEM
+        )) {
+            scope.allow(config, PlayerGeneric2Protection.Scope.creativeOp());
         }
     }
 
